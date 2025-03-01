@@ -154,6 +154,7 @@ export const useWsStore = defineStore(
             return false;
           try {
             const data = JSON.parse(event.data) as Result<WsMsgBodyVO>;
+            checkResponse(data); // 处理错误
             if (data) {
               const wsMsg = data.data;
               const body = wsMsg.data;

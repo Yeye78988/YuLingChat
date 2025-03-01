@@ -1,3 +1,4 @@
+import type { Result } from "~/types/result";
 // @ts-nocheck
 import { StatusCode, StatusCodeText } from "~/types/result";
 
@@ -27,38 +28,11 @@ export function httpRequest<T = unknown>(
       // }
     },
     onResponse: (config: any) => {
-      const data = config.response._data;
-      let msg = "";
-      const type = "error";
-      const code: StatusCode = data.code;
-      if (data.code !== StatusCode.SUCCESS)
-        msg = StatusCodeText[code] || "";
-      if (data.code === StatusCode.TOKEN_ERR || data.code === StatusCode.TOKEN_EXPIRED_ERR || data.code === StatusCode.TOKEN_DEVICE_ERR) {
-        ElMessage.closeAll();
-        // 登录失效，清除用户信息，跳转登录页
-        user.clearUserStore();
-        if (useRoute().path !== "/msg")
-          navigateTo("/login", { replace: true });
-        return;
-      }
-      else if (data.code === StatusCode.STATUS_OFF_ERR) {
-        // 用户被禁用
-        ElMessage.error("账号被禁用，请联系管理员！");
-        return;
-      }
       // 续签
       if (config.response.headers?.Authorization) {
         user.token = config.response.headers?.Authorization;
       }
-      if (msg !== "") {
-        ElMessage.closeAll("error");
-        // 组件
-        ElMessage.error({
-          grouping: true,
-          type,
-          message: data.message.length > 50 ? msg : data.message,
-        });
-      }
+      checkResponse(config.response._data);
     },
     // 请求错误
     onRequestError() {
@@ -145,3 +119,44 @@ export const useHttp = {
   },
 
 };
+
+const isNavigator = ref(false);
+
+export function checkResponse<T>(data: Result<T>) {
+  let msg = "";
+  const type = "error";
+  const code: StatusCode = data.code;
+  if (data.code !== StatusCode.SUCCESS)
+    msg = StatusCodeText[code] || "";
+  const user = useUserStore();
+  if (data.code === StatusCode.TOKEN_ERR || data.code === StatusCode.TOKEN_EXPIRED_ERR || data.code === StatusCode.TOKEN_DEVICE_ERR) {
+    ElMessage.closeAll();
+    if (isNavigator.value) {
+      return false;
+    }
+    isNavigator.value = true;
+    // 登录失效，清除用户信息，跳转登录页
+    user.clearUserStore();
+    if (useRoute().path !== "/msg") {
+      isNavigator.value = false;
+      navigateTo("/login", { replace: true });
+    }
+    return false;
+  }
+  else if (data.code === StatusCode.STATUS_OFF_ERR) {
+    // 用户被禁用
+    ElMessage.error("账号被禁用，请联系管理员！");
+    return false;
+  }
+  if (msg !== "") {
+    ElMessage.closeAll("error");
+    // 组件
+    ElMessage.error({
+      grouping: true,
+      type,
+      message: data.message.length > 50 ? msg : data.message,
+    });
+    return false;
+  }
+  return true;
+}

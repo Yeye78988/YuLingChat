@@ -13,8 +13,8 @@ export interface HistoryAccount {
 }
 
 
-export function useHistoryAccount() {
-  const historyAccounts = useLocalStorage<HistoryAccount[]>("historyAccounts", []);
+export function useHistoryAccount(key: string = "history-accounts") {
+  const historyAccounts = useLocalStorage<HistoryAccount[]>(key, []);
 
   /**
    * 添加登录记录
