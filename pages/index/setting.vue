@@ -259,7 +259,7 @@ const {
     <DialogPopup
       v-model="showUpateNoticeLine"
       destroy-on-close
-      width="fit-content"
+      :duration="300"
     >
       <template #title>
         <h3 mb-6>
@@ -267,7 +267,7 @@ const {
           <i i-solar:notebook-bold ml-2 p-2.5 />
         </h3>
       </template>
-      <el-scrollbar wrap-class="w-88vw animate-[blur-in_.6s] overflow-y-auto max-h-40vh min-h-30vh sm:max-h-60vh md:w-420px sm:w-380px max-w-90vw">
+      <el-scrollbar wrap-class="w-86vw pr-2 sm:pr-4 animate-[blur-in_.6s] overflow-y-auto max-h-40vh min-h-30vh sm:max-h-60vh md:w-420px sm:w-380px">
         <el-timeline style="max-width: 100%;">
           <ListAutoIncre
             :immediate="true"
@@ -348,7 +348,9 @@ const {
     </DialogPopup>
     <DialogPopup
       v-model="showNotice"
-      center
+
+      destroy-on-close center
+      :duration="300"
       width="fit-content"
     >
       <template #title>
@@ -434,7 +436,7 @@ const {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 1) 100%);
 }
 .dark .linear-bt {
-  background: linear-gradient(to bottom, rgba(20, 20, 20, 0) 0%, rgba(20, 20, 20, 0.8) 50%, rgba(20, 20, 20, 1) 100%);
+  background: linear-gradient(to bottom, rgba(15, 15, 15, 0) 0%, rgba(15, 15, 15, 0.8) 50%, rgba(15, 15, 15, 1) 100%);
 }
 
 :deep(.el-timeline-item){

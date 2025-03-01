@@ -260,7 +260,7 @@ defineExpose({
           class="relative"
           :class="{
             'disabled-anima': loadingAnima,
-            'max-w-90vw rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color shadow': !contentClass,
+            'max-w-full rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color shadow': !contentClass,
             [contentClass]: contentClass,
             'text-center': center,
           }"

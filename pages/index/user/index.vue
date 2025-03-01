@@ -41,7 +41,7 @@ useHead({
   <div h-full w-full flex flex-1 flex-col card-bg-color>
     <!-- 壁纸 -->
     <UserInfoBgToggle class="fixed left-0 top-0 z-0 w-full" />
-    <div class="mains border-default-2-t">
+    <div class="mains">
       <!-- 用户头像 -->
       <div v-if="user" class="avatars relative flex-1 -top-5em md:pr-4">
         <UserInfoLine

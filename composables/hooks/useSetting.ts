@@ -79,7 +79,7 @@ export function useSettingNotice({
   });
 
   const versionList = reactive<ResAppVersionCommVO[]>([]);
-  const isNoMore = computed(() => pageInfo.value.total > 0 && versionList.length >= pageInfo.value.total);
+  const isNoMore = computed(() => pageInfo.value.current > 0 && pageInfo.value.current >= pageInfo.value.pages);
   const isEmpty = computed(() => pageInfo.value.current > 0 && versionList.length === 0);
 
   if (watchParamsReload) {

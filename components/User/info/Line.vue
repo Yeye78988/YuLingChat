@@ -193,7 +193,7 @@ onMounted(() => {
         <h2
           v-show="!isEditNickname"
           key="nickname1"
-          class="group"
+          class="group w-full flex"
         >
           <span @click="isEditNickname = true">{{ user?.nickname }}</span>
           <span
@@ -203,7 +203,8 @@ onMounted(() => {
           />
           <el-button
             type="info"
-            class="ml-4em opacity-0 border-default group-hover:opacity-100"
+            size="small"
+            class="ml-4em border-default group-hover:opacity-100 sm:op-0"
             @click="showInvitation"
           >
             分 享
@@ -277,7 +278,7 @@ onMounted(() => {
         </div>
         <!-- 生日 -->
         <div class="small-input mt-3 flex-row-c-c justify-start">
-          <small>生日：</small>
+          <small flex-shrink-0>生日：</small>
           <el-date-picker
             v-model.lazy="userCopy.birthday"
             type="date"

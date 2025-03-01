@@ -61,8 +61,12 @@ let refreshTimeoutTimer: number | null = null;
 // 刷新
 const { stop, isSupported } = useIntersectionObserver(
   loadMoreRef,
-  ([entry]) => {
-    isIntersecting.value = !!entry?.isIntersecting;
+  (arr) => {
+    const obj = arr[arr.length - 1];
+    isIntersecting.value = !!obj?.isIntersecting;
+    if (!isIntersecting.value) {
+      clearInterval(timer.value);
+    }
   },
   {
     threshold: 0,
@@ -340,7 +344,6 @@ defineExpose({
       </div>
     </div>
   </div>
-
   <!-- 不启用下拉刷新时的原始内容 -->
   <template v-else>
     <slot name="default" />
