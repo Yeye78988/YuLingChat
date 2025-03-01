@@ -12,7 +12,6 @@ const ws = useWsStore();
 const setting = useSettingStore();
 const chat = useChatStore();
 
-const applyUnRead = ref(0);
 /**
  * 获取好友申请数量 (未读)
  */
@@ -21,7 +20,7 @@ async function getApplyCount() {
     return;
   const res = await getApplyUnRead(user.getToken);
   if (res.code === StatusCode.SUCCESS) {
-    applyUnRead.value = res.data.unReadCount;
+    chat.applyUnReadCount = res.data.unReadCount;
   }
 }
 watch(() => route.path, (newVal, oldVal) => {
@@ -57,7 +56,7 @@ const menuList = computed<MenuItem[]>(() => ([
     path: "/friend",
     icon: "i-solar:users-group-rounded-line-duotone",
     activeIcon: "i-solar:users-group-rounded-bold-duotone",
-    tipValue: applyUnRead.value,
+    tipValue: chat.applyUnReadCount,
   },
   {
     title: "AI客服",
@@ -135,7 +134,7 @@ export interface MenuItem {
           [`${p.class}`]: p.class,
         }"
         :title="p.title"
-        class="group item"
+        class="item group"
         @click="(e: MouseEvent) => {
           if (p.onClick) {
             e.stopPropagation();

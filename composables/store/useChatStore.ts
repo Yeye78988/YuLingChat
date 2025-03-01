@@ -47,6 +47,9 @@ export const useChatStore = defineStore(
     /** ---------------------------- 撤回的消息map ---------------------------- */
     const recallMsgMap = ref<Record<number, ChatMessageVO>>({});
 
+    /** ---------------------------- 好友 ---------------------------- */
+    const applyUnReadCount = ref(0); // 申请未读数
+
     /** ---------------------------- 会话 ---------------------------- */
     const searchKeyWords = ref("");
     const isOpenContact = ref(true); // 用于移动尺寸
@@ -890,6 +893,8 @@ export const useChatStore = defineStore(
       isMemberReload,
       inviteMemberForm,
       roomMapCache,
+      // 申请
+      applyUnReadCount,
       // 方法
       inviteMemberFormReset,
       setContact,

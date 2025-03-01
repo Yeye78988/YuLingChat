@@ -31,14 +31,14 @@ const chat = useChatStore();
 @use './msg.scss';
 
 .icon {
-  margin: 0 0.5em 0.1em 0;
+  margin: 0 0.2em 0.1em 0;
 }
 .self {
   .msg-popper {
 
     .icon {
       order: 1;
-      margin: 0 0 0.1em 0.5em;
+      margin: 0 0 0.1em 0.4em;
     }
   }
 }
