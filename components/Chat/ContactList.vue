@@ -86,7 +86,6 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
   else if (roomId) { // 刷新某一房间
     refreshItem(roomId);
   }
-  isScrollTop.value = false;
   nextTick(() => {
     isReload.value = false;
   });

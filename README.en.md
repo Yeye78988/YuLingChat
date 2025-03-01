@@ -33,6 +33,8 @@
       </a>
     </div>
 
+Home Page: [JiwuChat](https://jiwuchat.kiwi233.top/)
+<br>
 Language : [简体中文](./README.en.md) | English
 
 </div>

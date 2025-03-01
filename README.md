@@ -36,10 +36,12 @@
     </div>
     <div>
       <a href="https://www.deepseek.com/" target="_blank" style="margin: 2px;">
-        <img alt="Homepage" src="https://github.com/deepseek-ai/DeepSeek-V2/blob/main/figures/badge.svg?raw=true" />
+        <img alt="DeepSeek AI" src="https://github.com/deepseek-ai/DeepSeek-V2/blob/main/figures/badge.svg?raw=true" />
       </a>
     </div>
 
+官网：[JiwuChat](https://jiwuchat.kiwi233.top/)
+<br>
 语言 : 简体中文 | [English](./README.en.md)
 
 </div>
