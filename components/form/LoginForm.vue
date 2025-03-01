@@ -9,12 +9,16 @@ import {
 import { LoginType } from "~/types/user/index.js";
 
 const user = useUserStore();
-const setting = useSettingStore();
 const loginType = useLocalStorage<LoginType>("loginType", LoginType.EMAIL);
+const {
+  historyAccounts,
+  addHistoryAccount,
+  removeHistoryAccount,
+} = useHistoryAccount();
 const isLoading = ref<boolean>(false);
 const autoLogin = ref<boolean>(true);
 // 表单
-const userForm = useLocalStorage("userForm", {
+const userForm = ref({
   username: "",
   password: "",
   code: "", // 验证码
@@ -24,11 +28,11 @@ const userForm = useLocalStorage("userForm", {
 
 const rules = reactive({
   username: [
-    { required: true, message: "该项不能为空！", trigger: "blur" },
+    { required: true, message: "用户名不能为空！", trigger: "change" },
     { min: 6, max: 30, message: "长度在6-30个字符！", trigger: "blur" },
   ],
   password: [
-    { required: true, message: "密码不能为空！", trigger: "blur" },
+    { required: true, message: "密码不能为空！", trigger: "change" },
     { min: 6, max: 20, message: "密码长度6-20位！", trigger: "blur" },
   ],
   code: [
@@ -211,12 +215,25 @@ async function onLogin(formEl: any | undefined) {
     if (res.code === 20000) {
       // 登录成功
       if (res.data) {
-        await store.onUserLogin(res.data, autoLogin.value);
+        await store.onUserLogin(res.data, autoLogin.value, "/", (info) => {
+          // 初始化
+          useWsStore().reload();
+          // 保存账号
+          if (!autoLogin.value) {
+            return;
+          }
+          addHistoryAccount({
+            type: loginType.value,
+            account: userForm.value.username,
+            password: userForm.value.password,
+            userInfo: {
+              id: info.id,
+              avatar: info.avatar,
+              nickname: info.nickname,
+            },
+          });
+        });
         done();
-        // 初始化
-        useWsStore().reload();
-        // 跳转
-        await navigateTo("/");
       }
       // 登录失败
       else {
@@ -239,10 +256,39 @@ async function onLogin(formEl: any | undefined) {
 }
 
 const options = [
-  { label: "手机登录", value: LoginType.PHONE },
   { label: "邮箱登录", value: LoginType.EMAIL },
+  { label: "手机登录", value: LoginType.PHONE },
   { label: "密码登录", value: LoginType.PWD },
 ];
+
+const theHistoryAccount = ref({
+  type: LoginType.EMAIL,
+  account: "",
+  password: "",
+  userInfo: {
+    avatar: "",
+    nickname: "",
+  },
+});
+async function handleSelectAccount(item: Record<string, any>) {
+  if (!item || !item.account)
+    return;
+  const pwd = await decrypt(JSON.parse(item.password), item.account);
+  userForm.value.username = item.account;
+  userForm.value.password = pwd || "";
+  loginType.value = item.type;
+  theHistoryAccount.value = {
+    type: item.type,
+    account: item.account,
+    password: item.password || "",
+    userInfo: item.userInfo,
+  };
+}
+
+function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
+  const results = queryString ? historyAccounts.value.filter(p => p.account.toLowerCase().indexOf(queryString.toLowerCase()) === 0) : historyAccounts.value;
+  cb(results);
+}
 </script>
 
 <template>
@@ -341,14 +387,45 @@ const options = [
         prop="username"
         class="animated"
       >
-        <el-input
+        <!-- <el-input
           v-model.trim="userForm.username"
           autocomplete="off"
           :prefix-icon="ElIconUser"
           size="large"
           placeholder="请输入用户名、手机号或邮箱"
           @keyup.enter="onLogin(formRef)"
-        />
+        /> -->
+        <el-autocomplete
+          v-model.trim="userForm.username"
+          autocomplete="off"
+          :prefix-icon="ElIconUser"
+          size="large"
+          :fetch-suggestions="querySearchAccount"
+          :trigger-on-focus="true"
+          clearable
+          popper-class=""
+          select-when-unmatched
+          placement="bottom"
+          fit-input-width
+          teleported
+          hide-loading
+          value-key="account"
+          placeholder="请输入用户名、手机号或邮箱"
+          @select="handleSelectAccount"
+        >
+          <template #default="{ item }">
+            <div :title="item.account" class="group w-full flex items-center px-2">
+              <el-avatar :size="30" class="mr-2 flex-shrink-0" :src="BaseUrlImg + item.userInfo.avatar" />
+              <span class="block max-w-14em truncate">{{ item.account }}</span>
+              <i
+                title="删除"
+                class="i-carbon:close ml-a h-0 w-0 flex-shrink-0 overflow-hidden transition-all group-hover:(h-1.5em w-1.5em) btn-danger"
+                @click.stop.capture="removeHistoryAccount(item.account)"
+              />
+              <span v-if="item.type === LoginType.ADMIN" class="ml-2 flex-shrink-0 rounded-4px bg-theme-primary px-1 py-1px text-xs text-white">管理员</span>
+            </div>
+          </template>
+        </el-autocomplete>
       </el-form-item>
       <el-form-item
         v-if="loginType === LoginType.PWD || loginType === LoginType.ADMIN"

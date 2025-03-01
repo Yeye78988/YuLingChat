@@ -281,7 +281,7 @@ defineExpose({
         <div
           v-if="imgStep"
           key="2"
-          class="h-250px min-w-80vw flex-row-c-c flex-col md:w-280px sm:h-300px"
+          class="mt-4 h-250px min-w-80vw flex-row-c-c flex-col sm:(h-300px min-w-fit w-280px)"
         >
           <!-- 选择头像 -->
           <el-form-item
