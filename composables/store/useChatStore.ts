@@ -502,39 +502,54 @@ export const useChatStore = defineStore(
       recallMsgMap.value[msg.message.roomId] = JSON.parse(JSON.stringify(msg));
       return true;
     }
+
+
+    const readDebounceTimers: Record<string, NodeJS.Timeout> = {};
     /**
      * 设置消息已读
      */
-    async function setReadList(roomId: number, lastMsg = "") {
+    async function setReadList(roomId: number, isSender = false) {
       if (!roomId)
         return false;
       if (!await isActiveWindow()) // 窗口未激活
         return false;
       const contact = contactDetailMapCache.value?.[roomId];
-      if (!contactMap.value[roomId]?.unreadCount && !contact?.unreadCount) {
-        return;
+      if (!contactMap.value[roomId]?.unreadCount && !contact?.unreadCount && !isSender) {
+        return true;
       }
-
       // 标记已读
       if (roomId === contact?.roomId) {
         const msg = contact?.msgList[contact?.msgList.length - 1];
-        contact.unreadCount = 0;
+        // contact.unreadCount = 0;
         contact.unreadMsgList = [];
         contact.text = msg ? resolveMsgContactText(msg) : contact?.text;
         contact.lastMsgId = msg?.message?.id || contact?.lastMsgId;
       }
-
-      setMsgReadByRoomId(roomId, user.getToken).then((res) => {
-        if (res.code !== StatusCode.SUCCESS)
-          return false;
-        if (contactMap.value[roomId]) {
-          contactMap.value[roomId].unreadCount = 0;
+      if (readDebounceTimers[roomId])
+        clearTimeout(readDebounceTimers[roomId]);
+      // 标记已读请求（优化错误处理）
+      readDebounceTimers[roomId] = setTimeout(async () => {
+        try {
+          const res = await setMsgReadByRoomId(roomId, user.getToken);
+          if (res.code === StatusCode.SUCCESS && contactMap.value[roomId]) {
+            contactMap.value[roomId].unreadCount = 0;
+            const ctx = contactDetailMapCache.value[roomId];
+            if (ctx) {
+              ctx.unreadCount = 0;
+              ctx.unreadMsgList = [];
+            }
+          }
+          // 消费消息
+          const ws = useWsStore();
+          ws.wsMsgList.newMsg = ws.wsMsgList.newMsg.filter(k => k.message.roomId !== roomId);
         }
-        // 消费消息
-        const ws = useWsStore();
-        ws.wsMsgList.newMsg = ws.wsMsgList.newMsg.filter(k => k.message.roomId !== roomId);
-      }).catch(() => {
-      });
+        catch (error) {
+          console.error("标记已读失败:", error);
+        }
+        finally {
+          delete readDebounceTimers[roomId];
+        }
+      }, 300);
     }
     // 标记全部已读
     const clearAllUnread = () => {
@@ -584,13 +599,11 @@ export const useChatStore = defineStore(
       }
       else if (setting.isDesktop) { // 桌面端
         const win = WebviewWindow.getCurrent();
-        if (!await win?.isFocused()) // 窗口未激活
-          return false;
+        return await win?.isFocused();
       }
       else { // 移动端 TODO:待定
         return true;
       }
-      return true;
     }
 
 

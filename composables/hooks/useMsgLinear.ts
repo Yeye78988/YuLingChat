@@ -41,7 +41,6 @@ export function useMsgLinear() {
   };
 }
 
-
 /**
  * 1. 新消息处理
  */
@@ -76,15 +75,11 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     chat.setReadList(targetCtx.roomId);
   }
   // 3）本房间追加消息
-  // const oldMsg = chat.findMsg(msg.message.roomId, msg.message.id);
-  // if (!oldMsg) { // 说明是新消息
-  //   targetCtx.msgList.push(msg);
-  //   msg.message.type === MessageType.RTC && handleRTCMsg(msg); // 处理rtc消息 多一步滚动
-  // }
   chat.appendMsg(msg); // 追加消息
   msg.message.type === MessageType.RTC && msg.message.roomId === chat.theContactId && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
   ws.wsMsgList.newMsg.splice(0);
 }
+
 /**
  * 2. 撤回消息处理
  * @param msg 消息

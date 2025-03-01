@@ -403,7 +403,6 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           :fetch-suggestions="querySearchAccount"
           :trigger-on-focus="true"
           clearable
-          popper-class=""
           select-when-unmatched
           placement="bottom"
           fit-input-width

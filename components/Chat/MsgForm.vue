@@ -31,11 +31,6 @@ const loadInputTimer = shallowRef<NodeJS.Timeout>();
 const inputAllRef = useTemplateRef("inputAllRef"); // 输入框
 const formRef = useTemplateRef("formRef"); // 表单
 
-// 阅读本房间（防抖）
-const setReadListDebounce = useDebounceFn(() => {
-  chat.theContact.roomId && chat.setReadList(chat.theContact.roomId);
-}, 400);
-
 // hooks
 const isDisableUpload = computed(() => isAiRoom.value || route.path !== "/");
 // Oss上传
@@ -174,9 +169,10 @@ async function onSubmit() {
  *
  */
 async function submit(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: ChatMessageVO) => void) {
+  const roomId = chat.theContact.roomId;
   const res = await addChatMessage({
     ...formData,
-    roomId: chat.theContact.roomId,
+    roomId,
   }, user.getToken);
   isSending.value = false;
   if (res.code === StatusCode.SUCCESS) {
@@ -187,8 +183,8 @@ async function submit(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: 
     await nextTick();
     chat.scrollBottom?.(false);
     // 消息阅读上报（延迟）
+    chat.setReadList(roomId, true);
     resetForm();
-    setReadListDebounce();
     typeof callback === "function" && callback(res.data); // 执行回调
   }
   else if (res.message === "您和对方已不是好友！") {
