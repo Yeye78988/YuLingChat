@@ -167,7 +167,7 @@ const {
               <ElButton
                 v-if="setting.isDesktop"
                 class="flex-row-c-c cursor-pointer transition-all"
-                plain round
+                round plain
                 style="height: 2em;padding: 0 0.8em;"
                 :type="setting.appUploader.isUpdating ? 'warning' : 'info'"
                 @click="!setting.appUploader.isCheckUpdatateLoad && setting.checkUpdates(true)"
@@ -240,6 +240,7 @@ const {
     </section>
     <div class="btns mt-a flex flex-col items-center gap-4 sm:flex-row">
       <BtnElButton
+        title="重置并清理缓存"
         class="h-10 w-full rounded-4rem shadow sm:(ml-a h-fit w-fit) !card-bg-color" icon-class="i-solar:trash-bin-trash-outline" :transition-icon="true"
         style="--el-color-primary: var(--el-color-danger);--el-button-hover-border-color: var(--el-color-danger);background-color: inherit;"
         @click="setting.reset()"

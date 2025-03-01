@@ -181,8 +181,9 @@ onDeactivated(() => {
       <div v-if="isShowModel" class="absolute left-0 top-2.5rem z-1 h89vh w-full flex-1 bg-color">
         <!-- 搜索历史记录 -->
         <div
+          v-show="searchPage.current === 0"
           class="tags overflow-hidden transition-max-height"
-          :class="showSearchHistory ? 'max-h-18em' : 'max-h-3.4em '"
+          :class="showSearchHistory ? 'max-h-15em' : 'max-h-3.2em '"
         >
           <div mt-2 text-mini>
             历史记录：
@@ -193,7 +194,8 @@ onDeactivated(() => {
               }"
             />
             <i
-              i-solar:round-alt-arrow-up-bold
+              i-solar:round-alt-arrow-down-bold
+              title="查看更多"
               class="float-right mr-1 p-2.8 btn-primary"
               :class="{ 'rotate-180': showSearchHistory }"
               @click="showSearchHistory = !showSearchHistory"
@@ -204,9 +206,9 @@ onDeactivated(() => {
             :key="p"
             closable
             size="small"
-            effect="dark"
-            style="padding: 0.3em 0.6em;--el-tag-bg-color: var(--el-color-primary-light-9);color: #fff;border:none; font-size: 0.8em;transition: none;"
-            class="mt-2 cursor-pointer not-first:ml-1"
+            type="primary"
+            style="padding: 0.3em 0.6em;border:none; font-size: 0.8em;transition: none;"
+            class="mr-1 mt-1 cursor-pointer"
             @close="handleClose(p)"
             @click="clickTag(p, i)"
           >
@@ -224,15 +226,16 @@ onDeactivated(() => {
         </div>
         <el-scrollbar
           v-show="isShowResult && searchPage.current && searchPageList.length > 0"
-          wrap-class="pb-6 flex-1  overflow-hidden"
-          class="h-full pb-6"
+          class="py-2"
+          wrap-class="pb-4 flex-1  overflow-hidden"
+          height="calc(100vh - 150px)"
         >
           <ListAutoIncre
             :immediate="false"
             :no-more="noMore"
             @load="onLoadMore"
           >
-            <ListTransitionGroup tag="div" class="py-2">
+            <ListTransitionGroup tag="div">
               <!-- 用户卡片 -->
               <div
                 v-for="(p, index) in searchPageList"

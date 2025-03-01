@@ -14,7 +14,9 @@ export interface HistoryAccount {
 
 
 export function useHistoryAccount(key: string = "history-accounts") {
-  const historyAccounts = useLocalStorage<HistoryAccount[]>(key, []);
+  const historyAccounts = useLocalStorage<HistoryAccount[]>(key, [], {
+    shallow: true,
+  });
 
   /**
    * 添加登录记录
