@@ -193,7 +193,7 @@ defineExpose({
   <DialogPopup
     v-model="show"
     destroy-on-close
-    content-class="max-w-90vw rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color"
+    content-class="max-w-95vw overflow-hidden rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color"
   >
     <template #title>
       <div data-tauri-drag-region select-none text-center>
@@ -208,7 +208,7 @@ defineExpose({
       class="relative pt-4"
     >
       <div ref="autoAnimateRef">
-        <div v-show="!imgStep" key="first" class="mt-4 w-84vw flex flex flex-col gap-4 md:w-800px md:flex-row">
+        <div v-show="!imgStep" key="first" class="mt-4 w-82vw flex flex flex-col gap-4 md:w-800px md:flex-row">
           <!-- 未选列表 -->
           <el-form-item
             class="left flex-1"
@@ -226,7 +226,7 @@ defineExpose({
               </div>
             </template>
             <el-checkbox-group v-model="form.uidList" class="w-full">
-              <div class="scroll-bar max-h-200px flex flex-col overflow-y-auto sm:max-h-300px sm:pr-2">
+              <div class="scroll-bar max-h-40vh min-h-40vh flex flex-col overflow-y-auto sm:(max-h-300px min-h-300px pr-2)">
                 <ListAutoIncre
                   :immediate="false"
                   :auto-stop="false"
@@ -247,6 +247,7 @@ defineExpose({
           </el-form-item>
           <!-- 已选列表 -->
           <el-form-item
+            v-if="!setting.isMobileSize"
             label="已选好友"
             prop="uidList"
             :rules="[
@@ -258,7 +259,9 @@ defineExpose({
             class="right h-fit flex-1 sm:pr-4"
             style="display: flex;;flex-direction: column;"
           >
-            <ListTransitionGroup v-show="getCheckList.length > 0" tag="div" class="scroll-bar grid grid-cols-3 mt-0 max-h-200px min-h-200px w-full items-start gap-col-2 overflow-y-auto card-rounded-df p-2 sm:(grid-cols-4 max-h-300px min-h-300px) bg-color-2">
+            <ListTransitionGroup
+              v-show="getCheckList.length > 0" tag="div" class="scroll-bar grid grid-cols-3 mt-0 max-h-200px min-h-200px w-full items-start gap-col-2 overflow-y-auto card-rounded-df p-2 sm:(grid-cols-4 max-h-300px min-h-300px) bg-color-2"
+            >
               <div v-for="p in getCheckList" :key="p.userId" class="item" :label="p.userId">
                 <i i-solar:close-circle-bold p-2 btn-primary class="absolute right-2px top-2px z-1" @click="remove(p.userId)" />
                 <div class="avatar-icon">
@@ -272,23 +275,13 @@ defineExpose({
               <i i-solar:user-plus-broken mr-2 p-2.5 />
               <p>未选择成员</p>
             </div>
-            <div mt-8 w-full flex-row-c-c>
-              <el-button class="w-1/3" @click="show = false">
-                取消
-              </el-button>
-              <el-button
-                class="w-1/3"
-                :disabled="form.uidList.length <= 0"
-                :type="form.roomId ? 'warning' : 'info'" @click="next()"
-              >
-                {{ form.roomId ? '邀请' : '下一步' }}
-              </el-button>
-            </div>
           </el-form-item>
         </div>
+        <!-- 第二步 -->
         <div
           v-if="imgStep"
-          key="2" class="h-250px w-90vw flex-row-c-c flex-col md:w-280px sm:h-300px"
+          key="2"
+          class="h-250px min-w-80vw flex-row-c-c flex-col md:w-280px sm:h-300px"
         >
           <!-- 选择头像 -->
           <el-form-item
@@ -330,6 +323,19 @@ defineExpose({
             </el-button>
           </div>
         </div>
+        <!-- 第一步 -->
+        <div v-else key="1" class="flex justify-center px-4 py-2 sm:justify-end">
+          <el-button class="w-6em sm:w-8em" @click="show = false">
+            取消
+          </el-button>
+          <el-button
+            class="w-6em sm:w-8em"
+            :disabled="form.uidList.length <= 0"
+            :type="form.roomId ? 'warning' : 'info'" @click="next()"
+          >
+            {{ form.roomId ? '邀请' : '下一步' }}
+          </el-button>
+        </div>
       </div>
     </el-form>
   </DialogPopup>
@@ -366,10 +372,10 @@ defineExpose({
   --at-apply:"flex flex-col relative items-center gap-4 px-2 py-3.6 page-pointer rounded-6px hover:(bg-color-3 ) transition-300"
 }
 .check-item {
-  --at-apply:"flex items-center px-4 gap-2 page-pointer rounded-6px p-2 hover:(bg-color-3 ) transition-300"
+  --at-apply:"flex items-center px-4 gap-2 page-pointer rounded-6px p-2 hover:(bg-color-3 dark:bg-dark-8) transition-300"
 }
 :deep(.el-checkbox.is-checked){
-  --at-apply:" bg-color-3 shadow-sm"
+  --at-apply:" bg-color-3 dark:bg-dark-8 shadow-sm"
 }
 .avatar {
   :deep(.el-form-item__error) {

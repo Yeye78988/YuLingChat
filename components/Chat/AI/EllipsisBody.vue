@@ -12,7 +12,7 @@ const emit = defineEmits<{
 
 
 <template>
-  <div class="max-w-full flex items-center truncate">
+  <div class="max-w-full flex truncate !items-center">
     <p class="msg-poper flex-1 truncate">
       {{ (modelValue || '').slice(0, 50) }}
     </p>

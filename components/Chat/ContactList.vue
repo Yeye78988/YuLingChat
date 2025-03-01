@@ -18,7 +18,14 @@ const pageInfo = ref({
   size: 20,
 });
 const isLoadRoomMap: Record<number, boolean> = {};
-
+// 滚动顶部触发
+const isScrollTop = ref(true);
+function onScroll(e: {
+  scrollTop: number;
+  scrollLeft: number;
+}) {
+  isScrollTop.value = e.scrollTop === 0;
+}
 // 计算
 const theContactId = computed({
   get() {
@@ -60,10 +67,12 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
     return;
   isReload.value = true;
   if (isAll) {
-    chat.contactMap = {};
-    pageInfo.value.cursor = undefined;
-    pageInfo.value.isLast = false;
-    pageInfo.value.size = size;
+    // chat.contactMap = {};
+    pageInfo.value = {
+      cursor: undefined,
+      isLast: false,
+      size,
+    };
     if (setting.isMobileSize) { // 移动端
       setting.isOpenGroupMember = false;// 关闭群成员列表
       setting.isOpenContactSearch = true;// 打开搜索框
@@ -77,8 +86,10 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
   else if (roomId) { // 刷新某一房间
     refreshItem(roomId);
   }
-  await nextTick();
-  isReload.value = false;
+  isScrollTop.value = false;
+  nextTick(() => {
+    isReload.value = false;
+  });
 }
 
 // 刷新某一房间
@@ -183,7 +194,9 @@ function onClickContact(room: ChatContactVO) {
   chat.onChangeRoom(room.roomId);
 }
 
-reload();
+onMounted(() => {
+  reload();
+});
 
 const RoomTypeTagType: Record<number, "" | "primary" | "info" | any> = {
   [RoomType.AICHAT]: "warning",
@@ -215,7 +228,7 @@ const menuList = [
 
 <template>
   <div
-    class="group main"
+    class="group main main-bg-color"
   >
     <!-- 搜索群聊 -->
     <div
@@ -252,19 +265,35 @@ const menuList = [
       </MenuPopper>
     </div>
     <!-- 会话列表 -->
-    <el-scrollbar wrap-class="w-full h-full" class="contact-list" wrapper-class="relative">
-      <!-- 添加骨架屏 -->
-      <div v-if="isReload" class="animate-(fade-in duration-150) overflow-y-auto">
-        <ChatContactSkeleton v-for="i in 10" :key="i" />
-      </div>
+    <el-scrollbar
+      wrap-class="w-full h-full"
+      class="contact-list"
+      wrapper-class="relative"
+      @scroll="onScroll"
+    >
       <ListAutoIncre
-        :immediate="true"
+        :immediate="false"
         :auto-stop="false"
-        loading-class="op-0"
+        :is-scroll-top="isScrollTop"
         :no-more="pageInfo.isLast"
+        enable-pull-to-refresh
+        loading-class="op-0"
+        :damping="0.7"
+        :pull-trigger-distance="30"
+        :refresh-timeout="8000"
+        :on-refresh="reload"
         @load="loadData(dto)"
       >
-        <ListTransitionGroup :immediate="false">
+        <ListTransitionGroup
+          :immediate="false" tag="div" :class="{
+            reload: isReload,
+          }"
+          class="relative"
+        >
+          <!-- 添加骨架屏 -->
+          <div v-if="isReload" class="contact-list main-bg-color absolute z-1 w-full overflow-y-auto">
+            <ChatContactSkeleton v-for="i in 10" :key="i" />
+          </div>
           <div
             v-for="room in chat.getContactList"
             :key="room.roomId"
@@ -324,7 +353,10 @@ const menuList = [
 
 <style lang="scss" scoped>
 .main {
-  --at-apply: "z-4 h-full flex flex-shrink-0 flex-col select-none overflow-hidden border-0 border-0 rounded-0 sm:(relative left-0 top-0 w-1/4 pl-0 card-bg-color-2) bg-color-3";
+  --at-apply: "z-4 h-full flex flex-shrink-0 flex-col select-none overflow-hidden border-0 border-0 rounded-0 sm:(relative left-0 top-0 w-1/4 pl-0)";
+}
+.main-bg-color {
+  --at-apply: "sm:card-bg-color-2 bg-color-3";
 }
 .contact-list {
   --at-apply: "sm:p-2 p-0";
@@ -381,6 +413,12 @@ const menuList = [
 
   .el-scrollbar__thumb {
     width: 6px;
+  }
+}
+.reload {
+  transition: none !important;
+  * {
+    transition: none !important;
   }
 }
 </style>

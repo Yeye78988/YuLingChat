@@ -13,21 +13,19 @@ const {
   >
     <!-- 头像 -->
     <div
-      class="h-2.4rem w-2.4rem flex-shrink-0 rounded bg-light-900 object-cover dark:bg-dark-4"
+      class="h-2.6rem w-2.6rem flex-shrink-0 rounded bg-light-900 object-cover dark:bg-dark/50"
       :class="animteClass"
     />
     <!-- 信息 -->
-    <div
-      class="info-skeleton"
-    >
+    <div class="info-skeleton">
       <!-- 昵称 -->
       <div
         :class="animteClass"
-        class="nickname-skeleton h-4 w-8em rounded bg-light-900 dark:bg-dark-4"
+        class="nickname-skeleton h-4 w-8em rounded bg-light-900 dark:bg-dark/50"
       />
       <!-- 最近消息 -->
       <div
-        class="mt-4 h-3 w-10em rounded bg-light-900 dark:bg-dark-4"
+        class="mt-4 h-3 w-10em rounded bg-light-900 dark:bg-dark/50"
         :class="animteClass"
       />
     </div>
