@@ -292,7 +292,10 @@ defineExpose({
     <div
       v-show="isPulling || isRefreshing"
       class="absolute left-0 top-0 w-full flex-row-c-c transform py-2 text-center -translate-y-full text-mini"
-      :style="{ opacity: Math.min(1, pullDistance / 15) }"
+      :style="{
+        opacity: Math.min(1, pullDistance / pullTriggerDistance),
+        transform: `translateY(-${pullDistance / 1.5}px) scale(${Math.min(1, pullDistance / pullTriggerDistance + 0.2)})`,
+      }"
     >
       <slot name="pull-text" :text="refreshText" :state="isRefreshing" :distance="pullDistance">
         <div class="flex items-center justify-center">
