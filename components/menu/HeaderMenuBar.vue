@@ -104,7 +104,7 @@ async function toggleContactOpen() {
 
 <style lang="scss" scoped>
 .nav {
-  --at-apply: "h-56px sm:h-50px relative left-0 top-0 flex-row-bt-c select-none gap-4 rounded-b-0 px-3  border-default-b  bg-color";
+  --at-apply: "h-3.5rem sm:h-3.125rem relative left-0 top-0 flex-row-bt-c select-none gap-4 rounded-b-0 px-3  border-default-b  bg-color";
   z-index: 999;
   background-size: 3px 3px;
   backdrop-filter: blur(1rem);

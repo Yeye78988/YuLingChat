@@ -25,6 +25,7 @@ const getType = computed(() => {
       <CardElImage
         loading="lazy"
         :preview-src-list="[BaseUrlImg + chat.theContact.avatar]"
+        preview-teleported
         :alt="chat.theContact.name"
         :src="BaseUrlImg + chat.theContact.avatar"
         class="h-2rem w-2rem flex-shrink-0 object-cover sm:(h-2.2rem w-2.2rem) border-default card-default"

@@ -83,14 +83,16 @@ export function useSettingInit() {
   if (app)
     app.classList.remove("stop-transition");
   ElMessage.closeAll("error");
-  const font = setting.settingPage.fontFamily.value || null;
-
   setting.showDownloadPanel = false;
-
   // 4、设置字体
+  const font = setting.settingPage.fontFamily.value || null;
   if (font)
     document.documentElement.style.setProperty("--font-family", font);
-
+  // 字体大小
+  const fontSize = setting.settingPage.fontSize.value || null;
+  if (fontSize) {
+    document.documentElement.style.setProperty("--font-size", `${fontSize}px`);
+  }
   // 5、流畅模式
   if (setting.settingPage.isCloseAllTransition)
     document.documentElement.classList.add("stop-transition-all");

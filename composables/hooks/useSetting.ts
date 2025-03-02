@@ -1,5 +1,4 @@
 import { getVersion } from "@tauri-apps/api/app";
-import { open as openFile } from "@tauri-apps/plugin-shell";
 
 
 /**
@@ -304,7 +303,7 @@ export function useSettingDefault() {
         document.documentElement.style.setProperty("--font-family", val);
         setTimeout(() => {
           isFullLoading.value = false;
-        }, 300);
+        }, 500);
       }
     },
   );
@@ -345,31 +344,9 @@ export function useSettingDefault() {
       document.documentElement.classList.remove("stop-transition-all");
   }
 
-  // 打开下载文件夹
-  async function openFileFolder() {
-    if (!await existsFile(setting.appDataDownloadDirUrl)) {
-      ElMessageBox.confirm("下载目录不存在，是否创建？", {
-        title: "提示",
-        center: true,
-        confirmButtonText: "创建",
-        cancelButtonText: "取消",
-        confirmButtonClass: "el-button-warning",
-        lockScroll: true,
-        callback: async (action: string) => {
-          if (action === "confirm") {
-            mkdirFile(setting.appDataDownloadDirUrl);
-          }
-        },
-      });
-      return;
-    }
-    openFile(setting.appDataDownloadDirUrl);
-  }
-
   return {
     isFullLoading,
     notificationTypeList,
     changeAnimateMode,
-    openFileFolder,
   };
 }

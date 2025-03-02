@@ -126,6 +126,10 @@ JiwuChat 是一款基于 Tauri2 和 Nuxt3 构建的轻量`(~10MB)`多平台聊�
 
 ![账号与安全](./.doc/chat5.png)
 
+- 设置
+
+![设置](./.doc/chat6-light.png)
+
 - 移动端适配
 
 <div>

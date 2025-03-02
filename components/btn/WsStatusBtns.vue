@@ -22,7 +22,7 @@ const getStatusText = computed(() => {
     data-fade
     style="--anima: latter-slice-bottom;"
   >
-    <small truncate text-10px tracking-0.1em el-color-danger>
+    <small truncate text-0.625rem tracking-0.1em el-color-danger>
       {{ getStatusText }}
       <span v-if="online" class="text-[var(--el-color-danger)]">(无网络)</span>
     </small>

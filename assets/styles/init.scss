@@ -1,5 +1,18 @@
 :root {
   --font-family: "Alimama", --animate-duration: $transition-delay;
+  --font-size: 16px;
+}
+
+@media screen and (width <= 768px) {
+  html {
+    font-size: var(--font-size, 16px); /* 当前屏幕尺寸除以划分的等份:320/15 */
+  }
+}
+
+@media screen and (width >= 750px) {
+  html {
+    font-size: var(--font-size, 16px); /* 当前屏幕尺寸除以划分的等份:720/15 */
+  }
 }
 
 * {
@@ -83,17 +96,6 @@ body {
   src: url("https://jiwu.kiwi2333.top/font/ZiWanGeTe.ttf") format("truetype");
 }
 
-@media screen and (width <= 768px) {
-  html {
-    font-size: 16px; /* 当前屏幕尺寸除以划分的等份:320/15 */
-  }
-}
-
-@media screen and (width >= 750px) {
-  html {
-    font-size: 16px; /* 当前屏幕尺寸除以划分的等份:720/15 */
-  }
-}
 *,
 .cursor-pointer {
   // 移动端点击有蓝色底

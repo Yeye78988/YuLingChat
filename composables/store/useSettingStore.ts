@@ -112,6 +112,15 @@ export const useSettingStore = defineStore(
         value: "Alimama",
         list: [] as { name: string; value: string }[],
       },
+      fontSize: {
+        value: 16,
+        list: [
+          { name: "小", value: 12 },
+          { name: "中", value: 14 },
+          { name: "默认", value: 16 },
+          { name: "超大", value: 18 },
+        ],
+      },
       modeToggle: {
         value: "system",
         list: [
@@ -459,6 +468,15 @@ export const useSettingStore = defineStore(
         fontFamily: {
           value: "Alimama",
           list: [],
+        },
+        fontSize: {
+          value: 16,
+          list: [
+            { name: "小", value: 12 },
+            { name: "中", value: 14 },
+            { name: "默认", value: 16 },
+            { name: "超大", value: 18 },
+          ],
         },
         modeToggle: {
           value: "system",
