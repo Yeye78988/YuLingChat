@@ -31,8 +31,8 @@ const props = withDefaults(defineProps<{
   loadingClass: "mx-a my-0.6em h-1rem w-1rem animate-[spin_2s_infinite_linear] rounded-6px bg-[var(--el-color-primary)]",
   // 下拉刷新默认值
   enablePullToRefresh: false,
-  pullDistance: 60,
-  pullTriggerDistance: 20,
+  pullDistance: 90,
+  pullTriggerDistance: 60,
   pullRefreshText: "下拉刷新",
   pullReleaseText: "释放更新",
   pullRefreshingText: "更新中...",

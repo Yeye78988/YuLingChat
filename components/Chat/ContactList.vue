@@ -278,8 +278,9 @@ const menuList = [
         enable-pull-to-refresh
         loading-class="op-0"
         :damping="0.7"
-        :pull-trigger-distance="30"
-        :refresh-timeout="8000"
+        :pull-distance="90"
+        :pull-trigger-distance="60"
+        :refresh-timeout="3000"
         :on-refresh="reload"
         @load="loadData(dto)"
       >
