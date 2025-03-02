@@ -154,7 +154,7 @@ const size = computed(() => {
 
 <style scoped lang="scss">
 .title {
-  --at-apply: "block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-6 mb-3) ";
+  --at-apply: "text-0.9em block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-6 mb-3) ";
 }
 .box {
   --at-apply: "text-0.9em card-rounded-df bg-white dark:bg-dark shadow p-3 sm:p-4 flex flex-col gap-3";
