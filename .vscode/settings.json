@@ -58,5 +58,8 @@
   // iconsfy
   "interline-translate.knownPopularWordCount": 6000,
   "iconify.annotations": true,
-  "iconify.inplace": true
+  "iconify.inplace": true,
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32s3"
+  }
 }

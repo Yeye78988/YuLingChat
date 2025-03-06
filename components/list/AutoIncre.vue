@@ -1,5 +1,26 @@
 <script lang="ts" setup>
-const props = withDefaults(defineProps<{
+const {
+  noMore = false,
+  immediate = true,
+  loading = false,
+  autoStop = true,
+  delay = 1000,
+  thresholdHeight = 160,
+  appendLoadingClass = "mx-a mt-a text-1.8rem",
+  loadingClass = "mx-a my-0.6em h-0.8em w-0.8em animate-[spin_2s_infinite_linear] rounded-6px bg-[var(--el-color-primary)]",
+  // 下拉刷新默认值
+  enablePullToRefresh = false,
+  pullDistance: pullDistanceMax = 90,
+  pullTriggerDistance = 60,
+  pullRefreshText = "下拉刷新",
+  pullReleaseText = "释放更新",
+  pullRefreshingText = "更新中...",
+  damping = 0.6,
+  refreshTimeout = 2000,
+  disableWhenLoading = true,
+  isScrollTop = false,
+  onRefresh,
+} = defineProps<{
   noMore: boolean
   immediate?: boolean
   delay?: number
@@ -20,27 +41,7 @@ const props = withDefaults(defineProps<{
   damping?: number
   refreshTimeout?: number
   disableWhenLoading?: boolean
-}>(), {
-  noMore: false,
-  immediate: true,
-  loading: false,
-  autoStop: true,
-  delay: 1000,
-  thresholdHeight: 300,
-  appendLoadingClass: "mx-a text-1.8rem",
-  loadingClass: "mx-a my-0.6em h-1rem w-1rem animate-[spin_2s_infinite_linear] rounded-6px bg-[var(--el-color-primary)]",
-  // 下拉刷新默认值
-  enablePullToRefresh: false,
-  pullDistance: 90,
-  pullTriggerDistance: 60,
-  pullRefreshText: "下拉刷新",
-  pullReleaseText: "释放更新",
-  pullRefreshingText: "更新中...",
-  damping: 0.6,
-  refreshTimeout: 2000,
-  disableWhenLoading: true,
-  isScrollTop: false,
-});
+}>();
 
 const emit = defineEmits<{
   (e: "load"): any
@@ -74,7 +75,7 @@ const { stop, isSupported } = useIntersectionObserver(
 );
 
 function callBack() {
-  if (props.noMore && props.autoStop) {
+  if (noMore && autoStop) {
     clearInterval(timer.value);
     stop && stop();
   }
@@ -86,50 +87,50 @@ function callBack() {
 watch(isIntersecting, (val) => {
   if (val) {
     callBack();
-    timer.value = setInterval(callBack, props.delay);
+    timer.value = setInterval(callBack, delay);
   }
   else {
     clearInterval(timer.value);
   }
 });
 
-if (props.immediate) {
+if (immediate) {
   nextTick(() => {
     clearInterval(timer.value);
     callBack();
-    timer.value = setInterval(callBack, props.delay);
+    timer.value = setInterval(callBack, delay);
   });
 }
 
 // 展示加载
-const showLoad = computed(() => !props.noMore);
+const showLoad = computed(() => !noMore);
 
 // 是否没有更多
-watch(() => props.noMore, (val) => {
-  if (val && props.autoStop)
+watch(() => noMore, (val) => {
+  if (val && autoStop)
     stop && stop();
 });
 
 // 下拉刷新相关
 const pullContainerRef = useTemplateRef("pullContainerRef");
 const startY = ref(0);
-const pullDistance = ref(0);
+const _pullDistance = ref(0);
 const isPulling = ref(false);
 const isRefreshing = ref(false);
-const refreshText = ref(props.pullRefreshText);
+const refreshText = ref(pullRefreshText);
 
 // 内部loading状态
-const isLoading = computed(() => props.loading || isRefreshing.value);
+const isLoading = computed(() => loading || isRefreshing.value);
 
 // 检查当前是否可以下拉刷新
 function canPullToRefresh() {
-  if (!props.enablePullToRefresh)
+  if (!enablePullToRefresh)
     return false;
   if (isRefreshing.value)
     return false;
-  if (props.disableWhenLoading && props.loading)
+  if (disableWhenLoading && loading)
     return false;
-  return props.isScrollTop;
+  return isScrollTop;
 }
 
 // 使用被动事件监听选项优化触摸事件性能
@@ -143,7 +144,7 @@ function handleTouchStart(e: TouchEvent) {
   // 重置状态
   startY.value = e.touches?.[0]?.pageY || 0;
   isPulling.value = true;
-  refreshText.value = props.pullRefreshText;
+  refreshText.value = pullRefreshText;
 }
 
 // 触摸移动事件
@@ -155,33 +156,33 @@ function handleTouchMove(e: TouchEvent) {
   const deltaY = currentY - startY.value;
 
   // 应用阻尼效果，使下拉体验更自然
-  pullDistance.value = deltaY > 0
-    ? Math.min(props.pullDistance, deltaY * props.damping)
+  _pullDistance.value = deltaY > 0
+    ? Math.min(pullDistanceMax, deltaY * damping)
     : 0;
 
-  if (pullDistance.value <= 0) {
+  if (_pullDistance.value <= 0) {
     resetPullState();
     return;
   }
 
   // 防止页面滚动
-  if (isPulling.value && pullDistance.value > 0) {
+  if (isPulling.value && _pullDistance.value > 0) {
     e.preventDefault();
   }
 
-  refreshText.value = pullDistance.value > props.pullTriggerDistance
-    ? props.pullReleaseText
-    : props.pullRefreshText;
+  refreshText.value = _pullDistance.value > pullTriggerDistance
+    ? pullReleaseText
+    : pullRefreshText;
 }
 
 // 触发刷新 只判断一次
 const triggerRefresh = (() => {
-  if (props.onRefresh && typeof props.onRefresh === "function") {
+  if (onRefresh && typeof onRefresh === "function") {
     return () => {
       isRefreshing.value = true;
-      refreshText.value = props.pullRefreshingText;
+      refreshText.value = pullRefreshingText;
       // 执行刷新回调
-      props.onRefresh!().then(() => {
+      onRefresh!().then(() => {
         finishRefresh();
       }).catch(() => {
         finishRefresh();
@@ -189,15 +190,16 @@ const triggerRefresh = (() => {
       // 设置超时保护，防止刷新一直不结束
       refreshTimeoutTimer = window.setTimeout(() => {
         finishRefresh();
-      }, props.refreshTimeout);
+      }, refreshTimeout);
     };
   }
   return () => {
     isRefreshing.value = true;
-    refreshText.value = props.pullRefreshingText;
+    refreshText.value = pullRefreshingText;
     // 执行刷新回调
-    if (props.onRefresh && typeof props.onRefresh === "function") {
-      props.onRefresh()?.then(() => {
+    if (onRefresh && typeof onRefresh === "function") {
+      // @ts-expect-error
+      onRefresh()?.then(() => {
         finishRefresh();
       }).catch(() => {
         finishRefresh();
@@ -206,7 +208,7 @@ const triggerRefresh = (() => {
     // 设置超时保护，防止刷新一直不结束
     refreshTimeoutTimer = window.setTimeout(() => {
       finishRefresh();
-    }, props.refreshTimeout);
+    }, refreshTimeout);
   };
 })();
 
@@ -215,7 +217,7 @@ function handleTouchEnd() {
   if (!isPulling.value || isRefreshing.value)
     return;
 
-  if (pullDistance.value > props.pullTriggerDistance) {
+  if (_pullDistance.value > pullTriggerDistance) {
     triggerRefresh();
   }
   else {
@@ -225,7 +227,7 @@ function handleTouchEnd() {
 
 // 重置下拉状态
 function resetPullState() {
-  pullDistance.value = 0;
+  _pullDistance.value = 0;
   isPulling.value = false;
 }
 
@@ -237,14 +239,14 @@ function finishRefresh() {
     refreshTimeoutTimer = null;
   }
 
-  pullDistance.value = 0;
+  _pullDistance.value = 0;
   isRefreshing.value = false;
   isPulling.value = false;
 }
 
 // 添加和删除事件监听器
 onMounted(() => {
-  if (props.enablePullToRefresh && pullContainerRef.value) {
+  if (enablePullToRefresh && pullContainerRef.value) {
     pullContainerRef.value.addEventListener("touchstart", handleTouchStart, passiveOptions);
     pullContainerRef.value.addEventListener("touchmove", handleTouchMove, passiveOptions);
     pullContainerRef.value.addEventListener("touchend", handleTouchEnd, passiveOptions);
@@ -283,7 +285,7 @@ defineExpose({
     ref="pullContainerRef"
     class="relative"
     :style="{
-      transform: `translateY(${pullDistance}px)`,
+      transform: `translateY(${_pullDistance}px)`,
       transition: isRefreshing || !isPulling ? 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)' : 'none',
       willChange: isPulling ? 'transform' : 'auto',
     }"
@@ -293,11 +295,11 @@ defineExpose({
       v-show="isPulling || isRefreshing"
       class="absolute left-0 top-0 w-full flex-row-c-c transform py-2 text-center -translate-y-full text-mini"
       :style="{
-        opacity: Math.min(1, pullDistance / pullTriggerDistance),
-        transform: `translateY(-${pullDistance / 1.5}px) scale(${Math.min(1, pullDistance / pullTriggerDistance + 0.2)})`,
+        opacity: Math.min(1, _pullDistance / pullTriggerDistance),
+        transform: `translateY(-${_pullDistance / 1.5}px) scale(${Math.min(1, pullDistanceMax / pullTriggerDistance + 0.2)})`,
       }"
     >
-      <slot name="pull-text" :text="refreshText" :state="isRefreshing" :distance="pullDistance">
+      <slot name="pull-text" :text="refreshText" :state="isRefreshing" :distance="_pullDistance">
         <div class="flex items-center justify-center">
           <svg
             v-if="isRefreshing"
@@ -306,7 +308,7 @@ defineExpose({
           <svg
             v-else
             class="mr-1 h-5 w-5 transform transition-transform"
-            :style="{ transform: `rotate(${Math.min(180, (pullDistance / pullTriggerDistance) * 180)}deg)` }"
+            :style="{ transform: `rotate(${Math.min(180, (_pullDistance / pullTriggerDistance) * 180)}deg)` }"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
           ><path fill="currentColor" d="M12 4a1 1 0 0 1 .707.293l4 4a1 1 0 0 1-1.414 1.414L13 7.414V15a1 1 0 1 1-2 0V7.414L8.707 9.707a1 1 0 0 1-1.414-1.414l4-4A1 1 0 0 1 12 4M6 20a1 1 0 1 0 0-2a1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2a1 1 0 0 0 0 2m6 0a1 1 0 1 0 0-2a1 1 0 0 0 0 2" /></svg>
@@ -347,6 +349,7 @@ defineExpose({
       </div>
     </div>
   </div>
+
   <!-- 不启用下拉刷新时的原始内容 -->
   <template v-else>
     <slot name="default" />
@@ -359,7 +362,7 @@ defineExpose({
       <div
         ref="loadMoreRef"
         key="loadMoreRef"
-        class="absolute top-0 z-1 w-full"
+        class="absolute bottom-0 z-1 w-full flex flex-col"
         :style="{ height: `${thresholdHeight}px` }"
       >
         <slot name="load">
@@ -371,12 +374,12 @@ defineExpose({
       </div>
     </div>
     <!-- 完成 -->
-    <div v-else>
+    <template v-else>
       <slot name="done">
         <div v-if="!noMore && !loading" key="done" mim-h-4 w-full text-center text-mini @click="!isSupported && $emit('load')">
           <!-- 暂无更多 -->
         </div>
       </slot>
-    </div>
+    </template>
   </template>
 </template>

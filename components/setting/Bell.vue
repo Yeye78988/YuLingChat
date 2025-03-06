@@ -14,7 +14,7 @@ const {
 <template>
   <div id="chat-bell" class="group h-8 flex-row-bt-c">
     通话铃声
-    <div class="ml-a flex items-center gap-3 pr-4 text-1em" :title="setting.isDefaultRtcCallBell ? '默认铃声' : '自定义铃声'">
+    <div class="ml-a flex items-center gap-3 pr-4 text-0.9em" :title="setting.isDefaultRtcCallBell ? '默认铃声' : '自定义铃声'">
       <span
         v-if="!setting.isDefaultRtcCallBell"
         class="cursor-pointer tracking-0.1em op-0 btn-warning group-hover:op-100"

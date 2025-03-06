@@ -9,7 +9,7 @@ const {
 
 <template>
   <div
-    class="flex flex-shrink-0 gap-4 truncate px-4 py-3 transition-200 transition-shadow sm:(w-full p-4 px-5) hover:bg-[#7c7c7c1a] text-color"
+    class="h-18 w-full flex cursor-pointer items-center gap-3 sm:(card-rounded-df mb-2 w-full border-transparent card-bg-color p-3 text-color) p-4 text-sm card-bg-color dark:bg-transparent !hover:bg-[#f8f8f8] !dark:hover:bg-[#151515]"
   >
     <!-- 头像 -->
     <div
@@ -21,7 +21,7 @@ const {
       <!-- 昵称 -->
       <div
         :class="animteClass"
-        class="nickname-skeleton h-4 w-8em rounded bg-light-900 dark:bg-dark/50"
+        class="nickname-skeleton h-3 w-8em rounded bg-light-900 dark:bg-dark/50"
       />
       <!-- 最近消息 -->
       <div
