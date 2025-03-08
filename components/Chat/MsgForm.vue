@@ -265,6 +265,9 @@ function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
  * 单按键触发事件
  */
 function onInputExactKey(key: "ArrowUp" | "ArrowDown") {
+  if (!setting.downUpChangeContact) {
+    return;
+  }
   if (!chat.msgForm.content?.trim() && (key === "ArrowUp" || key === "ArrowDown")) {
     chat.onDownUpChangeRoom(key === "ArrowDown" ? "down" : "up");
   }

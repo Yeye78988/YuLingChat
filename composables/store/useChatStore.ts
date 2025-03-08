@@ -635,7 +635,6 @@ export const useChatStore = defineStore(
         return;
       const index = getContactList.value.findIndex(p => p.roomId === theContact.value?.roomId);
       onDownUpChangeRoomLoading.value = true;
-      const chat = useChatStore();
       if (index === -1 && getContactList?.value?.[0]?.roomId) {
         await onChangeRoom(getContactList?.value?.[0]?.roomId as number);
         onDownUpChangeRoomLoading.value = false;
