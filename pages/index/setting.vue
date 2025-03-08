@@ -37,7 +37,7 @@ const size = computed(() => {
   <el-scrollbar
     v-loading.fullscreen.lock="isFullLoading"
     class="h-full w-full flex-1 pt-8 card-bg-color-2"
-    wrap-class="h-full w-full pb-10em flex flex-1 flex-col px-4"
+    wrap-class="h-full w-full pb-4 sm:pb-20 flex flex-1 flex-col px-4"
     element-loading-text="更新中..."
     element-loading-background="transparent"
     :element-loading-spinner="defaultLoadingIcon"
@@ -191,7 +191,7 @@ const size = computed(() => {
 }
 .btns {
   background-image: linear-gradient(to bottom, transparent 0%, #fff 70%);
-  --at-apply: "w-full  mt-a p-4 pt-12 flex flex-col items-center gap-4 sm:flex-row absolute bottom-0 z-1 right-0";
+  --at-apply: "w-full  mt-a  flex flex-col items-center gap-4 sm:flex-row static sm:(absolute p-4 bottom-0) py-6 z-1 right-0";
 
   :deep(.el-button) {
     span {
@@ -201,5 +201,10 @@ const size = computed(() => {
 }
 .dark .btns {
   background-image: linear-gradient(to bottom, transparent 0%, #111111 70%);
+}
+@media screen and (max-width: 768px) {
+  .btns {
+    background-image: none !important;
+  }
 }
 </style>

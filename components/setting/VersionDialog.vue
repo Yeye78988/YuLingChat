@@ -112,6 +112,7 @@ const {
                 :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
                 :code-foldable="false"
                 code-theme="a11y"
+                no-img-zoom-in
                 preview-theme="smart-blue"
                 style="font-size: 12px;background-color: transparent;"
                 class="mt-2 card-rounded-df px-4 op-60 shadow-sm shadow-inset transition-opacity hover:op-100 !border-default-hover"
@@ -169,6 +170,7 @@ const {
         language="zh-CN"
         editor-id="notice-toast"
         show-code-row-number
+        :no-img-zoom-in="setting.isMobileSize"
         :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
         preview-theme="smart-blue"
         :code-foldable="false"
