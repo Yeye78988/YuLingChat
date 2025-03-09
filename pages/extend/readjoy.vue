@@ -10,7 +10,7 @@ useSeoMeta({
 
 const setting = useSettingStore();
 const isLoading = ref(true);
-const shopUrl = computed(() => "https://readjoy.kiwi233.top/");
+const url = computed(() => "https://readjoy.kiwi233.top/");
 
 onMounted(async () => {
   if (setting.isDesktop) {
@@ -29,9 +29,9 @@ onMounted(async () => {
     class="w-full flex flex-col select-none"
   >
     <iframe
-      v-if="shopUrl"
+      v-if="url"
       class="select-none"
-      :src="shopUrl"
+      :src="url"
       frameborder="0"
       width="100%"
       height="100%"

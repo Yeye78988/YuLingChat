@@ -62,15 +62,33 @@ useMsgLinear();
       </div>
     </div>
     <!-- 邀请进群 -->
-    <LazyChatNewGroupDialog v-model="showGroupDialog" :form="chat.inviteMemberForm" />
+    <LazyChatNewGroupDialog
+      v-model="showGroupDialog"
+      hydrate-on-idle
+      :form="chat.inviteMemberForm"
+    />
     <!-- 视频播放器 -->
-    <LazyUtilVideoPlayerDialog v-model="showVideoDialog" />
+    <LazyUtilVideoPlayerDialog
+      v-model="showVideoDialog"
+      hydrate-on-idle
+    />
     <!-- 扩展菜单 -->
-    <LazyMenuExtensionMenu v-model:show="chat.showExtension" />
+    <LazyMenuExtensionMenu
+      v-model:show="chat.showExtension"
+      hydrate-on-idle
+    />
     <!-- RTC通话弹窗 -->
-    <LazyChatRtcCallDialog v-model="chat.showRtcCall" v-model:call-type="chat.rtcCallType" />
-    <!-- 移动端菜单 -->
-    <LazyMenuBottomMenu v-if="setting.isMobileSize && chat.isOpenContact" class="grid sm:hidden" />
+    <LazyChatRtcCallDialog
+      v-model="chat.showRtcCall"
+      v-model:call-type="chat.rtcCallType"
+      hydrate-on-idle
+    />
+    <!-- 移动端菜单 - 小屏幕才加载 -->
+    <LazyMenuBottomMenu
+      v-if="setting.isMobileSize && chat.isOpenContact"
+      hydrate-on-media-query="(max-width: 768px)"
+      class="grid sm:hidden"
+    />
   </main>
 </template>
 

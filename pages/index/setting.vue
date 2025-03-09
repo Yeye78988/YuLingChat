@@ -186,8 +186,8 @@ const size = computed(() => {
   }
 }
 :deep(.el-slider__button) {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1rem;
+  height: 1rem;
 }
 .btns {
   background-image: linear-gradient(to bottom, transparent 0%, #fff 70%);

@@ -69,6 +69,7 @@ const extendMenuAllList = ref<ExtendItem[]>([
 
 // 暂存的扩展菜单
 const extendMenuSaveList = ref<ExtendItem[]>([]);
+const filterMenuList = computed(() => extendMenuAllList.value.filter(item => !extendMenuSaveList.value.includes(item)));
 
 // 添加
 function onAdd(item: ExtendItem) {
@@ -195,7 +196,7 @@ function createItem() {
         已折叠菜单
       </small>
       <!-- 其他菜单项 -->
-      <template v-for="item in extendMenuAllList.filter(item => !extendMenuSaveList.includes(item))" :key="item.title">
+      <template v-for="item in filterMenuList" :key="item.title">
         <div
           v-loading="item.loading"
           :element-loading-spinner="defaultLoadingIcon"
