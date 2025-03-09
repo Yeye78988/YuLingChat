@@ -36,7 +36,7 @@ const size = computed(() => {
 <template>
   <el-scrollbar
     v-loading.fullscreen.lock="isFullLoading"
-    class="h-full w-full flex-1 pt-8 card-bg-color-2"
+    class="h-full w-full flex-1 pt-8 bg-color-3 sm:card-bg-color-2"
     wrap-class="h-full w-full pb-4 sm:pb-20 flex flex-1 flex-col px-4"
     element-loading-text="更新中..."
     element-loading-background="transparent"

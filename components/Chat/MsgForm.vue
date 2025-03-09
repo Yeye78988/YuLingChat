@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { ElForm, ElMention } from "element-plus";
 import ContextMenu from "@imengyu/vue3-context-menu";
 import { FILE_TYPE_ICON_DEFAULT, FILE_TYPE_ICON_MAP, formatFileSize } from "~/composables/api/res/file";
 
@@ -28,8 +29,8 @@ const loadInputDone = ref(false); // 用于移动尺寸动画
 const loadInputTimer = shallowRef<NodeJS.Timeout>();
 
 // ref
-const inputAllRef = useTemplateRef("inputAllRef"); // 输入框
-const formRef = useTemplateRef("formRef"); // 表单
+const inputAllRef = useTemplateRef<InstanceType<typeof ElMention>>("inputAllRef"); // 输入框
+const formRef = useTemplateRef<InstanceType<typeof ElForm>>("formRef"); // 表单
 
 // hooks
 const isDisableUpload = computed(() => isAiRoom.value || route.path !== "/");
