@@ -103,6 +103,7 @@ function showJoinGroup() {
         minlength="2"
         maxlength="30"
         placeholder="搜索群友"
+        @blur.stop="() => searchUserWord === '' && (showSearch = false)"
         @input="scrollTo(0)"
       />
     </div>

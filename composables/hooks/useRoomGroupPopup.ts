@@ -16,7 +16,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   const showSearch = ref(false);
   const searchUserWord = ref("");
   const isShowApply = ref(false);
-  const isGrid = useLocalStorage(`chat_room_group_member_show_type_${user.userInfo.id}`, false);
   // 计算
   const isTheGroupOwner = computed(() => chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER);
   const isTheGroupPermission = computed(() => chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER || chat.theContact?.member?.role === ChatRoomRoleEnum.ADMIN); // 是否有权限（踢出群聊、）
@@ -29,6 +28,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     }
     return list.sort((a, b) => b.activeStatus - a.activeStatus);
   });
+
   const { list: vMemberList, scrollTo, containerProps, wrapperProps } = useVirtualList(
     memberList,
     {
@@ -48,7 +48,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
       });
     }
   }, {
-    flush: "post",
   });
 
   const onScroll = useDebounceFn((e) => {
@@ -274,7 +273,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     theContactClone.value = data;
   }, { deep: true, immediate: true });
 
-
   watch(() => chat.theContact.avatar, (val) => {
     if (val) {
       imgList.value = [{
@@ -290,6 +288,9 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
 
   // 监听房间变化
   watch(() => chat.theContactId, async (newRoomId) => {
+    if (!newRoomId) {
+      return;
+    }
     searchUserWord.value = "";
     await nextTick();
     containerProps.onScroll();
@@ -300,11 +301,12 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     if (chat.roomMapCache[newRoomId]?.cacheTime && Date.now() - chat.roomMapCache[newRoomId]?.cacheTime < 300000) { // 缓存5分钟
       return;
     }
-    await reload();
+    await reload(newRoomId);
     await nextTick();
     containerProps.onScroll(); // 切换会话成员列表滚动条位置重置
     scrollTo(0);
   }, {
+    immediate: true,
   });
 
   function onExitOrClearGroup() {
@@ -321,8 +323,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
 
 
   onMounted(() => {
-  // 初始化加载
-    reload();
     // 整个生命周期不能解除
     mitter.on(MittEventType.RELOAD_MEMBER_LIST, async ({ type, payload: { roomId, userId } }) => {
       if (chat.roomMapCache[roomId] === undefined) {
@@ -331,6 +331,10 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
       await reload(roomId);
       containerProps.onScroll(); // 触发刷新
     });
+  });
+
+  onBeforeUnmount(() => {
+    mitter.off(MittEventType.RELOAD_MEMBER_LIST);
   });
 
 

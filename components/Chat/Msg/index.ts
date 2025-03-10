@@ -79,6 +79,18 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
+        label: "翻译",
+        hidden: !txt,
+        customClass: "group",
+        icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-success",
+        onClick: () => {
+          if (!txt) {
+            return ElMessage.error("翻译失败，请选择文本！");
+          }
+          useTranslateTxt(txt as string);
+        },
+      },
+      {
         label: "打开链接",
         hidden: !txt || !txt?.match(/https?:\/\/[^\s]+/g)?.length,
         customClass: "group",
@@ -329,6 +341,18 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
+        label: "翻译",
+        hidden: !txt,
+        customClass: "group",
+        icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-success",
+        onClick: () => {
+          if (!txt) {
+            return ElMessage.error("翻译失败，请选择文本！");
+          }
+          useTranslateTxt(txt as string);
+        },
+      },
+      {
         label: "搜一搜",
         hidden: !data.message.content, // 暂时只支持文本消息
         customClass: "group",
@@ -359,6 +383,11 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     theme: setting.contextMenuTheme,
     items,
   });
+}
+
+function useTranslateTxt(txt: string, to: string = "zh-CN") {
+  // 翻译api
+  window.open(`https://fanyi.baidu.com/mtpe-individual/multimodal?query=${txt}`);
 }
 
 // 撤回消息
