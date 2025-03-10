@@ -198,7 +198,7 @@ async function onUpload(ossFile: OssFile) {
   }
   else if (uploadType === OssFileType.VIDEO && ossFile?.file) { // 视频先获取一帧，作为封面
     // 2. 获取封面
-    generateVideoThumbnail(ossFile.file, { quality: 0.4, mimeType: "image/png" }).then(async ({
+    generateVideoThumbnail(ossFile.file, { quality: 0.15, mimeType: "image/png" }).then(async ({
       blob,
       width,
       height,
@@ -230,8 +230,9 @@ async function onUpload(ossFile: OssFile) {
         return;
       }
       coverFile.value.key = coverRes.data.key;
-      // 图片文件上传
-      qiniuUpload(coverFile?.value?.file as File, coverFile.value.key as string, coverRes.data.uploadToken, coverFile.value, false, (theCover) => {
+      // 图片文件上传 压缩
+      console.log(formatFileSize(blob.size));
+      qiniuUpload(coverFileRaw as File, coverFile.value.key as string, coverRes.data.uploadToken, coverFile.value, false, (theCover) => {
         if (ossFile.status === "success") {
           ossFile.status = theCover.status;
         }

@@ -248,7 +248,7 @@ interface ThumbnailOptions {
  */
 export function generateVideoThumbnail(file: File, options: ThumbnailOptions = {
   mimeType: "image/png",
-  quality: 0.7,
+  quality: 0.4,
 }): Promise<VideoFileInfo> {
   return new Promise((resolve, reject) => {
     // 检查浏览器是否支持 OffscreenCanvas
@@ -376,49 +376,73 @@ function generateThumbnailWithCanvas(
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
+  if (!ctx) {
+    reject(new Error("无法创建Canvas上下文"));
+    return;
+  }
+
+  // 添加FileReader错误处理
   const reader = new FileReader();
+  reader.onerror = () => {
+    reject(new Error("文件读取失败"));
+  };
+
   reader.onload = (e) => {
     if (e.target && e.target.result) {
       video.src = e.target.result as string;
 
-      // 视频时长
-      video.addEventListener("loadeddata", () => {
-        video.currentTime = video.duration / 2;
-      });
+      // 设置加载元数据事件
+      video.addEventListener("loadedmetadata", () => {
+        // 设置视频位置到中间
+        video.currentTime = 0;
+      }, { once: true });
 
-      // 视频尺寸
+      // 视频跳转完成后截取画面
       video.addEventListener("seeked", () => {
-        canvas.width = options.width || video.videoWidth;
-        canvas.height = options.height || video.videoHeight;
-        if (!ctx) {
-          reject(new Error("Error occurred while generating thumbnail using Canvas."));
-          return;
+        try {
+          const videoWidth = video.videoWidth;
+          const videoHeight = video.videoHeight;
+          const quality = options.quality || 0.4;
+          const width = (options.width || videoWidth) * quality;
+          const height = options.height || videoHeight * quality;
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              // 成功生成缩略图
+              resolve({
+                blob,
+                duration: video.duration,
+                width,
+                height,
+                size: file.size,
+              });
+            }
+            else {
+              reject(new Error("生成缩略图Blob失败"));
+            }
+            // 清理资源
+            video.src = "";
+            video.load(); // 释放视频资源
+          }, options.mimeType || "image/png", quality);
         }
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve({
-              blob,
-              duration: video.duration,
-              width: video.videoWidth,
-              height: video.videoHeight,
-              size: file.size,
-            });
-          }
-          else {
-            reject(new Error("Error occurred while generating thumbnail using Canvas."));
-          }
-        }, options.mimeType || "image/png", options.quality || 1);
-      });
+        catch (err: any) {
+          reject(new Error(`生成缩略图时发生错误: ${err?.message}`));
+        }
+      }, { once: true });
     }
   };
-  reader.readAsDataURL(file);
 
+  // 视频加载错误处理
   video.addEventListener("error", (e) => {
-    reject(new Error("Error occurred while generating thumbnail using Canvas."));
-  });
-}
+    reject(new Error(`视频加载失败: ${video.error?.message || "未知错误"}`));
+    video.src = "";
+  }, { once: true });
 
+  // 开始读取文件
+  reader.readAsDataURL(file);
+}
 export interface VideoFileInfo {
   blob: Blob;
   duration: number;
