@@ -1,43 +1,58 @@
-/* eslint-disable regexp/negation */
 import ContextMenu from "@imengyu/vue3-context-menu";
-import { save as saveDialog } from "@tauri-apps/plugin-dialog";
-import { appName } from "~/constants";
 
+// 常量定义
 export const RECALL_TIME_OUT = 300000; // 默认5分钟
+const COPY_IMAGE_TYPES = ["image/png", "image/jpg", "image/svg+xml"];
 
-// 剪切板支持的图片格式
-const CopyImgType = ["image/png", "image/jpg", "image/svg+xml"];
-
-// @unocss-include
+/**
+ * 处理消息上下文菜单事件
+ * @param {MouseEvent} e - 鼠标事件
+ * @param {ChatMessageVO<any>} data - 聊天消息数据
+ * @param {Function} onDownLoadFile - 可选的文件下载回调函数
+ */
 export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDownLoadFile?: () => any) {
   const chat = useChatStore();
   const user = useUserStore();
   const setting = useSettingStore();
   const showTranslation = ref(false);
-  // @ts-expect-error
-  let ctxName = String(e?.target?.getAttribute?.("ctx-name") as DOMTokenList | undefined || "");
+  // 阻止默认上下文菜单
+  e.preventDefault();
+
+  // 从目标元素获取上下文名称
+  let ctxName = String((e?.target as HTMLElement)?.getAttribute?.("ctx-name") || "");
   const isAiReplyMsg = data.message.type === MessageType.AI_CHAT_REPLY;
+
+  // 如果没有上下文名称且不是AI回复，则返回
   if (!ctxName && !isAiReplyMsg) {
     return;
   }
 
+  // 为AI回复设置上下文名称
   if (!ctxName && isAiReplyMsg) {
     ctxName = "aiReply";
   }
-  // 显示右键菜单
-  e.preventDefault();
-  // 是否是自己
-  const isSelf = user.userInfo.id === data.fromUser.userId;
+
   // 权限检查
+  const isSelf = user.userInfo.id === data.fromUser.userId;
   const isTheGroupPermission = computed(() => {
-    return chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER || chat.theContact?.member?.role === ChatRoomRoleEnum.ADMIN;
+    return chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER
+      || chat.theContact?.member?.role === ChatRoomRoleEnum.ADMIN;
   });
-  // 右键菜单项配置
-  // 默认有文字类型的右键菜单
+
+  // 选中的文本或消息内容
+  const txt = window.getSelection()?.toString() || data.message.content;
+
+  // 处理移动端@提及
+  if (setting.isMobileSize && ctxName === "avatar" && chat.theContact?.type === RoomType.GROUP) {
+    chat.setAtUid(data.fromUser.userId);
+    return;
+  }
+
+  // 大多数消息类型的默认上下文菜单选项
   const defaultContextMenu = [
     {
       label: "撤回",
-      hidden: !isSelf || data.message.sendTime < Date.now() - RECALL_TIME_OUT, // 超过5min
+      hidden: !isSelf || data.message.sendTime < Date.now() - RECALL_TIME_OUT, // 超过5分钟
       customClass: "group",
       icon: "i-solar:backspace-broken group-hover:(scale-110 i-solar:backspace-bold) group-btn-danger",
       onClick: () => refundMsg(data, data.message.id),
@@ -45,7 +60,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     {
       label: "回复",
       customClass: "group",
-      icon: "i-solar:arrow-to-down-right-line-duotone -rotate-90  group-hover:(translate-x-1 translate-x-2px) group-btn-info",
+      icon: "i-solar:arrow-to-down-right-line-duotone -rotate-90 group-hover:(translate-x-1 translate-x-2px) group-btn-info",
       onClick: () => chat.setReplyMsg(data),
     },
     {
@@ -57,21 +72,17 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       onClick: () => deleteMsg(data, data.message.id),
     },
   ];
-  const txt = window.getSelection()?.toString() || data.message.content;
-  // 移动端长按
-  if (setting.isMobileSize && ctxName === "avatar" && chat.theContact?.type === RoomType.GROUP) { // 右键直接AT他
-    chat.setAtUid(data.fromUser.userId);
-    return;
-  }
+
+  // 不同消息类型的上下文菜单配置
   const contextMenuType: Record<string, any> = {
-    content: [// 文本内容
+    // 文本内容
+    content: [
       {
         label: "复制",
-        hidden: !txt, // 只支持文本消息
+        hidden: !txt,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: () => {
-          // 待定是否匹配content内容
           if (!txt) {
             return ElMessage.error("复制失败，请选择文本！");
           }
@@ -92,47 +103,39 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       {
         label: "打开链接",
-        hidden: !txt || !txt?.match(/https?:\/\/[^\s]+/g)?.length,
+        hidden: !txt || !txt?.match(/https?:\/\/\S+/g)?.length,
         customClass: "group",
         icon: "i-solar:link-line-duotone group-hover:(scale-110 i-solar:link-bold-duotone) group-btn-info",
         onClick: () => {
-          if (!txt) {
+          if (!txt)
             return;
-          }
-          const utls = txt?.match(/https?:\/\/[^\s]+/g);
-          if (!utls?.length)
+          const urls = txt?.match(/https?:\/\/\S+/g);
+          if (!urls?.length) {
             return ElMessage.error("抱歉找不到链接！");
-          if (utls.length === 1)
-            return window.open(utls[0], "_blank");
-          // ElMessageBox.confirm(`是否打开\`${utls[0]}\`？`, "打开链接", {
-          //   confirmButtonText: "打开",
-          //   cancelButtonText: "取消",
-          //   center: true,
-          //   lockScroll: false,
-          //   callback: (action: string) => {
-          //     if (action === "confirm" && utls?.length) {
-          //     }
-          //   },
-          // });
+          }
+          if (urls.length === 1) {
+            return window.open(urls[0], "_blank");
+          }
         },
       },
       {
         label: "搜一搜",
-        hidden: !data.message.content, // 暂时只支持文本消息
+        hidden: !data.message.content,
         customClass: "group",
         icon: "i-solar:magnifer-linear group-hover:(rotate-15 i-solar:magnifer-bold) group-btn-info",
         onClick: () => {
           if (!txt) {
             return ElMessage.error("选择内容为空，无法搜索！");
           }
-          // bing
-          const bingUrl = `https://bing.com/search?q=${encodeURIComponent(txt)}`;
+          const bingUrl = `https://bing.com/search?q=${encodeURIComponent(txt as string)}`;
           window.open(bingUrl, "_blank");
         },
       },
       ...defaultContextMenu,
     ],
-    img: [// 图片内容
+
+    // 图片内容
+    img: [
       {
         label: "复制",
         customClass: "group",
@@ -140,19 +143,23 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         icon: "i-solar:copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: async () => {
           let img = await getImgBlob(BaseUrlImg + data.message.body.url);
-          if (!img)
+          if (!img) {
             return ElMessage.error("图片加载失败！");
-          if (!CopyImgType.includes(img.type)) {
+          }
+
+          if (!COPY_IMAGE_TYPES.includes(img.type)) {
             img = await convertImgToPng(img);
           }
+
           if (!img) {
             return ElMessage.error("图片处理失败！");
           }
+
           const { copy, isSupported } = useClipboardItems({
             read: false,
             source: [new ClipboardItem({ [img.type]: img })],
-            // copiedDuring: 1500,
           });
+
           if (isSupported.value) {
             copy()
               .then(() => {
@@ -167,7 +174,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
           else {
             ElMessage.error("当前设备不支持复制图片！");
             img = null;
-          };
+          }
         },
       },
       {
@@ -175,28 +182,13 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         customClass: "group",
         hidden: !data.message.body.url,
         icon: "i-solar-download-minimalistic-broken group-hover:(translate-y-2px i-solar-download-minimalistic-bold) group-btn-success",
-        onClick: async () => {
-          let path: string | undefined | null = "";
-          const fileName = path.split("\\").pop() || `${Date.now()}.png`;
-          if (!setting.isWeb) {
-            path = await saveDialog({
-              title: setting.isDesktop ? `${appName} - 保存图片` : undefined,
-              filters: [{ name: "图片文件", extensions: ["png", "jpeg", "jpg", "svg", "webp"] }],
-              defaultPath: fileName,
-            });
-            if (!path) {
-              return;
-            }
-          }
-
-          downloadFile(BaseUrlImg + data.message.body.url, fileName, { targetPath: path }, () => {
-            ElMessage.success(setting.isWeb ? "图片已保存" : `图片已保存到 ${path}`);
-          });
-        },
+        onClick: async () => saveImageLocal(BaseUrlImg + data.message.body.url),
       },
       ...defaultContextMenu,
     ],
-    file: [// 文件内容
+
+    // 文件内容
+    file: [
       {
         label: setting.fileDownloadMap?.[BaseUrlFile + data.message.body.url] ? "打开文件" : "下载文件",
         hidden: setting.isWeb || data.message.type !== MessageType.FILE,
@@ -208,14 +200,17 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       {
         label: "文件夹打开",
-        hidden: setting.isWeb || data.message.type !== MessageType.FILE || !setting.fileDownloadMap?.[BaseUrlFile + data.message.body.url],
+        hidden: setting.isWeb || data.message.type !== MessageType.FILE
+          || !setting.fileDownloadMap?.[BaseUrlFile + data.message.body.url],
         customClass: "group",
         icon: "i-solar:folder-with-files-line-duotone group-hover:(scale-110 i-solar:folder-with-files-bold-duotone) group-btn-info",
         onClick: () => setting.openFileFolder(setting.fileDownloadMap?.[BaseUrlFile + data.message.body.url] as FileItem),
       },
       ...defaultContextMenu,
     ],
-    sound: [// 语音内容
+
+    // 语音内容
+    sound: [
       {
         label: showTranslation.value ? "折叠转文字" : "转文字",
         hidden: data.message.type !== MessageType.SOUND || !data.message.body?.translation,
@@ -225,7 +220,9 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       ...defaultContextMenu,
     ],
-    nickname: [// 昵称内容
+
+    // 昵称内容
+    nickname: [
       {
         label: "复制",
         hidden: !data.fromUser.nickName,
@@ -251,7 +248,9 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         onClick: () => chat.setAtUid(data.fromUser.userId),
       },
     ],
-    avatar: [// 头像内容
+
+    // 头像内容
+    avatar: [
       {
         label: isSelf ? "查看自己" : "个人资料",
         icon: "i-solar:user-broken group-btn-info",
@@ -266,7 +265,9 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         onClick: () => chat.setAtUid(data.fromUser.userId),
       },
     ],
-    rtc: [// RTC通话内容
+
+    // RTC通话内容
+    rtc: [
       {
         label: "重新拨打",
         icon: "i-solar:call-dropped-bold p-2.6 group-btn-warning",
@@ -279,8 +280,9 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         onClick: () => chat.setReplyMsg(data),
       },
     ],
-    video: [// video视频内容
-      // 静音播放
+
+    // 视频内容
+    video: [
       {
         label: "静音播放",
         icon: "i-solar:volume-cross-line-duotone group-hover:(scale-110 i-solar:volume-cross-bold-duotone) group-btn-warning",
@@ -290,6 +292,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
           if (!body?.url) {
             return;
           }
+
           mitter.emit(MittEventType.VIDEO_READY, {
             type: "play-dbsound",
             payload: {
@@ -306,17 +309,16 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
           });
         },
       },
-      // 另存视频
       {
         label: "另存视频",
         icon: "i-solar:download-line-duotone group-hover:(scale-110 i-solar:download-bold-duotone) group-btn-success",
         customClass: "group",
-        onClick: async () => {
-          saveDownloadVideoByUrl(BaseUrlVideo + data.message.body.url);
-        },
+        onClick: async () => saveVideoLocal(BaseUrlVideo + data.message.body.url),
       },
       ...defaultContextMenu,
     ],
+
+    // AI回复内容
     aiReply: [
       {
         label: "分享图片",
@@ -324,16 +326,14 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         customClass: "group",
         onClick: () => {
           ElMessage.warning("暂不支持分享图片");
-          // const dom = document.getElementById(`msg-md-${data.message.id}`);
         },
       },
       {
         label: "复制",
-        hidden: !txt, // 只支持文本消息
+        hidden: !txt,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: () => {
-          // 待定是否匹配content内容
           if (!txt) {
             return ElMessage.error("复制失败，请选择文本！");
           }
@@ -354,29 +354,28 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       {
         label: "搜一搜",
-        hidden: !data.message.content, // 暂时只支持文本消息
+        hidden: !data.message.content,
         customClass: "group",
         icon: "i-solar:magnifer-linear group-hover:(rotate-15 i-solar:magnifer-bold) group-btn-info",
         onClick: () => {
           if (!txt) {
             return ElMessage.error("选择内容为空，无法搜索！");
           }
-          // bing
-          const bingUrl = `https://bing.com/search?q=${encodeURIComponent(txt)}`;
+          const bingUrl = `https://bing.com/search?q=${encodeURIComponent(txt as string)}`;
           window.open(bingUrl, "_blank");
         },
       },
       ...defaultContextMenu,
     ],
   };
-  const getContextMenuItems = (ctxName: string, isSelf: boolean) => {
-    return contextMenuType[ctxName] || [];
-  };
 
-  const items = getContextMenuItems(ctxName, isSelf);
-  if (items.length === 0)
+  // 获取适当的上下文菜单项
+  const items = contextMenuType[ctxName] || [];
+  if (items.length === 0) {
     return;
+  }
 
+  // 显示上下文菜单
   ContextMenu.showContextMenu({
     x: e.x,
     y: e.y,
@@ -385,25 +384,44 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
   });
 }
 
+/**
+ * 使用外部服务翻译文本
+ * @param {string} txt - 要翻译的文本
+ * @param {string} to - 目标语言（默认：zh-CN）
+ */
 function useTranslateTxt(txt: string, to: string = "zh-CN") {
-  // 翻译api
-  window.open(`https://fanyi.baidu.com/mtpe-individual/multimodal?query=${txt}`);
+  // 检测语言（简单启发式）
+  let lang = "zh2en";
+  if ((txt.match(/[A-Z]/gi)?.length || 0) / txt.length > 0.8) {
+    lang = "en2zh"; // 主要是英文
+  }
+  else {
+    lang = "zh2en"; // 主要是中文
+  }
+
+  window.open(`https://fanyi.baidu.com/mtpe-individual/multimodal?query=${txt}&lang=${lang}`);
 }
 
-// 撤回消息
-async function refundMsg(data: ChatMessageVO, msgId: number) {
+/**
+ * 撤回消息
+ * @param {ChatMessageVO} data - 消息数据
+ * @param {number} msgId - 消息ID
+ */
+async function refundMsg(data: ChatMessageVO<any>, msgId: number) {
   const oldData = JSON.parse(JSON.stringify(data));
   const user = useUserStore();
   const chat = useChatStore();
   const roomId = data.message.roomId;
+
   const res = await refundChatMessage(roomId, msgId, user.getToken);
+
   if (res.code === StatusCode.SUCCESS) {
     if (data.message.id === msgId) {
       if (data.message.content) {
-        // 记录撤回的消息（提供后续撤回功能）
+        // 存储撤回的消息以便潜在的恢复
         chat.setRecallMsg(oldData);
       }
-      data.message.type = MessageType.RECALL;
+
       data.message.type = MessageType.RECALL;
       data.message.content = `${data.fromUser.userId === user.userInfo.id ? "我" : `"${data.fromUser.nickName}"`}撤回了一条消息`;
       data.message.body = undefined;
@@ -411,54 +429,38 @@ async function refundMsg(data: ChatMessageVO, msgId: number) {
   }
 }
 
-// 删除消息
+/**
+ * 删除消息
+ * @param {ChatMessageVO} data - 消息数据
+ * @param {number} msgId - 消息ID
+ */
 function deleteMsg(data: ChatMessageVO<any>, msgId: number) {
   ElMessageBox.confirm("是否确认删除消息？", "删除提示", {
     lockScroll: false,
     confirmButtonText: "确 认",
-    confirmButtonClass: "el-button--primary is-plain border-default ",
+    confirmButtonClass: "el-button--primary is-plain border-default",
     cancelButtonText: "取 消",
     center: true,
     callback: async (action: string) => {
       if (action !== "confirm")
         return;
+
       const user = useUserStore();
       const roomId = data.message.roomId;
+
       const res = await deleteChatMessage(roomId, msgId, user.getToken);
+
       if (res.code === StatusCode.SUCCESS) {
         if (data.message.id === msgId) {
           data.message.type = MessageType.DELETE;
-          data.message.content = `${data.fromUser.userId === user.userInfo.id ? "我删除了一条消息" : `我删除了一条"${data.fromUser.nickName}"成员消息`}`;
+          data.message.content = `${
+            data.fromUser.userId === user.userInfo.id
+              ? "我删除了一条消息"
+              : `我删除了一条"${data.fromUser.nickName}"成员消息`
+          }`;
           data.message.body = undefined;
         }
       }
     },
-  });
-}
-
-
-/**
- * 下载视频
- * @param url 视频地址
- */
-export async function saveDownloadVideoByUrl(url: string) {
-  if (!url) {
-    return;
-  }
-  const setting = useSettingStore();
-  let path: string | undefined | null = "";
-  const fileName = path.split("\\").pop() || `${Date.now()}.mp4`;
-  if (!setting.isWeb) {
-    path = await saveDialog({
-      title: setting.isDesktop ? `${appName} - 保存视频` : undefined,
-      filters: [{ name: "视频文件", extensions: ["mp4"] }],
-      defaultPath: fileName,
-    });
-    if (!path) {
-      return;
-    }
-  }
-  downloadFile(url, fileName, { targetPath: path }, () => {
-    ElMessage.success(setting.isWeb ? "视频已保存" : `视频已保存到 ${path}`);
   });
 }

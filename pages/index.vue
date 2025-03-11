@@ -7,7 +7,6 @@ const user = useUserStore();
 const ws = useWsStore();
 const setting = useSettingStore();
 const chat = useChatStore();
-const showVideoDialog = ref(false);
 const showWsStatusBtns = computed(() => ws.status !== WsStatusEnum.OPEN || !user.isLogin);
 const showGroupDialog = computed({
   get() {
@@ -69,7 +68,7 @@ useMsgLinear();
     />
     <!-- 视频播放器 -->
     <LazyUtilVideoPlayerDialog
-      v-model="showVideoDialog"
+      v-model="chat.showVideoDialog"
       hydrate-on-idle
     />
     <!-- 扩展菜单 -->

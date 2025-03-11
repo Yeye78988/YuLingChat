@@ -725,6 +725,7 @@ export const useChatStore = defineStore(
         },
       });
     }
+    const showVideoDialog = ref(false);
 
     /** ---------------------------- RTC通话 ---------------------------- */
     const showRtcCall = ref(false);
@@ -892,6 +893,7 @@ export const useChatStore = defineStore(
       showTheFriendPanel,
       isOpenContact,
       isMsgListScroll,
+      showVideoDialog,
       roomGroupPageInfo,
       playSounder,
       isVisible,

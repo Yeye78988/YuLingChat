@@ -68,6 +68,7 @@ async function onHandelRobot(robot: RobotUserVO) {
             load.close();
           }, 1000);
         }).catch(() => {
+          isLoadRobot.value = "";
         });
       }
     },
@@ -147,5 +148,8 @@ onDeactivated(() => {
     --at-apply: "border-(2px solid light) cursor-pointer flex-shrink-0 h-3rem w-3rem sm:(w-3.5rem h-3.5rem) card-bg-color-2  rounded-1/2 flex-row-c-c  ";
     box-shadow: rgba(172, 172, 172, 0.3) 0px 0px 5px;
   }
+}
+:deep(.el-loading-mask) {
+  border-radius: 50%;
 }
 </style>

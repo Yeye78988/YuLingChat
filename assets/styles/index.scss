@@ -349,7 +349,7 @@ body .el-message {
   }
   .el-image-viewer__actions {
     height: 2.4em !important;
-    --at-apply: "!card-default-br";
+    --at-apply: "py-2 bg-color-br rounded-2rem op-80 hover:op-100 h-fit transition-all";
   }
 }
 

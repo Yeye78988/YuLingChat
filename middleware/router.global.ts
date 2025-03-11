@@ -9,6 +9,11 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (to.path.startsWith("/goods/detail")) {
     return abortNavigation("请使用「极物圈」查看商品详情");
   }
+  checkDialogOrPopup();
+  // if (doneDialog) {
+  //   doneDialog?.();
+  //   return abortNavigation();
+  // }
   // 移动尺寸
   const setting = useSettingStore();
   if (setting.isMobileSize) {
@@ -128,4 +133,27 @@ function checkDesktop() {
   catch (error) {
     return false;
   }
+}
+
+function checkDialogOrPopup() {
+  // 清除状态
+  const chat = useChatStore();
+  chat.showRtcCall = false;
+  chat.showExtension = false;
+  chat.inviteMemberForm.show = false;
+  chat.showVideoDialog = false;
+
+  // let dom = document.querySelector(".el-image-viewer__wrapper") as HTMLElement | null;
+  // if (dom) {
+  //   return () => {
+  //     dom!.remove();
+  //   };
+  // }
+  // dom = document.querySelector(".el-dialog__wrapper");
+  // if (dom) {
+  //   return () => {
+  //     dom!.remove();
+  //   };
+  // }
+  // return null;
 }

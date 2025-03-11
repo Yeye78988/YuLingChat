@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { saveDownloadVideoByUrl } from "../Chat/Msg";
-
 const props = defineProps<{
   modelValue: boolean;
 }>();
@@ -231,7 +229,7 @@ const videoSize = computed(() => {
           <div ref="dragHandler" class="h-10 flex flex-1 select-none sm:cursor-move" />
           <div class="ml-a flex-row-c-c gap-4 px-4 py-2 transition-opacity card-default-br sm:(op-0 group-hover:op-100)">
             <div
-              @click.stop="saveDownloadVideoByUrl(videoInfo.url)"
+              @click.stop="saveVideoLocal(videoInfo.url)"
             >
               <i
                 class="i-solar:download-minimalistic-linear"

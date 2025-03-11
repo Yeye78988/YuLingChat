@@ -17,12 +17,13 @@ const OVERFLOW_LENGTH = 250;
 const chat = useChatStore();
 const user = useUserStore();
 
+const body = computed(() => data.message?.body);
 const initFold = data.message?.content?.length && data.message?.content?.length > 200 && chat.theContact.lastMsgId !== data.message.id;
-const initReasonFold = data.message?.body?.reasoningContent?.length && data.message?.body?.reasoningContent?.length > 200 && chat.theContact.lastMsgId !== data.message.id;
+const initReasonFold = body.value?.reasoningContent?.length && body.value.reasoningContent?.length > 200 && chat.theContact.lastMsgId !== data.message.id;
 const isFold = ref(initFold);
 const isResonFold = ref(initReasonFold);
-const showReasonLoading = computed(() => data?.message?.body?.status === AiReplyStatusEnum.IN_PROGRESS && !data.message?.content);
-const showContentLoading = computed(() => (data?.message?.body?.status !== undefined && data?.message?.body?.status === AiReplyStatusEnum.IN_PROGRESS && (data.message?.content || !data.message?.body?.reasoningContent)));
+const showReasonLoading = computed(() => body.value?.status === AiReplyStatusEnum.IN_PROGRESS && !data.message?.content);
+const showContentLoading = computed(() => (body.value?.status !== undefined && body.value?.status === AiReplyStatusEnum.IN_PROGRESS && (data.message?.content || !body.value?.reasoningContent)));
 </script>
 
 <template>

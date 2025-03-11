@@ -1,6 +1,4 @@
 import type { Result } from "~/types/result";
-// @ts-nocheck
-import { StatusCode, StatusCodeText } from "~/types/result";
 
 type FetchType = typeof $fetch;
 type ReqType = Parameters<FetchType>[0];

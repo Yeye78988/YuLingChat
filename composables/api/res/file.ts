@@ -1,7 +1,9 @@
 import type { OssConstantItemType } from "~/init/system";
 import { invoke } from "@tauri-apps/api/core";
+import { save as saveDialog } from "@tauri-apps/plugin-dialog";
 import { download } from "@tauri-apps/plugin-upload";
 import streamSaver from "streamsaver";
+import { appName } from "~/constants";
 
 // export const IMG_MAX_SIZE = 3 * 1024 * 1024;// 3MB 图片大小
 // export const VIDEO_MAX_SIZE = 20 * 1024 * 1024;// 20MB 视频文件大小
@@ -101,15 +103,19 @@ export const DownFileStatusIconMap: Record<FileStatus, string> = {
  * @param options 下载选项
  * @param options.targetPath 下载到指定目录
  * @param options.mimeType 文件类型
+ * @param options.selected 是否选择下载目录
  * @param callback 下载进度回调函数
  * @returns 下载进度对象
  */
 export async function downloadFile(url: string, fileName: string, options: {
   targetPath?: string
   mimeType?: string
+  selected?: boolean
 } = {}, callback?: (progress: number) => void) {
   const { targetPath = "", mimeType = "" } = options;
   const setting = useSettingStore();
+  console.log(url, fileName, targetPath, mimeType);
+
   if (setting.isWeb || setting.isMobile) {
     // 移动端 | Web 使用 streamSaver 正在使用浏览器下载，请稍后 下载
     ElMessage.warning("正在下载，请稍后...");
@@ -119,7 +125,7 @@ export async function downloadFile(url: string, fileName: string, options: {
     return;
   let dir = setting.appDataDownloadDirUrl;
   const existsDir = await existsFile(dir);
-  if (!existsDir) {
+  if (!existsDir || options.selected) {
     // 选择下载目录
     const newDir = await setting.changeDownloadDir();
     if (!newDir) {
@@ -525,4 +531,58 @@ export function getSimpleOssTypeByExtName(fileName: string): { type: OssConstant
     };
   }
   return null;
+}
+
+/**
+ * 保存图片到本地
+ * @param url 图片地址
+ * @param showMessage 是否显示保存成功消息
+ */
+export async function saveImageLocal(url: string, showMessage = true) {
+  let path: string | undefined | null = "";
+  const fileName = path.split("\\").pop() || `${Date.now()}.png`;
+  const setting = useSettingStore();
+  if (setting.isDesktop) {
+    path = await saveDialog({
+      title: setting.isDesktop ? `${appName} - 保存图片` : undefined,
+      filters: [{ name: "图片文件", extensions: ["png", "jpeg", "jpg", "svg", "webp"] }],
+      defaultPath: fileName,
+    });
+
+    if (!path) {
+      return;
+    }
+    downloadFile(url, fileName, { targetPath: path }, () => {
+      showMessage && ElMessage.success(setting.isWeb ? "图片已保存" : `图片已保存到 ${path}`);
+    });
+  }
+}
+
+/**
+ * 下载并保存视频文件
+ * @param {string} url - 视频URL
+ */
+export async function saveVideoLocal(url: string, showMessage = true) {
+  if (!url) {
+    return;
+  }
+  const setting = useSettingStore();
+  let path: string | undefined | null = "";
+  const fileName = path.split("\\").pop() || `${Date.now()}.mp4`;
+
+  if (!setting.isWeb) {
+    path = await saveDialog({
+      title: setting.isDesktop ? `${appName} - 保存视频` : undefined,
+      filters: [{ name: "视频文件", extensions: ["mp4"] }],
+      defaultPath: fileName,
+    });
+
+    if (!path) {
+      return;
+    }
+  }
+
+  downloadFile(url, fileName, { targetPath: path }, () => {
+    showMessage && ElMessage.success(setting.isWeb ? "视频已保存" : `视频已保存到 ${path}`);
+  });
 }

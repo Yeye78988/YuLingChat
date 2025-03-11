@@ -33,6 +33,10 @@ const body: Partial<AiChatBodyMsgVO> = data.message?.body || {};
           :src="BaseUrlImg + body.robotInfo?.avatar"
           class="mr-2 h-4 w-4 flex-shrink-0 rounded-full"
         >
+        <span
+          v-else
+          class="mr-2 h-4 w-4 flex-shrink-0 rounded-full card-bg-color-2"
+        />
         {{ body.robotInfo?.nickname }}
       </div>
     </template>
