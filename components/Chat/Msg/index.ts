@@ -1,5 +1,5 @@
 import ContextMenu from "@imengyu/vue3-context-menu";
-
+// @unocss-include
 // 常量定义
 export const RECALL_TIME_OUT = 300000; // 默认5分钟
 const COPY_IMAGE_TYPES = ["image/png", "image/jpg", "image/svg+xml"];

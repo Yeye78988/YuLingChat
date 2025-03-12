@@ -48,8 +48,11 @@ const showContentLoading = computed(() => (body.value?.status !== undefined && b
     <template #body>
       <div class="ai-reply-msg-popper relative min-h-2.5em min-w-2.6em">
         <!-- 思考内容 -->
-        <p v-if="data?.message?.body?.reasoningContent && !isFold" :class="isResonFold ? 'h-2.5em truncate is-reson-open' : ''" class="reson-content" style="white-space: pre-wrap;">
-          思考：
+        <p v-if="data?.message?.body?.reasoningContent && !isFold" :class="isResonFold ? 'h-2.5em truncate is-reson-open' : 'max-h-fit'" class="reson-content" style="white-space: pre-wrap;">
+          <span class="text-theme-info">
+            <i i-solar:lightbulb-linear p-2 />
+            思考:
+          </span>
           {{ isResonFold ? `${data?.message?.body?.reasoningContent.slice(0, OVERFLOW_LENGTH)}...` : data?.message?.body?.reasoningContent }}
           <span
             class="text absolute bottom-1.5 right-1.5 z-2 h-2em px-3 leading-2em shadow btn-info text-mini"
