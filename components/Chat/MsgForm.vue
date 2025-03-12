@@ -446,13 +446,15 @@ onMounted(() => {
     }
     const { type, payload: userId } = e;
     const user = userOptions.value.find(u => u.userId === userId);
-    if (type === "add" && user) {
-      if (user) {
-        chat.msgForm.content += `@${user.nickName}(#${user.username}) `;
-        inputAllRef.value?.input?.focus(); // 聚焦
-      }
+    if (!user)
+      return ElMessage.warning("该用户不可艾特！");
+    if (type === "add") {
+      inputAllRef.value?.input?.focus(); // 聚焦
+      if (chat?.msgForm?.content?.includes(`@${user.nickName}(#${user.username}) `))
+        return;
+      chat.msgForm.content += `@${user.nickName}(#${user.username}) `;
     }
-    else if (type === "remove" && user) {
+    else if (type === "remove") {
     // const atIndex = chat.msgForm.content.lastIndexOf(`@${payload.nickName}(#${payload.username}) `);
     // if (atIndex > -1) {
     //   chat.msgForm.content = chat.msgForm.content.slice(0, atIndex) + chat.msgForm.content.slice(atIndex + 3 + payload.username.length);

@@ -64,9 +64,6 @@ async function toUpdate() {
       isLoading.value = false;
     }, 300);
   }
-  else {
-    ElMessage.error(res.message || "修改失败，请稍后重试！");
-  }
 }
 // 获取验证码
 let timer: NodeJS.Timeout | string | number | undefined;
@@ -158,7 +155,7 @@ async function getPhoneCode() {
 
 <style scoped lang="scss">
 .form {
-  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-hover backdrop-blur-5px card-default p-1.2em";
+  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default p-1.2em";
 
   :deep(.el-input__wrapper) {
     padding: 0.3em 1em;

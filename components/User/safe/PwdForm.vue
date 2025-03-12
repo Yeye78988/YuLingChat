@@ -178,6 +178,9 @@ async function getCheckCodeReq(type?: CheckTypeEnum) {
     }
   }
 }
+onMounted(() => {
+  chooseType.value = user.userInfo.isEmailVerified ? CheckTypeEnum.EMAIL : user.userInfo.isPhoneVerified ? CheckTypeEnum.PHONE : CheckTypeEnum.OLD_PASSWORD;
+});
 </script>
 
 <template>
@@ -195,7 +198,7 @@ async function getCheckCodeReq(type?: CheckTypeEnum) {
     </div>
     <transition-group :name="setting.settingPage.isCloseAllTransition ? '' : 'group-list'" mode="ease-in-out" class="relative">
       <!-- 二步验证 -->
-      <el-form-item v-if="isSecondCheck" type="password" :label="`${chooseType === CheckTypeEnum.PHONE ? '手机号' : '邮箱'}`" prop="password" class="animated">
+      <el-form-item v-if="isSecondCheck" key="code-1" type="password" :label="`${chooseType === CheckTypeEnum.PHONE ? '手机号' : '邮箱'}`" prop="password" class="animated">
         <el-input
           v-model:model-value="checkTypeValue"
           disabled
@@ -215,6 +218,7 @@ async function getCheckCodeReq(type?: CheckTypeEnum) {
       </el-form-item>
       <el-form-item
         v-if="isSecondCheck"
+        key="code-2"
         type="text" label="验证码" prop="code" class="animated"
       >
         <el-input
@@ -230,7 +234,14 @@ async function getCheckCodeReq(type?: CheckTypeEnum) {
         />
       </el-form-item>
       <!-- 新旧密码 -->
-      <el-form-item v-else type="password" label="旧密码" prop="password" class="animated">
+      <el-form-item
+        v-else
+        key="code-3"
+        type="password"
+        label="旧密码"
+        prop="password"
+        class="animated"
+      >
         <el-input
           v-model.trim="userForm.password"
           :prefix-icon="ElIconUnlock"
@@ -284,7 +295,7 @@ async function getCheckCodeReq(type?: CheckTypeEnum) {
 
 <style scoped lang="scss">
 .form {
-  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-hover backdrop-blur-5px card-default py-2em";
+  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default py-2em";
 
   :deep(.el-input-group__append) {
     .el-button {

@@ -134,11 +134,9 @@ const form = ref({
         </div>
       </div>
     </div>
-    <ClientOnly>
-      <Teleport to="body">
-        <UserSafeDialog v-model="form" />
-      </Teleport>
-    </ClientOnly>
+    <Teleport to="body">
+      <UserSafeDialog v-model="form" />
+    </Teleport>
   </div>
 </template>
 

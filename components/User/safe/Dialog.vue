@@ -16,18 +16,18 @@ function close() {
 <template>
   <transition name="popup">
     <div
-      v-if="
-        modelValue.showUpdatePwd || modelValue.showUpdateEmail || modelValue.showUpdatePhone
-      "
+      v-if=" modelValue.showUpdatePwd || modelValue.showUpdateEmail || modelValue.showUpdatePhone"
+      v-bind="$attrs"
+      key="popup"
       class="fixed left-0 top-0 z-1000 h-100dvh w-full flex-row-c-c overflow-hidden"
     >
       <div
-        class="absolute h-full w-full bg-[#b4b4b459] backdrop-blur-5px dark:bg-[#1d1d1d80]"
+        class="absolute h-full w-full card-rounded-df backdrop-blur-2px"
         @click="close"
       />
-      <UserSafePwdForm v-if="modelValue.showUpdatePwd" @close="close()" />
-      <UserSafePhoneForm v-if="modelValue.showUpdatePhone" @close="close()" />
-      <UserSafeEmailForm v-if="modelValue.showUpdateEmail" @close="close()" />
+      <UserSafePwdForm v-if="modelValue.showUpdatePwd" key="UserSafePwdForm" @close="close()" />
+      <UserSafePhoneForm v-if="modelValue.showUpdatePhone" key="UserSafePhoneForm" @close="close()" />
+      <UserSafeEmailForm v-if="modelValue.showUpdateEmail" key="UserSafeEmailForm" @close="close()" />
     </div>
   </transition>
 </template>
