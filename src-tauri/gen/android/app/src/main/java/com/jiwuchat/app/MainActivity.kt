@@ -1,6 +1,8 @@
 package com.jiwuchat.app
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,8 +23,11 @@ class MainActivity : TauriActivity() {
     webView.settings.textZoom = 100;
   }
 
+  @SuppressLint("SourceLockedOrientationActivity")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main);
+    requestedOrientation =ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     // 请求权限
     requestPermissions()
   }

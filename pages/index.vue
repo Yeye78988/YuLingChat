@@ -84,7 +84,7 @@ useMsgLinear();
     />
     <!-- 移动端菜单 - 小屏幕才加载 -->
     <LazyMenuBottomMenu
-      v-if="setting.isMobileSize && chat.isOpenContact"
+      v-if="setting.isMobileSize && user.isLogin && chat.isOpenContact"
       hydrate-on-media-query="(max-width: 768px)"
       class="grid sm:hidden"
     />

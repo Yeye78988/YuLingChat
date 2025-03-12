@@ -27,6 +27,7 @@ interface DialogProps {
   duration?: number;
   destroyOnClose?: boolean;
   center?: boolean;
+  zIndex?: number;
 }
 
 const {
@@ -35,11 +36,10 @@ const {
   width = "",
   showClose = true,
   teleportTo = "body",
-  confirmButtonText = "确定",
-  cancelButtonText = "取消",
   closeOnClickModal = true,
   contentClass = "",
   duration = 300,
+  zIndex = 2099,
   center = false,
   destroyOnClose = false,
 } = defineProps<DialogProps>();
@@ -243,8 +243,12 @@ defineExpose({
       <div
         v-show="modelValue"
         key="dialog"
-        :style="{ '--duration': `${duration}ms` }"
-        class="fixed inset-0 z-2099 flex items-center justify-center"
+        :style="{
+
+          '--duration': `${duration}ms`,
+          'zIndex': `${zIndex}`,
+        }"
+        class="fixed inset-0 flex items-center justify-center"
         @click.self="handleClose"
       >
         <!-- 背景遮罩 -->

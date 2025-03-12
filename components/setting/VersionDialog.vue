@@ -61,11 +61,45 @@ const {
       </template>
     </div>
   </div>
+  <!-- 版本公告 -->
+  <DialogPopup
+    v-model="showNotice"
+    destroy-on-close
+    :duration="300"
+    :z-index="2100"
+    width="fit-content"
+  >
+    <template #title>
+      <h4 mb-4 text-center text-1.2rem>
+        &emsp;版本公告 🔔
+      </h4>
+    </template>
+    <div class="max-h-60vh min-h-30vh w-86vw overflow-y-auto sm:w-500px">
+      <MdPreview
+        language="zh-CN"
+        editor-id="notice-toast"
+        show-code-row-number
+        :no-img-zoom-in="setting.isMobileSize"
+        :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
+        preview-theme="smart-blue"
+        :code-foldable="false"
+        code-theme="a11y"
+        class="mt-2 px-4 !bg-transparent"
+        :model-value="notice"
+      />
+    </div>
+    <div class="mt-2 mt-4 flex-row-c-c">
+      <el-button type="primary" @click="showNotice = false">
+        &emsp;我知道了 🎉
+      </el-button>
+    </div>
+  </DialogPopup>
   <!-- 版本的时间线 -->
   <DialogPopup
     v-model="showUpateNoticeLine"
     destroy-on-close
     :duration="300"
+    :z-index="2099"
   >
     <template #title>
       <h4 mb-6 text-center text-1.2rem>
@@ -151,38 +185,6 @@ const {
       >
         {{ setting.appUploader.isUpdating ? '正在更新' : '检查更新' }}
       </BtnElButton>
-    </div>
-  </DialogPopup>
-  <!-- 版本公告 -->
-  <DialogPopup
-    v-model="showNotice"
-    destroy-on-close
-    :duration="300"
-    width="fit-content"
-  >
-    <template #title>
-      <h4 mb-4 text-center text-1.2rem>
-        &emsp;版本公告 🔔
-      </h4>
-    </template>
-    <div class="max-h-60vh min-h-30vh w-86vw overflow-y-auto sm:w-500px">
-      <MdPreview
-        language="zh-CN"
-        editor-id="notice-toast"
-        show-code-row-number
-        :no-img-zoom-in="setting.isMobileSize"
-        :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
-        preview-theme="smart-blue"
-        :code-foldable="false"
-        code-theme="a11y"
-        class="mt-2 px-4 !bg-transparent"
-        :model-value="notice"
-      />
-    </div>
-    <div class="mt-2 mt-4 flex-row-c-c">
-      <el-button type="primary" @click="showNotice = false">
-        &emsp;我知道了 🎉
-      </el-button>
     </div>
   </DialogPopup>
 </template>
