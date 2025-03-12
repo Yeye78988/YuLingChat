@@ -914,10 +914,14 @@ html.stop-transition-all {
   }
 }
 
+[data-fade-blur="false"],
+[data-fade="false"],
 [data-fade-blur-controller="false"][data-fade-blur],
 [data-fade-controller="false"][data-fade] {
   animation: none;
 }
+[data-fades-blur="false"] > *,
+[data-fades="false"] > *,
 [data-fades-blur-controller="false"][data-fades-blur] > *,
 [data-fades-controller="false"][data-fades] > * {
   animation: none;

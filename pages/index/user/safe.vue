@@ -6,6 +6,15 @@ useSeoMeta({
   description: "账户与安全 - 极物聊天 开启你的极物之旅！",
   keywords: appKeywords,
 });
+
+const isAnim = ref(true);
+const activeName = ref("security");
+onActivated(() => {
+  isAnim.value = false;
+});
+watch(activeName, () => {
+  isAnim.value = true;
+});
 </script>
 
 <template>
@@ -15,18 +24,18 @@ useSeoMeta({
       <i i-solar:devices-bold-duotone ml-2 inline-block p0.6em opacity-60 />
     </h3>
     <el-tabs
-      model-value="security"
+      v-model="activeName"
       tab-position="top"
       class="mt-6 flex-1 overflow-hidden rounded-2 bg-transparent"
     >
       <el-tab-pane name="security" style="max-height: 100%;height: 100%;" label="账号" lazy>
-        <UserSafeUpdateCards />
+        <UserSafeUpdateCards :data-fade="isAnim" />
       </el-tab-pane>
       <el-tab-pane name="account" label="安全管理" lazy>
-        <UserSafeDeviceList />
+        <UserSafeDeviceList :data-fade="isAnim" />
       </el-tab-pane>
       <el-tab-pane name="system" label="系统信息" lazy>
-        <UserSafeSystemInfo />
+        <UserSafeSystemInfo :data-fade="isAnim" />
       </el-tab-pane>
     </el-tabs>
   </main>

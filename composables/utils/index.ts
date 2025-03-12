@@ -523,3 +523,12 @@ export function calculateBirthdayCount(birthday?: number | string | Date | null)
   }
   return nextBirthday.diff(today, "day");
 }
+
+
+export function useDateFadeAnimation(initVal: boolean = true) {
+  const isAnimated = ref(initVal);
+  onActivated(() => {
+    isAnimated.value = false;
+  });
+  return isAnimated;
+}

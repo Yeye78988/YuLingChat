@@ -142,7 +142,7 @@ onDeactivated(() => {
   }
 }
 .item {
-  --at-apply: "card-default flex items-center gap-4 p-4 cursor-pointer rounded-2 hover:(scale-102 shadow)  transition-200";
+  --at-apply: "card-default flex items-center gap-4 p-4 cursor-pointer rounded-2 border-(1px solid transparent) hover:(shadow border-default) transition-200";
 
   .avatar-icon {
     --at-apply: "border-(2px solid light) cursor-pointer flex-shrink-0 h-3rem w-3rem sm:(w-3.5rem h-3.5rem) card-bg-color-2  rounded-1/2 flex-row-c-c  ";
