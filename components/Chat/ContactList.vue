@@ -291,8 +291,8 @@ const menuList = [
           class="relative"
         >
           <!-- 添加骨架屏 -->
-          <div v-if="isReload" class="contact-list main-bg-color absolute z-1 w-full overflow-y-auto">
-            <ChatContactSkeleton v-for="i in 10" :key="i" />
+          <div v-if="isReload" class="main-bg-color absolute z-2 w-full overflow-y-auto">
+            <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
           </div>
           <div
             v-for="room in chat.getContactList"
