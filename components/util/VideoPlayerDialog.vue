@@ -26,6 +26,7 @@ const videoInfo = ref<{
   thumbHeight: undefined,
 });
 
+const autoplay = ref(true);
 // 拖拽
 const dragHandler = useTemplateRef<HTMLDivElement>("dragHandler");
 const dragRef = useTemplateRef<HTMLDivElement>("dragRef");
@@ -141,6 +142,9 @@ onMounted(() => {
           x.value = Math.floor((innerWidth - (dragRef.value?.offsetWidth || 0)) / 2);
           y.value = Math.floor((innerHeight - (dragRef.value?.offsetHeight || 0)) / 2);
         });
+        // 自动播放
+        autoplay.value = true;
+        videoPlayerRef.value?.play();
         break;
       case "pause":
         status.value = "paused";
@@ -256,8 +260,9 @@ const videoSize = computed(() => {
           ref="videoPlayerRef"
           :style="{ width: videoSize.width, height: videoSize.height }"
           :src="src"
-
-          autoplay controls
+          :autoplay="autoplay"
+          controls
+          preload="auto"
           :muted="!!videoInfo.muted"
           class="block h-full w-full overflow-hidden card-rounded-df object-contain"
           @play="onPlay"

@@ -119,7 +119,7 @@ watch(() => chat.theContactId, async (val, oldVal) => {
     await nextTick();
     scrollbarRef.value && scrollBottom(false);
     if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
-      await reload(val);
+      reload(val);
     }
   }
   if (oldVal) { // 旧会话消息上报

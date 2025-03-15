@@ -166,12 +166,15 @@ function handleRTCMsg(msg: ChatMessageVO<RtcLiteBodyMsgVO>) {
   }
 }
 
-
 // 创建消息缓冲区
 const bufferMap = new WeakMap<ChatMessageVO<AiChatReplyBodyMsgVO>, {
   content: string
   reasoning: string
-  timer: number
+  timer: number | NodeJS.Timeout
+  pendingContent: string
+  pendingReasoning: string
+  charIndex: number
+  updateInterval: any
 }>();
 
 /**
@@ -204,12 +207,15 @@ function resolveAiStream(data: WSAiStreamMsg) {
       handleFinalState(data, contact, oldMsg);
   }
 }
-
-// 处理进度更新
+/**
+ * 处理进度更新
+ */
 function handleProgressUpdate(
   data: WSAiStreamMsg,
   contact: ChatContactDetailVO,
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
+  count = 2,
+  delay = 40,
 ) {
   // 初始化缓冲区
   if (oldMsg && !bufferMap.has(oldMsg)) {
@@ -217,35 +223,74 @@ function handleProgressUpdate(
       content: oldMsg?.message?.content || "",
       reasoning: oldMsg?.message?.body?.reasoningContent || "",
       timer: 0,
+      pendingContent: "",
+      pendingReasoning: "",
+      charIndex: 0,
+      updateInterval: null,
     });
   }
 
   const buffer = bufferMap.get(oldMsg!)!;
+  // 累积待处理内容
+  buffer.pendingContent += data.content;
+  buffer.pendingReasoning += data.reasoningContent || "";
+  const chat = useChatStore();
+  if (chat.theContactId === data.roomId) { // 不是当前房间
+    // 如果没有正在进行的更新，启动渐入效果
+    // 同步一次
+    applyBufferUpdate(contact, oldMsg, buffer);
+    if (!buffer.updateInterval) {
+      buffer.updateInterval = setInterval(() => {
+      // 每次更新s字符
+        const contentChars = buffer.pendingContent.length > 0 ? buffer.pendingContent.substring(0, count) : "";
+        const reasoningChars = buffer.pendingReasoning.length > 0 ? buffer.pendingReasoning.substring(0, count) : "";
 
-  // 累积更新内容
-  buffer.content += data.content;
-  buffer.reasoning += data.reasoningContent || "";
+        // 添加到显示内容
+        buffer.content += contentChars;
+        buffer.reasoning += reasoningChars;
 
-  // 使用节流更新
-  if (!buffer.timer) {
-    const delay = contact.roomId === data.roomId ? 1000 : 200; // 当前房间则更快
+        // 从待处理内容中移除已处理的字符
+        buffer.pendingContent = buffer.pendingContent.substring(contentChars.length);
+        buffer.pendingReasoning = buffer.pendingReasoning.substring(reasoningChars.length);
+
+        // 应用更新
+        applyBufferUpdate(contact, oldMsg, buffer);
+
+        // 如果没有待处理内容且收到了结束信号，清除定时器
+        if (buffer.pendingContent.length === 0 && buffer.pendingReasoning.length === 0) {
+          if (oldMsg?.message?.body?.status !== AiReplyStatusEnum.IN_PROGRESS) {
+            clearInterval(buffer.updateInterval);
+            buffer.updateInterval = null;
+            oldMsg && bufferMap.delete(oldMsg);
+          }
+        }
+      }, delay); // 调整速度，50ms更新s字符
+    }
+  }
+  else {
+    clearInterval(buffer.updateInterval);
+    buffer.updateInterval = null;
+    // 正常填充
+    buffer.content += data.content;
+    buffer.reasoning += data.reasoningContent || "";
+    clearTimeout(buffer.timer);
     buffer.timer = setTimeout(() => {
       applyBufferUpdate(contact, oldMsg, buffer);
-      oldMsg && bufferMap.delete(oldMsg);
-    }, delay) as unknown as number;
+    }, 1000); // 延迟1s更新
   }
 }
 
 function applyBufferUpdate(
   contact: ChatContactDetailVO,
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
-  buffer?: { content: string; reasoning: string },
+  buffer?: { content: string; reasoning: string; pendingContent?: string; pendingReasoning?: string; updateInterval?: any },
 ) {
   if (!buffer || !oldMsg)
     return;
+
   // 批量更新逻辑
   const update = {
-    content: buffer.content, // 限制最大长度
+    content: buffer.content,
     reasoning: buffer.reasoning,
   };
 
@@ -254,8 +299,11 @@ function applyBufferUpdate(
     oldMsg.message.body && (oldMsg.message.body.reasoningContent = update.reasoning);
     oldMsg.message.content = update.content;
   }
+
   // 更新联系人文本（截断处理）
-  contact.text = update.content.substring(0, 100);
+  if (contact.text?.length < 100) {
+    contact.text = update.content.substring(0, 100);
+  }
 }
 
 function handleStartState(
@@ -267,6 +315,10 @@ function handleStartState(
       content: "",
       reasoning: "",
       timer: 0,
+      pendingContent: "",
+      pendingReasoning: "",
+      charIndex: 0,
+      updateInterval: null,
     });
   }
 }
@@ -279,13 +331,19 @@ function handleFinalState(
 ) {
   const finalContent = (data.content || "...").substring(0, 100);
   contact.text = finalContent;
+
   if (oldMsg) {
-    // 删除缓冲区
-    clearTimeout(bufferMap.get(oldMsg!)?.timer);
-    bufferMap.delete(oldMsg!);
+    const buffer = bufferMap.get(oldMsg);
+    if (buffer) {
+      clearInterval(buffer.updateInterval);
+      clearTimeout(buffer.timer);
+      bufferMap.delete(oldMsg);
+    }
+
     if (oldMsg?.message) {
       oldMsg.message.body && (oldMsg.message.body.reasoningContent = data.reasoningContent || "");
       oldMsg.message.content = data.content;
     }
   }
 }
+

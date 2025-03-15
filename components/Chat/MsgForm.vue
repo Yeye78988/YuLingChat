@@ -328,7 +328,7 @@ function resetForm() {
  * @param key key
  * @param index 索引
  */
-function onContextMenu(e: MouseEvent, key?: string, index: number = 0, type: OssFileType = OssFileType.IMAGE) {
+function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type: OssFileType = OssFileType.IMAGE) {
   e.preventDefault();
   const textMap = {
     [OssFileType.IMAGE]: "图片",
@@ -357,8 +357,6 @@ function onContextMenu(e: MouseEvent, key?: string, index: number = 0, type: Oss
 }
 
 function removeOssFile(type: OssFileType = OssFileType.IMAGE, key?: string, index: number = 0) {
-  console.log("removeOssFile", type, key, index);
-
   const filesMap: Record<OssFileType, (Ref<OssFile[]> | undefined)> = {
     [OssFileType.IMAGE]: imgList,
     [OssFileType.FILE]: fileList,
@@ -568,7 +566,7 @@ onUnmounted(() => {
           class="group relative flex-row-c-c shadow-sm transition-shadow border-default card-default hover:shadow"
           :element-loading-spinner="defaultLoadingIcon"
           element-loading-background="transparent"
-          @contextmenu="onContextMenu($event, img.key, i, OssFileType.IMAGE)"
+          @contextmenu="onContextFileMenu($event, img.key, i, OssFileType.IMAGE)"
         >
           <div title="撤销图片" class="absolute right-2 top-2 z-5 h-6 w-6 transition-opacity !rounded-full card-default-br group-hover-op-80 hover-op-100 sm:op-0" @click.stop="removeOssFile(OssFileType.IMAGE, img.key, i)">
             <i i-solar:minus-circle-linear block h-full w-full />
@@ -596,7 +594,7 @@ onUnmounted(() => {
           title="点击播放[视频]"
           class="relative"
           @click="showVideoDialog($event, video)"
-          @contextmenu="onContextMenu($event, video.key, i, OssFileType.VIDEO)"
+          @contextmenu="onContextFileMenu($event, video.key, i, OssFileType.VIDEO)"
         >
           <div
             v-if="video?.children?.[0]?.id"
@@ -639,7 +637,7 @@ onUnmounted(() => {
         <div
           v-for="(file, i) in fileList"
           :key="i" class="flex-row-c-c p-3.2 shadow-sm transition-all border-default card-default bg-color sm:p-2.8 hover:shadow"
-          @contextmenu="onContextMenu($event, file.key, i, OssFileType.FILE)"
+          @contextmenu="onContextFileMenu($event, file.key, i, OssFileType.FILE)"
         >
           <img :src="file?.file?.type ? (FILE_TYPE_ICON_MAP[file?.file?.type] || FILE_TYPE_ICON_DEFAULT) : FILE_TYPE_ICON_DEFAULT" class="mr-2 h-8 w-8">
           <div class="max-w-16rem min-w-8rem">

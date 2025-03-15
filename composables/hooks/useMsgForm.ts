@@ -609,6 +609,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     fileList,
     videoList,
     isDragDropOver,
+    uploadFile,
 
     isUploadImg,
     isUploadFile,
