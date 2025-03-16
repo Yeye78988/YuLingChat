@@ -48,6 +48,8 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     return;
   }
 
+  const translation = data?.message.body?.translation as TranslationVO | null;
+
   // 大多数消息类型的默认上下文菜单选项
   const defaultContextMenu = [
     {
@@ -90,15 +92,24 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
-        label: "翻译",
+        label: translation ? "关闭翻译" : "翻译",
         hidden: !txt,
         customClass: "group",
-        icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-success",
-        onClick: () => {
-          if (!txt) {
-            return ElMessage.error("翻译失败，请选择文本！");
+        icon: `i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) ${translation ? "group-btn-danger" : "group-btn-success"}`,
+        onClick: async () => {
+          if (translation) {
+            closeTranslation(data.message.id, translation.targetLang);
+            data.message.body.translation = null;
           }
-          useTranslateTxt(txt as string);
+          else {
+            const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
+            if (res) {
+              data.message.body.translation = res;
+            }
+            else {
+              ElMessage.error("翻译失败，请稍后再试！");
+            }
+          }
         },
       },
       {
@@ -132,6 +143,32 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       ...defaultContextMenu,
+    ],
+    // 翻译
+    translation: [
+      {
+        label: "复制",
+        hidden: !txt || !data.message.body.translation,
+        customClass: "group",
+        icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
+        onClick: () => {
+          useCopyText(data.message.body.translation?.result as string);
+        },
+      },
+      {
+        label: "关闭翻译",
+        hidden: !txt || !data.message.body.translation,
+        customClass: "group",
+        icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-danger",
+        onClick: async () => {
+          if (!txt || !data.message.id || !translation)
+            return;
+          if (closeTranslation(data.message.id, translation.targetLang)) {
+            //
+            data.message.body.translation = null;
+          }
+        },
+      },
     ],
 
     // 图片内容
@@ -213,7 +250,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     sound: [
       {
         label: showTranslation.value ? "折叠转文字" : "转文字",
-        hidden: data.message.type !== MessageType.SOUND || !data.message.body?.translation,
+        hidden: data.message.type !== MessageType.SOUND || !translation,
         customClass: "group",
         icon: "i-solar:text-broken group-hover:(scale-110 i-solar:text-bold) group-btn-info",
         onClick: () => (showTranslation.value = !showTranslation.value),
@@ -341,15 +378,24 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
-        label: "翻译",
+        label: translation ? "关闭翻译" : "翻译",
         hidden: !txt,
         customClass: "group",
-        icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-success",
-        onClick: () => {
-          if (!txt) {
-            return ElMessage.error("翻译失败，请选择文本！");
+        icon: `i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) ${translation ? "group-btn-danger" : "group-btn-success"}`,
+        onClick: async () => {
+          if (translation) {
+            closeTranslation(data.message.id, translation.targetLang);
+            data.message.body.translation = null;
           }
-          useTranslateTxt(txt as string);
+          else {
+            const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
+            if (res) {
+              data.message.body.translation = res;
+            }
+            else {
+              ElMessage.error("翻译失败，请稍后再试！");
+            }
+          }
         },
       },
       {
@@ -382,24 +428,6 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     theme: setting.contextMenuTheme,
     items,
   });
-}
-
-/**
- * 使用外部服务翻译文本
- * @param {string} txt - 要翻译的文本
- * @param {string} to - 目标语言（默认：zh-CN）
- */
-function useTranslateTxt(txt: string, to: string = "zh-CN") {
-  // 检测语言（简单启发式）
-  let lang = "zh2en";
-  if ((txt.match(/[A-Z]/gi)?.length || 0) / txt.length > 0.8) {
-    lang = "en2zh"; // 主要是英文
-  }
-  else {
-    lang = "zh2en"; // 主要是中文
-  }
-
-  window.open(`https://fanyi.baidu.com/mtpe-individual/multimodal?query=${txt}&lang=${lang}`);
 }
 
 /**

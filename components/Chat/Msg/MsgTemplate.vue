@@ -15,8 +15,19 @@ defineEmits(["clickAvatar"]);
 const chat = useChatStore();
 const user = useUserStore();
 // 具体
-const body = computed(() => data.message?.body as Partial<TextBodyMsgVO> | undefined);
+interface TextBodyVO extends TextBodyMsgVO {
+  translation?: Partial<TranslationVO>;
+}
+const msgId = data.message?.id;
+const body = computed(() => data.message?.body as Partial<TextBodyVO> | undefined);
 const isSelf = user?.userInfo?.id && data?.fromUser?.userId === user?.userInfo?.id;
+// 关闭翻译
+function clearTranslation() {
+  if (body?.value?.translation) {
+    closeTranslation(msgId, body.value.translation.targetLang!);
+    body.value.translation = undefined;
+  }
+}
 </script>
 
 <template>
@@ -74,6 +85,20 @@ const isSelf = user?.userInfo?.id && data?.fromUser?.userId === user?.userInfo?.
       >
         有人@我
       </small>
+      <!-- 翻译内容 -->
+      <div
+        v-if="body?.translation"
+        key="translation"
+        ctx-name="translation"
+        class="translation group"
+      >
+        <div ctx-name="translation" class="mb-2px select-none pb-2px tracking-0.1em border-default-b dark:op-80" @click="clearTranslation">
+          <i ctx-name="translation" class="i-solar:check-circle-bold mr-1 bg-theme-info p-2.4" />
+          {{ body?.translation?.tool?.label || '' }}
+          <i ctx-name="translation" class="i-solar:close-circle-bold-duotone float-right p-2.4 btn-danger sm:(op-0 group-hover:op-100)" />
+        </div>
+        {{ body?.translation?.result || '' }}
+      </div>
     </div>
   </div>
 </template>

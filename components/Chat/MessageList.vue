@@ -111,6 +111,8 @@ function reload(roomId?: number) {
   ;
 }
 
+const requestAnimationFrameFn = window?.requestAnimationFrame || (callback => setTimeout(callback, 16));
+
 // 监听房间
 watch(() => chat.theContactId, async (val, oldVal) => {
   if (val) {
@@ -118,9 +120,11 @@ watch(() => chat.theContactId, async (val, oldVal) => {
     chat.setReadList(val);
     await nextTick();
     scrollbarRef.value && scrollBottom(false);
-    if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
-      reload(val);
-    }
+    requestAnimationFrameFn(() => {
+      if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
+        reload(val);
+      }
+    });
   }
   if (oldVal) { // 旧会话消息上报
     chat.setReadList(oldVal);
@@ -255,7 +259,7 @@ defineExpose({
     class="max-w-full flex-1"
     height="100%"
     wrap-class="px-0 shadow-inner-bg"
-    view-class="pb-10 "
+    view-class="pb-10"
     @scroll="onScroll"
   >
     <div

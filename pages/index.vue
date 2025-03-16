@@ -27,6 +27,13 @@ const showGroupDialog = computed({
 });
 // 监听消息
 useMsgLinear();
+// 初始化设置
+watch(() => user.isLogin, (val) => {
+  if (val)
+    setting.loadSettingPreData();
+}, {
+  immediate: true,
+});
 </script>
 
 <template>

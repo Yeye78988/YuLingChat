@@ -78,7 +78,8 @@ export function httpRequest<T = unknown>(
     else
       defaultOpts.body = bodyOrParams;
   }
-  return $fetch(url, { ...defaultOpts, ...opts }) as Promise<T>;
+  // @ts-ignore
+  return $fetch(url, { ...defaultOpts, ...opts } as any) as Promise<T>;
 }
 
 export const useHttp = {
@@ -120,7 +121,7 @@ export const useHttp = {
 
 const isNavigator = ref(false);
 
-export function checkResponse<T>(data: Result<T>) {
+export function checkResponse(data: Result<unknown>, showErrorMsg = true) {
   let msg = "";
   const type = "error";
   const code: StatusCode = data.code;
@@ -128,7 +129,7 @@ export function checkResponse<T>(data: Result<T>) {
     msg = StatusCodeText[code] || "";
   const user = useUserStore();
   if (data.code === StatusCode.TOKEN_ERR || data.code === StatusCode.TOKEN_EXPIRED_ERR || data.code === StatusCode.TOKEN_DEVICE_ERR) {
-    ElMessage.closeAll();
+    showErrorMsg && ElMessage.closeAll();
     if (isNavigator.value) {
       return false;
     }
@@ -143,13 +144,13 @@ export function checkResponse<T>(data: Result<T>) {
   }
   else if (data.code === StatusCode.STATUS_OFF_ERR) {
     // 用户被禁用
-    ElMessage.error("账号被禁用，请联系管理员！");
+    showErrorMsg && ElMessage.error("账号被禁用，请联系管理员！");
     return false;
   }
   if (msg !== "") {
-    ElMessage.closeAll("error");
+    showErrorMsg && ElMessage.closeAll("error");
     // 组件
-    ElMessage.error({
+    showErrorMsg && ElMessage.error({
       grouping: true,
       type,
       message: data.message.length > 50 ? msg : data.message,

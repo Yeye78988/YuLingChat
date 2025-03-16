@@ -248,6 +248,7 @@ export interface TextBodyMsgVO {
     gapCount: number;
     body?: string
   };
+  // [property: string]: any;
 }
 /**
  * 系统消息

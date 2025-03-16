@@ -35,10 +35,10 @@ function applyFontSettings() {
       :teleported="false"
       placement="bottom"
       :show-arrow="false"
-      class="inputs"
       v-bind="$attrs"
       fit-input-width
       filterable
+      class="inputs"
       default-first-option
       placeholder="请选择主题字体"
     >
@@ -69,25 +69,33 @@ function applyFontSettings() {
   </div>
 </template>
 
+
 <style scoped lang="scss">
 :deep(.inputs.el-select) {
   position: relative;
   z-index: 99;
+  width: fit-content;
 
   .el-select__wrapper {
-    border-radius: 1rem;
+    border-radius: 2rem;
     background-color: transparent;
     box-shadow: none;
     font-size: 0.8rem;
     --at-apply: "!border-default";
   }
 
+  .el-select-dropdown__list {
+    padding: 0.4rem;
+  }
   .el-popper.el-select__popper {
-    border-radius: 1rem;
+    border-radius: 0.5rem;
     overflow: hidden;
   }
   .el-input__inner {
-    padding-left: 0.5rem;
+    padding-left: 2rem;
+  }
+  .el-select-dropdown__item {
+    border-radius: 0.25rem;
   }
 }
 </style>

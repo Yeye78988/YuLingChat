@@ -76,6 +76,11 @@ const size = computed(() => {
       <!-- 通话铃声 -->
       <SettingBell />
     </div>
+    <!-- 工具 -->
+    <label class="title">工具</label>
+    <div class="box">
+      <SettingTranslation class="select" :size="size" />
+    </div>
     <!-- 功能与交互 -->
     <label class="title">功能与交互</label>
     <div class="box">

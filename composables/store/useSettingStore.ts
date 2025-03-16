@@ -129,12 +129,20 @@ export const useSettingStore = defineStore(
           { name: "夜间", value: "dark" },
         ],
       },
+      // 翻译
+      translation: {
+        value: 1,
+        targetLang: "zh" as TranslationEnums,
+        stream: false,
+        list: [] as TranslationToolVO[],
+      },
       isAutoStart: false, // 开机自启
       isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
       isEscMin: true, // esc
       notificationType: NotificationEnums.TRAY as NotificationEnums, // 托盘通知
       rtcCallBellUrl: DEFAULT_RTC_CALL_BELL_URL as string, // 呼叫铃声
     });
+    const translationTool = computed(() => settingPage.value.translation.list.find(item => item.value === settingPage.value.translation.value));
     const isDefaultRtcCallBell = computed(() => settingPage.value.rtcCallBellUrl === DEFAULT_RTC_CALL_BELL_URL);
     const isChatFold = ref(false);
     const isThemeChangeLoad = ref(false);
@@ -429,6 +437,29 @@ export const useSettingStore = defineStore(
       }
     }
 
+
+    /**
+     * 加载设置预设数据
+     */
+    function loadSettingPreData() {
+      // 在组件挂载时获取翻译工具列表
+      fetchTranslationTools();
+    }
+    // 获取翻译工具列表
+    async function fetchTranslationTools() {
+      try {
+        const user = useUserStore(); // 假设有一个 user store 提供 token
+        const token = user.getToken; // 获取用户 token
+        const res = await getTranslationToolList(token);
+        if (res.code === StatusCode.SUCCESS) {
+          settingPage.value.translation.list = res.data;
+        }
+      }
+      catch (error) {
+        console.error("获取翻译工具列表错误:", error);
+      }
+    }
+
     /**
      * 重置设置
      */
@@ -485,6 +516,13 @@ export const useSettingStore = defineStore(
             { name: "日间", value: "light" },
             { name: "夜间", value: "dark" },
           ],
+        },
+        // 翻译
+        translation: {
+          value: 1,
+          targetLang: "zh" as TranslationEnums,
+          stream: false,
+          list: [],
         },
         isAutoStart: settingPage.value.isAutoStart, // 开机自启
         isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
@@ -556,6 +594,7 @@ export const useSettingStore = defineStore(
       fileDownloadList,
       appPlatform,
       systemConstant,
+      translationTool,
       appDataDownloadDirUrl,
       BaseDirCode,
       osType,
@@ -567,6 +606,7 @@ export const useSettingStore = defineStore(
       checkUpdates,
       checkMainWinVisible,
       loadSystemFonts,
+      loadSettingPreData,
       reset,
       fileDownProgressCallback,
       openFileByDefaultApp,
