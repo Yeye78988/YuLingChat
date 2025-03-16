@@ -118,13 +118,14 @@ watch(() => chat.theContactId, async (val, oldVal) => {
   if (val) {
     // 消息阅读上报
     chat.setReadList(val);
-    await nextTick();
-    scrollbarRef.value && scrollBottom(false);
-    requestAnimationFrameFn(() => {
-      if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
-        reload(val);
-      }
+    nextTick(() => {
+      scrollbarRef.value && scrollBottom(false);
     });
+    if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
+      requestAnimationFrameFn(() => {
+        reload(val);
+      });
+    }
   }
   if (oldVal) { // 旧会话消息上报
     chat.setReadList(oldVal);
