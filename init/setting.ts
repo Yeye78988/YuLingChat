@@ -9,16 +9,16 @@ import {
 // const dev = import.meta.env.MODE === "development";
 async function onKeyDown(e: KeyboardEvent) {
   const setting = useSettingStore();
-  // 关闭打印 搜索快捷键
-
   // 允许刷新
   // const isReload = e.key === "F5" || (e.key === "R" && e.ctrlKey) || (e.key === "F" && e.ctrlKey && e.shiftKey);
   if ((e.key === "p" && e.ctrlKey) || (e.key === "f" && e.ctrlKey))
     e.preventDefault();
     // esc 最小化窗口
-  if (e.key === "Escape" && setting.settingPage.isEscMin && !document.querySelector(".el-image-viewer__wrapper")) {
+  const disShortcuts = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;
+  if (e.key === "Escape" && disShortcuts && setting.settingPage.isEscMin && !document.querySelector(".el-image-viewer__wrapper")) {
+    e.stopPropagation();
+    e.preventDefault();
     if (!setting.isWeb) {
-      e.preventDefault();
       const appWindow = getCurrentWindow();
       if (await appWindow.isFullscreen()) {
         await appWindow.setFullscreen(false);

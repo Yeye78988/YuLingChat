@@ -30,16 +30,15 @@ export function translateText(dto: TranslationDTO, token: string) {
  * @param token Authorization token
  * @returns SseResponseHandler 包含数据、加载状态和错误信息的处理器
  */
-export function translateTextSSE(dto: TranslationDTO, token: string) {
-  const sseRequest = useSseRequest<string>();
-  return sseRequest.request({
+export function translateTextSSE(dto: TranslationDTO, token: string, onError?: (error: any) => void) {
+  return useSseRequest<string>({
     url: "/res/utils/translation/sse",
     method: "POST",
     body: dto,
     headers: {
       Authorization: token,
     },
-    needAuth: false, // 因为我们已经手动传入了 token
+    onError,
   });
 }
 
@@ -65,11 +64,11 @@ export interface TranslationDTO {
 
 // 'auto' | 'zh' | 'zh_TW' | 'en' | 'ja' | 'ko' | 'fr' | 'es' | 'it' | 'de' | 'tr' | 'ru' | 'pt' | 'vi' | 'id' | 'th' | 'ms' | 'ar' | 'hi'
 export type TranslationEnums = "auto" | "zh" | "zh_TW" | "en" | "ja" | "ko" | "fr" | "es" | "it" | "de" | "tr" | "ru" | "pt" | "vi" | "id" | "th" | "ms" | "ar" | "hi";
-export const TranslationLangList = [
-  {
-    label: "自动",
-    value: "auto",
-  },
+export const translationLangList = Object.freeze([
+  // {
+  //   label: "自动",
+  //   value: "auto",
+  // },
   {
     label: "中文",
     value: "zh",
@@ -142,7 +141,9 @@ export const TranslationLangList = [
     label: "印地语",
     value: "hi",
   },
-];
+]);
+export const translationLangMap = Object.freeze(new Map<TranslationEnums | undefined, string>(translationLangList.map(item => [item.value as TranslationEnums, item.label])));
+
 
 /**
  * 翻译工具VO
@@ -177,9 +178,19 @@ export interface TranslationVO {
 
   tool?: TranslationToolVO;
 
+  status: SSEStatus;
+
   [key: string]: any;
 }
 
+export type SSEStatus = "connecting" | "done" | "error" | "cancelled" | "";
+export const SSEStatusMap = Object.freeze(new Map<SSEStatus, string>([
+  ["connecting", "连接中"],
+  ["done", "完成"],
+  ["error", "错误"],
+  ["cancelled", "已取消"],
+  ["", ""],
+]));
 
 /**
  * SSE返回类型（简化和必要的部分）

@@ -19,27 +19,42 @@ const translationCache = useLocalStorage<TranslationCache>(TRANSLATION_CACHE_KEY
  * @param {TranslationEnums} targetLang - 目标语言
  * @returns {Promise<>} - 返回翻译结果
  */
-export async function useTranslateTxt(msgId: number | string, txt: string, token: string, sourceLang: TranslationEnums = "auto", targetLang?: TranslationEnums, stream?: boolean): Promise<Ref<TranslationVO | null>> {
+export async function useTranslateTxt(msgId: number | string, txt: string, token: string, sourceLang: TranslationEnums = "auto", targetLang?: TranslationEnums, stream?: boolean) {
   const setting = useSettingStore();
   const resultData = ref<TranslationVO | null>(null); // 翻译结果
   stream = stream === undefined ? setting.settingPage.translation.stream : stream;
-
   targetLang = targetLang || setting.settingPage.translation.targetLang || "zh";
+  // 生成缓存 key（基于文本和目标语言）
+  const cacheKey = `${msgId}-${targetLang}`;
+  if (translationCache.value[cacheKey]?.status === "connecting") {
+    console.warn("正在翻译，请勿重复请求");
+    return;
+  }
+
   if (setting.settingPage.translation?.value === undefined) {
     ElMessage.error("请先在设置页面开启翻译功能");
     navigateTo(TranslationPagePath);
     return resultData;
   }
-  // 生成缓存 key（基于文本和目标语言）
-  const cacheKey = `${msgId}-${targetLang}`;
   // 检查缓存是否存在且未过期（例如 24 小时有效期）
   const cached = translationCache.value[cacheKey];
   const now = Date.now();
-  if (cached && now - cached.timestamp < 24 * 60 * 60 * 1000) {
+  if (cached && now - cached.startTime < 24 * 60 * 60 * 1000) {
     resultData.value = cached;
     return resultData; // 直接返回缓存结果
   }
 
+  // 开始
+  const tool = setting.translationTool;
+  resultData.value = {
+    startTime: now,
+    result: "",
+    sourceLang,
+    targetLang,
+    tool,
+    status: "connecting" as SSEStatus,
+  };
+  translationCache.value[cacheKey] = resultData.value;
   try {
     // 调用翻译 API
     if (stream) {
@@ -54,13 +69,18 @@ export async function useTranslateTxt(msgId: number | string, txt: string, token
   }
   catch (error) {
     console.error("翻译错误:", error);
-    resultData.value = null;
+    if (resultData.value) {
+      resultData.value.status = "error";
+      resultData.value.result = "翻译失败";
+    }
+    closeTranslation(msgId, targetLang);
     return resultData; // 直接返回 null
   }
 }
 
+
 // 使用 SSE 工具进行翻译
-async function streamTranslateTxt(msgId: number | string, txt: string, token: string, sourceLang: TranslationEnums, targetLang: TranslationEnums, now: number, resultData: Ref<TranslationVO | null>) {
+function streamTranslateTxt(msgId: number | string, txt: string, token: string, sourceLang: TranslationEnums, targetLang: TranslationEnums, now: number, resultData: Ref<TranslationVO | null>) {
   const setting = useSettingStore();
   const tool = setting.translationTool;
   if (!tool) {
@@ -74,21 +94,26 @@ async function streamTranslateTxt(msgId: number | string, txt: string, token: st
     sourceLang,
     targetLang,
     type: tool?.value,
-  }, token);
-
+  }, token, (error) => {
+    if (error && resultData.value) {
+      resultData.value.status = "error";
+      resultData.value.result = "翻译失败";
+      resultData.value.endTime = Date.now();
+      closeTranslation(msgId, targetLang);
+    }
+  });
   // 监听数据变化
   const unwatchData = watch(data, (newText) => {
     if (newText) {
-      // 缓存翻译结果
-      translationCache.value[cacheKey] = {
+      resultData.value = {
+        // startTime: now,
+        ...resultData.value,
         result: newText,
         sourceLang,
         targetLang,
         tool,
-        timestamp: now,
         status: sseStatus.value,
       };
-      resultData.value = translationCache.value[cacheKey];
     }
   });
 
@@ -96,11 +121,16 @@ async function streamTranslateTxt(msgId: number | string, txt: string, token: st
   const unwatchLoading = watch(sseStatus, (val) => {
     if (val === "done" && resultData.value) {
       resultData.value.status = "done";
+      resultData.value.endTime = Date.now();
+      // 缓存翻译结果
+      translationCache.value[cacheKey] = resultData.value;
       // 翻译完成，确保缓存结果
       checkTranslationCacheSize();
       // 取消监听
       unwatchData?.();
       unwatchLoading?.();
+    }
+    else { // 清除
     }
   });
 
@@ -122,7 +152,9 @@ async function syncTranslateTxt(msgId: number | string, txt: string, token: stri
     // 缓存翻译结果
     const data = {
       ...res.data,
-      timestamp: now,
+      startTime: now,
+      endTime: Date.now(),
+      status: "done" as SSEStatus,
     };
     translationCache.value[cacheKey] = data;
     checkTranslationCacheSize();
@@ -135,7 +167,7 @@ async function syncTranslateTxt(msgId: number | string, txt: string, token: stri
 
 
 // 删除消息翻译
-export function closeTranslation(msgId: number, targetLang: TranslationEnums) {
+export function closeTranslation(msgId: number | string, targetLang: TranslationEnums) {
   const cacheKey = `${msgId}-${targetLang}`;
   if (cacheKey in translationCache.value) {
     delete translationCache.value[cacheKey];
@@ -145,9 +177,10 @@ export function closeTranslation(msgId: number, targetLang: TranslationEnums) {
 
 // 检查缓存大小，如果超过 200 条 删除最早的 50 条
 function checkTranslationCacheSize() {
-  if (Object.keys(translationCache.value).length > 200) {
-    const keys = Object.keys(translationCache.value).sort((a, b) => {
-      return translationCache.value[a] && translationCache.value[b] ? translationCache.value[a].timestamp - translationCache.value[b].timestamp : 0;
+  const keyRaws = Object.keys(translationCache.value);
+  if (keyRaws.length > 200) {
+    const keys = keyRaws.sort((a, b) => {
+      return translationCache.value[a] && translationCache.value[b] ? translationCache.value[a].startTime - translationCache.value[b].startTime : 0;
     }) as string[];
     for (let i = 0; i < 50; i++) {
       if (keys[i]) {
@@ -155,7 +188,7 @@ function checkTranslationCacheSize() {
       }
     }
   }
-  console.log("翻译缓存大小:", Object.keys(translationCache.value).length);
+  console.log("翻译缓存大小:", keyRaws.length);
   return true;
 }
 

@@ -147,7 +147,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     // 翻译
     translation: [
       {
-        label: "复制",
+        label: "复制翻译",
         hidden: !txt || !data.message.body.translation,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
