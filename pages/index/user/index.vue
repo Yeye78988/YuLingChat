@@ -35,6 +35,9 @@ useHead({
     },
   ],
 });
+definePageMeta({
+  key: route => route.fullPath,
+});
 </script>
 
 <template>

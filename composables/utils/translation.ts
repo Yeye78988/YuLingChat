@@ -1,5 +1,6 @@
 // 本地缓存工具函数
 const TRANSLATION_CACHE_KEY = "translation_cache";
+export const TranslationPagePath = "/setting#translation";
 
 interface TranslationCache {
   [key: string]: TranslationVO;
@@ -26,7 +27,7 @@ export async function useTranslateTxt(msgId: number | string, txt: string, token
   targetLang = targetLang || setting.settingPage.translation.targetLang || "zh";
   if (setting.settingPage.translation?.value === undefined) {
     ElMessage.error("请先在设置页面开启翻译功能");
-    navigateTo("/setting#translation");
+    navigateTo(TranslationPagePath);
     return resultData;
   }
   // 生成缓存 key（基于文本和目标语言）
@@ -68,7 +69,7 @@ async function streamTranslateTxt(msgId: number | string, txt: string, token: st
   const cacheKey = `${msgId}-${targetLang}`;
 
   // 调用翻译 API
-  const { data, loading, cancel } = translateTextSSE({
+  const { data, sseStatus, cancel } = translateTextSSE({
     text: txt,
     sourceLang,
     targetLang,
@@ -85,14 +86,16 @@ async function streamTranslateTxt(msgId: number | string, txt: string, token: st
         targetLang,
         tool,
         timestamp: now,
+        status: sseStatus.value,
       };
       resultData.value = translationCache.value[cacheKey];
     }
   });
 
   // 监听加载完成
-  const unwatchLoading = watch(loading, (isLoading) => {
-    if (!isLoading && resultData.value) {
+  const unwatchLoading = watch(sseStatus, (val) => {
+    if (val === "done" && resultData.value) {
+      resultData.value.status = "done";
       // 翻译完成，确保缓存结果
       checkTranslationCacheSize();
       // 取消监听
@@ -102,7 +105,7 @@ async function streamTranslateTxt(msgId: number | string, txt: string, token: st
   });
 
   // 返回控制器，可用于取消请求
-  return { cancel, loading };
+  return { cancel, sseStatus };
 }
 
 async function syncTranslateTxt(msgId: number | string, txt: string, token: string, sourceLang: TranslationEnums = "auto", targetLang?: TranslationEnums, now = Date.now()): Promise<TranslationVO | null> {

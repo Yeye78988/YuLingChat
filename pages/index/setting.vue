@@ -6,6 +6,9 @@ useSeoMeta({
   description: "极物聊天 - 极物聊天 开启你的极物之旅！",
   keywords: appKeywords,
 });
+definePageMeta({
+  key: route => route.path,
+});
 
 const user = useUserStore();
 const setting = useSettingStore();
@@ -18,25 +21,67 @@ const {
 } = useSettingDefault();
 
 const size = computed(() => {
-  if (setting.settingPage.fontSize.value < 16) {
+  if (setting.settingPage?.fontSize?.value < 16) {
     return "small";
   }
-  else if (setting.settingPage.fontSize.value >= 16 && setting.settingPage.fontSize.value <= 20) {
+  else if (setting.settingPage?.fontSize?.value >= 16 && setting.settingPage?.fontSize?.value <= 20) {
     return "default";
   }
-  else if (setting.settingPage.fontSize.value > 20) {
+  else if (setting.settingPage?.fontSize?.value > 20) {
     return "large";
   }
   else {
     return "default";
   }
 });
+
+const scrollbarRef = useTemplateRef("scrollbarRef");
+const timer = shallowRef<NodeJS.Timeout>();
+async function onHashHandle() {
+  await nextTick();
+  if (document) {
+    const dom = document.querySelector(window.location.hash) as HTMLElement;
+    if (!dom)
+      return;
+    if (dom.classList.contains("setting-hash-anim")) {
+      return;
+    }
+    let top = 0;
+    // 获取滚动容器高度
+    const wrapHeight = scrollbarRef.value?.wrapRef?.clientHeight || 0;
+    // 获取目标元素相对于父容器的偏移量
+    const domRect = dom.getBoundingClientRect();
+    const wrapRect = scrollbarRef.value?.wrapRef?.getBoundingClientRect();
+    const offsetTop = domRect.top - (wrapRect?.top || 0);
+    // 计算滚动位置,使目标元素在容器中间
+    top = offsetTop - (wrapHeight / 2) + (domRect.height / 2);
+    clearTimeout(timer.value);
+    scrollbarRef.value?.wrapRef?.scrollTo({ // 缓动
+      top,
+      behavior: "smooth",
+    });
+    dom.classList.add("setting-hash-anim");
+    timer.value = setTimeout(() => {
+      dom.classList.remove("setting-hash-anim");
+      timer.value = undefined;
+    }, 2000);
+  }
+}
+
+
+onActivated(onHashHandle);
+onMounted(onHashHandle);
+onDeactivated(() => {
+  clearTimeout(timer.value);
+  timer.value = undefined;
+});
 </script>
 
 <template>
   <el-scrollbar
-    v-loading.fullscreen.lock="isFullLoading"
-    class="h-full w-full flex-1 pt-8 bg-color-3 sm:card-bg-color-2"
+    ref="scrollbarRef"
+    v-loading.fullscreen="isFullLoading"
+    class="setting-page h-full w-full flex-1 pt-8 bg-color-3 sm:card-bg-color-2"
     wrap-class="h-full w-full pb-4 sm:pb-20 flex flex-1 flex-col px-4"
     element-loading-text="更新中..."
     element-loading-background="transparent"
@@ -48,7 +93,7 @@ const size = computed(() => {
     </h3>
     <!-- 主题与字体 -->
     <label class="title">主题与字体</label>
-    <div class="box">
+    <div id="theme" class="box">
       <SettingTheme
         :input-props="{
           class: '!w-10rem sm:!w-12rem',
@@ -61,7 +106,7 @@ const size = computed(() => {
 
     <!-- 通知与提醒 -->
     <label class="title">通知与提醒</label>
-    <div class="box">
+    <div id="notification" class="box">
       <!-- 消息通知 -->
       <div class="group h-8 flex-row-bt-c">
         消息通知
@@ -78,12 +123,12 @@ const size = computed(() => {
     </div>
     <!-- 工具 -->
     <label class="title">工具</label>
-    <div class="box">
+    <div id="translation" class="box">
       <SettingTranslation class="select" :size="size" />
     </div>
     <!-- 功能与交互 -->
     <label class="title">功能与交互</label>
-    <div class="box">
+    <div id="function" class="box">
       <!-- 关闭动画 -->
       <div class="group h-8 flex-row-bt-c">
         流畅模式
@@ -129,7 +174,7 @@ const size = computed(() => {
     </div>
     <!-- 系统与更新 -->
     <label class="title">系统与更新</label>
-    <div class="box">
+    <div id="system" class="box">
       <!-- 自启动 -->
       <SettingAutoStart v-if="setting.isDesktop" :size="size" />
       <!-- 下载路径 -->
@@ -162,6 +207,7 @@ const size = computed(() => {
   --at-apply: "text-0.9em block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-6 mb-3) ";
 }
 .box {
+  border: 1px solid transparent;
   --at-apply: "text-0.9em card-rounded-df bg-white dark:bg-dark shadow p-3 sm:p-4 flex flex-col gap-3";
 
   .inputs {
@@ -210,6 +256,23 @@ const size = computed(() => {
 @media screen and (max-width: 768px) {
   .btns {
     background-image: none !important;
+  }
+}
+</style>
+
+<style lang="scss">
+.setting-hash-anim {
+  animation: border-shading 1s ease-in-out infinite !important;
+}
+@keyframes border-shading {
+  0% {
+    border-color: transparent !important;
+  }
+  50% {
+    border-color: var(--el-color-primary) !important;
+  }
+  100% {
+    border-color: transparent !important;
   }
 }
 </style>

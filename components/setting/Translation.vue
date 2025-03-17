@@ -6,7 +6,7 @@ const setting = useSettingStore();
   <div class="group h-8 flex-row-bt-c">
     翻译工具
     <el-select
-      id="translation"
+      id="translation-tool"
       v-model="setting.settingPage.translation.value"
       :teleported="false"
       placement="bottom"
@@ -44,7 +44,7 @@ const setting = useSettingStore();
       placeholder="请选择翻译目标语言"
     >
       <el-option
-        v-for="lang in TranslationLangList"
+        v-for="lang in translationLangList"
         :key="lang.label"
         :value="lang.value"
         :label="lang.label"

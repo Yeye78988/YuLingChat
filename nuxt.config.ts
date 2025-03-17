@@ -15,6 +15,11 @@ const version = packageJson?.version;
 console.log(`mode:${mode} api_url:${BASE_URL} SSR:${isSSR} platform: ${platform}`);
 export default defineNuxtConfig({
   ssr: false,
+  router: {
+    options: {
+      scrollBehaviorType: "smooth",
+    },
+  },
   future: {
     compatibilityVersion: 4,
     typescriptBundlerResolution: true, // https://nuxtjs.org.cn/docs/guide/going-further/features#typescriptbundlerresolution

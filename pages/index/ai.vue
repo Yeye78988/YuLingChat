@@ -7,6 +7,9 @@ useSeoMeta({
   description: `${appName} - 极物聊天 开启你的极物之旅！`,
   keywords: appKeywords,
 });
+definePageMeta({
+  key: route => route.fullPath,
+});
 const setting = useSettingStore();
 const user = useUserStore();
 

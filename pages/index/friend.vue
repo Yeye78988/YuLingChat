@@ -7,7 +7,6 @@ useSeoMeta({
   keywords: appKeywords,
 });
 const chat = useChatStore();
-const setting = useSettingStore();
 const theFriendOpt = computed({
   get: () => chat.theFriendOpt,
   set: (val) => {

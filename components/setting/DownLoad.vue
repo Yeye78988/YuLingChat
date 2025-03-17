@@ -26,7 +26,7 @@ async function openFileFolder() {
 </script>
 
 <template>
-  <div v-if="!setting.isWeb" id="download" class="group h-8 flex-row-bt-c">
+  <div v-if="!setting.isWeb" class="group h-8 flex-row-bt-c">
     下载
     <div class="ml-a flex items-center gap-3" :title="setting.appDataDownloadDirUrl">
       <small class="mr-2 max-w-40vw flex-1 truncate op-60">{{ setting.appDataDownloadDirUrl }}</small>

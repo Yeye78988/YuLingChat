@@ -63,6 +63,7 @@ watch(() => user.isLogin, (val) => {
         <!-- 缓存 页面内容 -->
         <NuxtPage
           keepalive
+          :page-key="route => route.fullPath"
           :transition="setting.isMobileSize && !setting.settingPage.isCloseAllTransition ? chat.pageTransition : false"
         />
       </div>
