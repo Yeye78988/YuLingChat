@@ -37,35 +37,36 @@ const size = computed(() => {
 
 const scrollbarRef = useTemplateRef("scrollbarRef");
 const timer = shallowRef<NodeJS.Timeout>();
+const showAnima = ref(false);
 async function onHashHandle() {
   await nextTick();
-  if (document) {
-    const dom = document.querySelector(window.location.hash) as HTMLElement;
-    if (!dom)
-      return;
-    if (dom.classList.contains("setting-hash-anim")) {
-      return;
-    }
-    let top = 0;
-    // 获取滚动容器高度
-    const wrapHeight = scrollbarRef.value?.wrapRef?.clientHeight || 0;
-    // 获取目标元素相对于父容器的偏移量
-    const domRect = dom.getBoundingClientRect();
-    const wrapRect = scrollbarRef.value?.wrapRef?.getBoundingClientRect();
-    const offsetTop = domRect.top - (wrapRect?.top || 0);
-    // 计算滚动位置,使目标元素在容器中间
-    top = offsetTop - (wrapHeight / 2) + (domRect.height / 2);
-    clearTimeout(timer.value);
-    scrollbarRef.value?.wrapRef?.scrollTo({ // 缓动
-      top,
-      behavior: "smooth",
-    });
-    dom.classList.add("setting-hash-anim");
-    timer.value = setTimeout(() => {
-      dom.classList.remove("setting-hash-anim");
-      timer.value = undefined;
-    }, 2000);
-  }
+  if (!document || !document.location.hash)
+    return;
+
+  const dom = document.querySelector(window.location.hash) as HTMLElement;
+  if (!dom || showAnima.value)
+    return;
+  showAnima.value = true;
+  let top = 0;
+  // 获取滚动容器高度
+  const wrapHeight = scrollbarRef.value?.wrapRef?.clientHeight || 0;
+  // 获取目标元素相对于父容器的偏移量
+  const domRect = dom.getBoundingClientRect();
+  const wrapRect = scrollbarRef.value?.wrapRef?.getBoundingClientRect();
+  const offsetTop = domRect.top - (wrapRect?.top || 0);
+  // 计算滚动位置,使目标元素在容器中间
+  top = offsetTop - (wrapHeight / 2) + (domRect.height / 2);
+  clearTimeout(timer.value);
+  scrollbarRef.value?.wrapRef?.scrollTo({ // 缓动
+    top,
+    behavior: "smooth",
+  });
+  dom.classList.add("setting-hash-anim");
+  timer.value = setTimeout(() => {
+    dom.classList.remove("setting-hash-anim");
+    timer.value = undefined;
+    showAnima.value = false;
+  }, 2000);
 }
 
 
@@ -73,6 +74,7 @@ onActivated(onHashHandle);
 onMounted(onHashHandle);
 onDeactivated(() => {
   clearTimeout(timer.value);
+  showAnima.value = false;
   timer.value = undefined;
 });
 </script>
@@ -86,6 +88,7 @@ onDeactivated(() => {
     element-loading-text="更新中..."
     element-loading-background="transparent"
     :element-loading-spinner="defaultLoadingIcon"
+    :class="{ 'settinlink-animated': showAnima }"
   >
     <h3 flex items-center px-3 sm:px-4>
       设置
@@ -185,14 +188,14 @@ onDeactivated(() => {
     <div class="btns">
       <BtnElButton
         title="重置并清理缓存"
-        class="h-10 w-full rounded-4rem shadow sm:(ml-a h-fit w-fit) !card-bg-color" icon-class="i-solar:trash-bin-trash-outline" :transition-icon="true"
+        class="h-10 w-full shadow sm:(ml-a h-fit w-fit rounded-4rem) !card-bg-color" icon-class="i-solar:trash-bin-trash-outline" :transition-icon="true"
         style="--el-color-primary: var(--el-color-danger);--el-button-hover-border-color: var(--el-color-danger);background-color: inherit;"
         @click="setting.reset()"
       >
         重置
       </BtnElButton>
       <BtnElButton
-        class="h-10 w-full rounded-4rem shadow sm:(ml-a h-fit w-fit)" icon-class="i-solar:logout-3-outline" type="danger" :transition-icon="true"
+        class="h-10 w-full shadow sm:(ml-a h-fit w-fit rounded-4rem)" icon-class="i-solar:logout-3-outline" type="danger" :transition-icon="true"
         style="margin-left: 0;"
         @click="user.exitLogin()"
       >
@@ -261,8 +264,10 @@ onDeactivated(() => {
 </style>
 
 <style lang="scss">
-.setting-hash-anim {
-  animation: border-shading 1s ease-in-out infinite !important;
+.settinlink-animated {
+  .setting-hash-anim {
+    animation: border-shading 1s ease-in-out infinite !important;
+  }
 }
 @keyframes border-shading {
   0% {

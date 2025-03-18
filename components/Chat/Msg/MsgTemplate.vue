@@ -90,16 +90,18 @@ function clearTranslation() {
         v-if="body?.translation"
         key="translation"
         ctx-name="translation"
-        class="translation group"
+        class="group translation"
       >
         <div ctx-name="translation" class="mb-2px select-none pb-2px tracking-0.1em border-default-b dark:op-80">
           <i ctx-name="translation" class="i-solar:check-circle-bold mr-1 bg-theme-info p-2.4" />
           {{ body?.translation?.tool?.label || '' }}
           <NuxtLink
-            to="/setting#translation"
-            ctx-name="translation" class="ml-1 text-theme-info" title="前往更改"
+            :to="TranslationPagePath"
+            ctx-name="translation" class="ml-1 text-theme-info op-80 hover:op-100" title="前往更改"
           >
-            {{ translationLangMap.get(body?.translation?.sourceLang) || "自动" }} -> {{ translationLangMap.get(body?.translation?.targetLang) || "自动" }}
+            {{ translationLangMap.get(body?.translation?.sourceLang) || "自动" }}
+            <i ctx-name="translation" class="i-solar:alt-arrow-right-linear mr-1 p-2" @click="clearTranslation" />
+            {{ translationLangMap.get(body?.translation?.targetLang) || "自动" }}
           </NuxtLink>
           <i ctx-name="translation" class="i-solar:close-circle-bold-duotone float-right p-2.4 btn-danger sm:(op-0 group-hover:op-100)" @click="clearTranslation" />
         </div>

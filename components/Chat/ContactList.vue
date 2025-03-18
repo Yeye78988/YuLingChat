@@ -17,6 +17,7 @@ const pageInfo = ref({
   isLast: false,
   size: 20,
 });
+const historyContactId = useLocalStorage<number | undefined>(`${user.userId}-history-contact-id`, undefined);
 const isLoadRoomMap: Record<number, boolean> = {};
 // 滚动顶部触发
 const isScrollTop = ref(true);
@@ -26,16 +27,6 @@ function onScroll(e: {
 }) {
   isScrollTop.value = e.scrollTop === 0;
 }
-// 计算
-const theContactId = computed({
-  get() {
-    return chat.theContactId;
-  },
-  set(contactId: number) {
-    chat.onChangeRoom(contactId);
-  },
-});
-
 /**
  * 加载会话列表
  */
@@ -67,7 +58,6 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
     return;
   isReload.value = true;
   if (isAll) {
-    // chat.contactMap = {};
     pageInfo.value = {
       cursor: undefined,
       isLast: false,
@@ -77,10 +67,11 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
       setting.isOpenGroupMember = false;// 关闭群成员列表
       setting.isOpenContactSearch = true;// 打开搜索框
     }
-    const list = await loadData(dto || props.dto);
+    // const list = await loadData(dto || props.dto);
+    await loadData(dto || props.dto);
     // 默认加载首个会话
-    if (!setting.isMobileSize && list && list.length && !chat.theContact.roomId) {
-      chat.setContact(list[0]);
+    if (!setting.isMobileSize && historyContactId.value && chat.contactMap[historyContactId.value]) {
+      chat.setContact(chat.contactMap[historyContactId.value]);
     }
   }
   else if (roomId) { // 刷新某一房间
@@ -190,12 +181,11 @@ async function toFriendPage() {
 
 function onClickContact(room: ChatContactVO) {
   chat.isOpenContact = false;
+  historyContactId.value = room.roomId;
   chat.onChangeRoom(room.roomId);
 }
 
-onMounted(() => {
-  reload();
-});
+reload();
 
 const RoomTypeTagType: Record<number, "" | "primary" | "info" | any> = {
   [RoomType.AICHAT]: "warning",
@@ -300,7 +290,7 @@ const menuList = [
             class="contact"
             :class="{
               'is-pin': room.pinTime,
-              'is-checked': room.roomId === theContactId,
+              'is-checked': room.roomId === chat.theContactId,
             }"
             @contextmenu.stop="onContextMenu($event, room)"
             @click="onClickContact(room)"
