@@ -15,7 +15,7 @@ interface DialogStyle {
 }
 
 interface DialogProps {
-  modelValue: boolean;
+  modelValue?: boolean;
   title?: string;
   width?: string | number;
   showClose?: boolean;
@@ -28,6 +28,8 @@ interface DialogProps {
   destroyOnClose?: boolean;
   center?: boolean;
   zIndex?: number;
+  disableClass?: string;
+  minScale?: number;
 }
 
 const {
@@ -38,10 +40,12 @@ const {
   teleportTo = "body",
   closeOnClickModal = true,
   contentClass = "",
+  disableClass = "disabled-anima",
   duration = 300,
   zIndex = 2099,
   center = false,
   destroyOnClose = false,
+  minScale = 0.5,
 } = defineProps<DialogProps>();
 
 const emit = defineEmits<{
@@ -143,7 +147,7 @@ function onBeforeEnter(): void {
   loadingAnima.value = true;
   // 重置样式，准备开始入场动画
   dialogStyle.value = {
-    transform: "scale(0.5)",
+    transform: `scale(${minScale})`,
     opacity: "0",
     transition: "none", // 确保没有过渡效果以立即应用初始状态
   };
@@ -190,7 +194,7 @@ function onBeforeLeave(): void {
   nextTick(() => {
     dialogStyle.value = {
       transformOrigin: originPoint,
-      transform: "scale(0.5)",
+      transform: `scale(${minScale})`,
       opacity: "0",
       transition,
     };
@@ -244,7 +248,6 @@ defineExpose({
         v-show="modelValue"
         key="dialog"
         :style="{
-
           '--duration': `${duration}ms`,
           'zIndex': `${zIndex}`,
         }"
@@ -253,7 +256,8 @@ defineExpose({
       >
         <!-- 背景遮罩 -->
         <div
-          class="fixed inset-0 card-rounded-df bg-black/40 transition-opacity duration-300 border-default-2 dark:bg-black/70"
+          v-if="modelValue"
+          class="fixed inset-0 z-0 card-rounded-df bg-black/30 transition-opacity duration-300 border-default-2 dark:bg-black/40"
           @click="handleClose"
         />
         <!-- 对话框 -->
@@ -263,7 +267,7 @@ defineExpose({
           :style="[dialogStyle, { width: dialogWidth }]"
           class="relative"
           :class="{
-            'disabled-anima': loadingAnima,
+            [disableClass]: loadingAnima,
             'max-w-full rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color shadow': !contentClass,
             [contentClass]: contentClass,
             'text-center': center,
@@ -299,15 +303,6 @@ defineExpose({
 </template>
 
 <style scoped lang="scss">
-/* .dialog-popper-enter-active,
-.dialog-popper-leave-active {
-  transition: opacity var(--duration, 0.3s) ease;
-}
-
-.dialog-popper-enter-from,
-.dialog-popper-leave-to {
-  opacity: 0;
-} */
 .disabled-anima {
   * {
     transition: none !important;

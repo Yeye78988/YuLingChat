@@ -235,7 +235,6 @@ body .el-message {
   }
 }
 
-
 /**  ------------------------------markdown---------------------------------------  **/
 
 // .md-editor {
@@ -350,6 +349,10 @@ body .el-message {
   .el-image-viewer__actions {
     height: 2.4em !important;
     --at-apply: "py-2 bg-color-br rounded-2rem op-80 hover:op-100 h-fit transition-all";
+  }
+  .el-image-viewer__mask {
+    background-color: rgba(0, 0, 0, 0.2);
+    opacity: 1;
   }
 }
 

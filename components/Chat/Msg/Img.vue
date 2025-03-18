@@ -4,16 +4,19 @@ import { getImgSize } from ".";
 /**
  * 图片消息
  */
-const props = defineProps<{
+const {
+  data,
+} = defineProps<{
   data: ChatMessageVO<ImgBodyMsgVO>
   prevMsg: Partial<ChatMessageVO<TextBodyMsgVO>>
   index: number
 }>();
-const { data } = toRefs(props);
 // 具体
-const body: Partial<ImgBodyMsgVO> | undefined = props.data.message?.body || {};
+const body: Partial<ImgBodyMsgVO> & { showWidth?: string, showHeight?: string } = data.message?.body || {};
 // 计算图片宽高
 const { width, height } = getImgSize(body?.width, body?.height);
+body.showWidth = width;
+body.showHeight = height;
 </script>
 
 <template>
@@ -28,11 +31,10 @@ const { width, height } = getImgSize(body?.width, body?.height);
       <CardElImage
         v-if="body?.url"
         ctx-name="img"
-        error-root-class=""
         :src="BaseUrlImg + body?.url"
         :style="{ width, height }"
         load-class="sky-loading block  absolute top-0"
-        class="w-fit shadow-sm transition-shadow border-default card-default hover:shadow"
+        class="max-h-12rem max-w-12rem shadow-sm transition-shadow border-default-2 card-default hover:shadow"
         preview-teleported
         :alt="body?.url"
         :preview-src-list="[BaseUrlImg + body?.url]"
@@ -47,9 +49,4 @@ const { width, height } = getImgSize(body?.width, body?.height);
 
 <style lang="scss" scoped>
 @use './msg.scss';
-:deep(.el-image__wrapper) {
-  width: 9rem;
-  height: 9rem;
-  position: static;
-}
 </style>

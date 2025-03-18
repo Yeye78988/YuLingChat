@@ -273,7 +273,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     theContactClone.value = data;
   }, { deep: true, immediate: true });
 
-  watch(() => chat.theContact.avatar, (val) => {
+  watch(() => chat?.theContact?.avatar, (val) => {
     if (val) {
       imgList.value = [{
         id: BaseUrlImg + val,

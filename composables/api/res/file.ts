@@ -556,6 +556,10 @@ export async function saveImageLocal(url: string, showMessage = true) {
       showMessage && ElMessage.success(setting.isWeb ? "图片已保存" : `图片已保存到 ${path}`);
     });
   }
+  else {
+    ElMessage.warning("正在下载，请稍后...");
+    return downloadFileByStreamSaver(url, fileName);
+  }
 }
 
 /**

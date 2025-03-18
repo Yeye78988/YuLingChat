@@ -493,17 +493,23 @@ function deleteMsg(data: ChatMessageVO<any>, msgId: number) {
   });
 }
 
+export interface ImgSizeOptions {
+  maxWidth: number;
+  maxHeight: number;
+  minWidth?: number;
+  minHeight?: number;
+}
+
 /**
  * 获取图片尺寸
  * @param {number} rawWidth - 原始宽度
  * @param {number} rawWeight - 原始高度
- * @param {number} maxHeight - 最大高度
- * @param {number} maxWidth - 最大宽度
  * @returns {object} 图片尺寸对象
  */
-export function getImgSize(rawWidth?: number, rawWeight?: number, maxHeight: number = 300, maxWidth: number = 240) {
+export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSizeOptions = { maxWidth: 300, maxHeight: 300, minWidth: 40, minHeight: 40 }) {
   const width = rawWidth || 0;
   const height = rawWeight || 0;
+  const { maxWidth = 300, maxHeight = 300, minWidth = 40, minHeight = 40 } = options;
 
   // 提前返回默认值
   if (!width || !height) {
@@ -530,7 +536,7 @@ export function getImgSize(rawWidth?: number, rawWeight?: number, maxHeight: num
   }
 
   return {
-    width: `${finalWidth}px`,
-    height: `${finalHeight}px`,
+    width: `${Math.max(finalWidth, minWidth)}px`,
+    height: `${Math.max(finalHeight, minHeight)}px`,
   };
 }
