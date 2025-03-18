@@ -492,3 +492,45 @@ function deleteMsg(data: ChatMessageVO<any>, msgId: number) {
     },
   });
 }
+
+/**
+ * 获取图片尺寸
+ * @param {number} rawWidth - 原始宽度
+ * @param {number} rawWeight - 原始高度
+ * @param {number} maxHeight - 最大高度
+ * @param {number} maxWidth - 最大宽度
+ * @returns {object} 图片尺寸对象
+ */
+export function getImgSize(rawWidth?: number, rawWeight?: number, maxHeight: number = 300, maxWidth: number = 240) {
+  const width = rawWidth || 0;
+  const height = rawWeight || 0;
+
+  // 提前返回默认值
+  if (!width || !height) {
+    return {
+      width: "",
+      height: "",
+    };
+  }
+  const ratio = width / height;
+  const maxRatio = maxWidth / maxHeight;
+
+  let finalWidth: number;
+  let finalHeight: number;
+
+  if (ratio > maxRatio) {
+    // 宽度优先
+    finalWidth = Math.min(width, maxWidth);
+    finalHeight = finalWidth / ratio;
+  }
+  else {
+    // 高度优先
+    finalHeight = Math.min(height, maxHeight);
+    finalWidth = finalHeight * ratio;
+  }
+
+  return {
+    width: `${finalWidth}px`,
+    height: `${finalHeight}px`,
+  };
+}

@@ -305,28 +305,29 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     fileList.value = [];
     videoList.value = [];
     const file = imgList.value.find(f => f.key === key);
-    if (key && file?.file) {
-      const url = window.URL || window.webkitURL;
-      let width = 0;
-      let height = 0;
-      const img = new Image();
-      img.src = url.createObjectURL(file?.file);
-      img.onload = () => {
-        width = img.width || 0;
-        height = img.height || 0;
-      };
-      chat.msgForm = {
-        roomId: chat.theRoomId!,
-        msgType: MessageType.IMG,
-        content: chat.msgForm.content,
-        body: {
-          url: key,
-          width,
-          height,
-          size: file?.file?.size,
-        },
-      };
+    if (!key || !file?.file) {
+      return;
     }
+    // const url = window.URL || window.webkitURL;
+    // let width = 0;
+    // let height = 0;
+    // const img = new Image();
+    // img.src = url.createObjectURL(file?.file);
+    // img.onload = () => {
+    //   width = img.width || 0;
+    //   height = img.height || 0;
+    // };
+    chat.msgForm = {
+      roomId: chat.theRoomId!,
+      msgType: MessageType.IMG,
+      content: chat.msgForm.content,
+      body: {
+        url: key,
+        width: file?.width || 0,
+        height: file?.height || 0,
+        size: file?.file?.size,
+      },
+    };
   }
 
   // 文件上传回调

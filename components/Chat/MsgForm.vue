@@ -2,6 +2,7 @@
 import type { ElForm, ElMention } from "element-plus";
 import ContextMenu from "@imengyu/vue3-context-menu";
 import { FILE_TYPE_ICON_DEFAULT, FILE_TYPE_ICON_MAP, formatFileSize } from "~/composables/api/res/file";
+import { getImgSize } from "./Msg";
 
 const emit = defineEmits<{
   (e: "submit", newMsg: ChatMessageVO): void
@@ -216,6 +217,8 @@ async function multiSubmitImg() {
       content: "",
       body: {
         url: file.key!,
+        width: file.width || 0,
+        height: file.height || 0,
         size: file?.file?.size || 0,
       },
     };
@@ -572,7 +575,7 @@ onUnmounted(() => {
       >
         <div
           v-for="(img, i) in imgList" :key="i" v-loading="img.status !== 'success'"
-          class="group relative flex-row-c-c shadow-sm transition-shadow border-default card-default hover:shadow"
+          class="group relative flex-row-c-c shadow-sm transition-shadow border-default-2 card-default hover:shadow"
           :element-loading-spinner="defaultLoadingIcon"
           element-loading-background="transparent"
           @contextmenu="onContextFileMenu($event, img.key, i, OssFileType.IMAGE)"
@@ -585,7 +588,10 @@ onUnmounted(() => {
             loading="lazy"
             :preview-src-list="[img.id || BaseUrlImg + img.key]"
             :src="img.id || BaseUrlImg + img.key"
-            class="rounded"
+            ctx-name="img"
+            load-class="sky-loading block  absolute top-0"
+            class="max-h-12rem max-w-12rem shadow-sm transition-shadow card-default hover:shadow"
+            :style="getImgSize(img.width, img.height)"
             :class="imgList.length > 1 ? 'w-4rem h-4rem sm:(w-6rem h-6rem)' : 'h-9rem max-w-16rem'"
             title="左键放大 | 右键删除"
           />

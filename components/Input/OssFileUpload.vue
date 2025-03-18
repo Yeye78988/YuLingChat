@@ -85,7 +85,6 @@ function getNewPathList(list: OssFile[]) {
 const error = ref<string>("");
 // 输入框ref
 const inputRef = useTemplateRef("inputRef");
-
 // 1、文件改变
 async function hangdleChange(e: Event) {
   if (disable)
@@ -97,16 +96,14 @@ async function hangdleChange(e: Event) {
   if (limit === 1) {
     if (fileList.value.length)
       fileList.value.splice(0);
-    await onUpload(
-      {
-        // id: URL.createObjectURL(t.files[0]),
-        id: URL.createObjectURL(t.files[0] as Blob | MediaSource),
-        key: undefined,
-        status: "",
-        percent: 0,
-        file: t.files[0],
-      },
-    );
+    const ossFile: OssFile = {
+      id: URL.createObjectURL(t.files[0] as Blob | MediaSource),
+      key: undefined,
+      status: "",
+      percent: 0,
+      file: t.files[0],
+    };
+    onUpload(ossFile);
   }
   else {
     // 多文件
@@ -122,15 +119,15 @@ async function hangdleChange(e: Event) {
     const data = [...t.files].map((p) => {
       return {
         id: URL.createObjectURL(p as Blob | MediaSource),
-        // id: uploadType === OssFileType.IMAGE ? URL.createObjectURL(p) : BASE_OSS_PATH + p,
         key: undefined,
         status: "",
         percent: 0,
         file: p,
       };
     }) as OssFile[];
-    for (const p of data)
+    for (const p of data) {
       onUpload(p);
+    }
   }
 }
 
@@ -162,6 +159,7 @@ async function onUpload(ossFile: OssFile) {
   else {
     error.value = "";
   }
+
   // 1）获取凭证
   const upToken = await getResToken(uploadType, user.getToken);
   if (upToken.code !== StatusCode.SUCCESS) {
@@ -181,10 +179,19 @@ async function onUpload(ossFile: OssFile) {
   // ------------添加到队列-----------
   // 上传中 只能压缩图片
   if (uploadType === OssFileType.IMAGE && acceptDesc.includes(ossFile.file.type)) {
-    // console.log("文件大小 before:", file?.file?.size);
+    // 获取图片尺寸
+    await new Promise((resolve) => {
+      const url = window.URL || window.webkitURL;
+      const img = new Image();
+      img.src = url.createObjectURL(ossFile.file!);
+      img.onload = () => {
+        ossFile.width = img.width;
+        ossFile.height = img.height;
+        resolve(true);
+      };
+    });
+
     qiniu.compressImage(ossFile?.file, options).then((res) => {
-      // 2）上传 监视器
-      // console.log("after:", res.dist.size);
       qiniuUpload(res.dist as File, ossFile?.key || "", upToken.data.uploadToken, ossFile);
     }).catch((e) => {
       console.warn(e);

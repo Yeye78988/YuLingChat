@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { getImgSize } from ".";
+
 /**
  * 图片消息
  */
@@ -10,6 +12,8 @@ const props = defineProps<{
 const { data } = toRefs(props);
 // 具体
 const body: Partial<ImgBodyMsgVO> | undefined = props.data.message?.body || {};
+// 计算图片宽高
+const { width, height } = getImgSize(body?.width, body?.height);
 </script>
 
 <template>
@@ -24,10 +28,11 @@ const body: Partial<ImgBodyMsgVO> | undefined = props.data.message?.body || {};
       <CardElImage
         v-if="body?.url"
         ctx-name="img"
-        error-root-class="min-h-9rem min-w-9rem"
+        error-root-class=""
         :src="BaseUrlImg + body?.url"
-        load-class="sky-loading block !min-h-9rem !min-w-9rem absolute top-0"
-        class="h-9rem max-w-16rem w-fit shadow-sm transition-shadow border-default card-default hover:shadow"
+        :style="{ width, height }"
+        load-class="sky-loading block  absolute top-0"
+        class="w-fit shadow-sm transition-shadow border-default card-default hover:shadow"
         preview-teleported
         :alt="body?.url"
         :preview-src-list="[BaseUrlImg + body?.url]"

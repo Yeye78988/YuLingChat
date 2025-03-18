@@ -129,6 +129,9 @@ export interface OssFile {
   key?: string
   subscribe?: any
   children?: OssFile[]
+  // 图片信息
+  width?: number;
+  height?: number;
   // 视频信息
   duration?: number;
   thumbSize?: number;
