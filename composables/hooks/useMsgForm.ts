@@ -316,7 +316,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
         height = img.height || 0;
       };
       chat.msgForm = {
-        roomId: chat.theContact.roomId,
+        roomId: chat.theRoomId!,
         msgType: MessageType.IMG,
         content: chat.msgForm.content,
         body: {
@@ -338,7 +338,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     const file = fileList.value.find(f => f.key === key);
     if (key && file?.file) {
       chat.msgForm = {
-        roomId: chat.theContact.roomId,
+        roomId: chat.theRoomId!,
         msgType: MessageType.FILE,
         content: chat.msgForm.content,
         body: {
@@ -360,7 +360,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     const file = videoList.value.find(f => f.key === key);
     if (key && file?.file) {
       chat.msgForm = {
-        roomId: chat.theContact.roomId,
+        roomId: chat.theRoomId!,
         msgType: MessageType.VIDEO,
         content: chat.msgForm.content,
         body: {
@@ -688,10 +688,10 @@ export function useLoadAtUserList() {
    * 加载@用户列表
    */
   async function loadUser() {
-    if (!chat.theContact.roomId || chat.theContact.type !== RoomType.GROUP)
+    if (!chat.theRoomId! || chat.theContact.type !== RoomType.GROUP)
       return;
 
-    const roomId = chat.theContact.roomId;
+    const roomId = chat.theRoomId!;
     const cache = userRoomMap.value[roomId];
 
     // 如果缓存存在且未过期,直接使用缓存
@@ -701,7 +701,7 @@ export function useLoadAtUserList() {
       return;
     }
 
-    const { data, code } = await getRoomGroupAllUser(chat.theContact.roomId, user.getToken);
+    const { data, code } = await getRoomGroupAllUser(chat.theRoomId!, user.getToken);
     if (data && code === StatusCode.SUCCESS) {
       const list = (data || []).map((u: ChatMemberSeVO) => ({
         label: u.nickName,
@@ -727,7 +727,7 @@ export function useLoadAtUserList() {
     if (!len)
       return;
     // 清除对应缓存
-    const roomId = chat.theContact.roomId;
+    const roomId = chat.theRoomId!;
     if (userRoomMap.value[roomId]) {
       delete userRoomMap.value[roomId];
     }

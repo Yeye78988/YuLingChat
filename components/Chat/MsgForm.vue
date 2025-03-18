@@ -18,7 +18,7 @@ const isReplyAI = computed(() => chat.msgForm.content?.startsWith("/") && chat.t
 // 表单
 const isSending = ref(false);
 const isDisabledFile = computed(() => !user?.isLogin || chat.theContact.selfExist === 0);
-const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theContact.roomId]?.isFriend === isTrue.FALESE
+const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
 const isLord = computed(() => chat.theContact.type === RoomType.GROUP && chat.theContact.member?.role === ChatRoomRoleEnum.OWNER); // 群主
 const isSelfRoom = computed(() => chat.theContact.type === RoomType.SELFT); // 私聊
 const isAiRoom = computed(() => chat.theContact.type === RoomType.AICHAT); // 机器人
@@ -157,7 +157,7 @@ async function onSubmit() {
       return false;
     }
     await submit({
-      roomId: chat.theContact.roomId,
+      roomId: chat.theRoomId!,
       msgType: MessageType.AI_CHAT, // AI消息
       content,
       body: {
@@ -177,7 +177,7 @@ async function onSubmit() {
  *
  */
 async function submit(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: ChatMessageVO) => void) {
-  const roomId = chat.theContact.roomId;
+  const roomId = chat.theRoomId!;
   const res = await addChatMessage({
     ...formData,
     roomId,
@@ -211,7 +211,7 @@ async function multiSubmitImg() {
   const uploadedFiles = new Set(); // 用来跟踪已经上传的文件
   for (const file of imgList.value) {
     chat.msgForm = {
-      roomId: chat.theContact.roomId,
+      roomId: chat.theRoomId!,
       msgType: MessageType.IMG, // 默认
       content: "",
       body: {
@@ -232,7 +232,7 @@ async function multiSubmitImg() {
     formTemp.msgType = MessageType.TEXT; // 默认
     chat.msgForm = {
       ...formTemp,
-      roomId: chat.theContact.roomId,
+      roomId: chat.theRoomId!,
       msgType: MessageType.TEXT, // 默认
     };
     await submit(chat.msgForm);
@@ -250,7 +250,7 @@ function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
   }
   const replyMsgId = chat.msgForm?.body?.replyMsgId;
   chat.msgForm = {
-    roomId: chat.theContact.roomId,
+    roomId: chat.theRoomId!,
     msgType: MessageType.GROUP_NOTICE,
     content: "",
     body: {
@@ -258,7 +258,7 @@ function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
   };
   const body = formData?.body as any;
   submit({
-    roomId: chat.theContact.roomId,
+    roomId: chat.theRoomId!,
     msgType: MessageType.GROUP_NOTICE,
     content: formData.content,
     body: {
@@ -307,7 +307,7 @@ async function onSubmitSound(callback: (key: string) => void) {
 // 重置表单
 function resetForm() {
   chat.msgForm = {
-    roomId: chat.theContact.roomId,
+    roomId: chat.theRoomId!,
     msgType: MessageType.TEXT, // 默认
     content: "",
     body: {
@@ -547,7 +547,7 @@ onUnmounted(() => {
     <div class="absolute w-full flex flex-col p-2 -transform-translate-y-full" @click.prevent="() => {}">
       <!-- 滚动底部 -->
       <div
-        v-if="chat.theContact?.msgList?.length > 20"
+        v-if="(chat.theContact?.msgList?.length || 0) > 20"
         data-fade
         class="mb-2 ml-a mr-2 w-fit rounded-full px-3 text-right shadow-lg btn-info card-bg-color border-default-hover"
         @click="setReadAndScrollBottom"
@@ -805,14 +805,14 @@ onUnmounted(() => {
           v-if="isSelfRoom"
           title="语音通话"
           class="i-solar:phone-calling-outline p-3 transition-200 btn-primary sm:p-2.8"
-          @click="chat.openRtcCall(chat.theContact.roomId, CallTypeEnum.AUDIO)"
+          @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.AUDIO)"
         />
         <!-- 视频通话 -->
         <div
           v-if="isSelfRoom"
           title="视频通话"
           class="i-solar:videocamera-record-line-duotone p-3.2 transition-200 btn-primary sm:p-2.8"
-          @click="chat.openRtcCall(chat.theContact.roomId, CallTypeEnum.VIDEO)"
+          @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.VIDEO)"
         />
       </div>
       <!-- 内容 -->
@@ -909,7 +909,7 @@ onUnmounted(() => {
       >
         <span op-80>
           <i i-solar:adhesive-plaster-bold-duotone mr-3 p-2.4 />
-          {{ SelfExistTextMap[chat.theContact.type] }}
+          {{ chat.theContact.type !== undefined && SelfExistTextMap[chat?.theContact?.type] }}
         </span>
       </div>
     </div>

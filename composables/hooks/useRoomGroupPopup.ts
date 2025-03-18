@@ -56,7 +56,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
       loadData();
     }
   }, 200);
-  const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theContact.roomId]?.isFriend === 0
+  const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === 0
   const theContactClone = ref<Partial<ChatContactDetailVO>>();
   const isLord = computed(() => chat.theContact.member?.role === ChatRoomRoleEnum.OWNER);
   const TextMap = {
@@ -117,10 +117,10 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
       lockScroll: false,
       callback: async (action: string) => {
         if (action === "confirm") {
-          const res = await updateGroupRoomInfo(chat.theContact.roomId, data, user.getToken);
+          const res = await updateGroupRoomInfo(chat.theRoomId!, data, user.getToken);
           if (res.code === StatusCode.SUCCESS && res.data === 1) {
           // 更新会话
-            const item = chat.contactMap[chat.theContact.roomId];
+            const item = chat.contactMap[chat.theRoomId!];
             if (field === "name") {
               if (item)
                 item.name = val?.trim() as string;
@@ -156,7 +156,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
    * 加载数据
    */
   async function loadData(roomId?: number) {
-    roomId = roomId || chat.theContact.roomId;
+    roomId = roomId || chat.theRoomId!;
     if (chat?.roomMapCache?.[roomId]?.isLoading || chat.roomMapCache[roomId]?.isReload || chat.memberPageInfo.isLast || chat.theContact.type !== RoomType.GROUP)
       return;
     chat.roomMapCache[roomId]!.isLoading = true;
@@ -175,7 +175,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
    * @param roomId 房间id
    */
   async function reload(roomId?: number) {
-    roomId = roomId || chat.theContact.roomId;
+    roomId = roomId || chat.theRoomId!;
     if (chat.roomMapCache[roomId]?.isLoading || chat.roomMapCache[roomId]?.isReload || chat.theContact.type !== RoomType.GROUP)
       return;
     chat.roomMapCache[roomId] = {
@@ -194,7 +194,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
       chat.roomMapCache[roomId]!.isLoading = true;
       chat.roomMapCache[roomId]!.isReload = true;
       const { data } = await getRoomGroupUserPage(roomId, chat.roomMapCache[roomId]?.pageInfo.size || 20, chat.roomMapCache[roomId]?.pageInfo.cursor || undefined, user.getToken);
-      if (roomId !== chat.theContact.roomId) {
+      if (roomId !== chat.theRoomId!) {
         return;
       }
       chat.memberPageInfo.isLast = data.isLast;
@@ -249,7 +249,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     list.forEach((p) => {
       if (!p.changeList)
         return;
-      for (const item of (chat.roomMapCache?.[chat.theContact.roomId]?.userList || [])) {
+      for (const item of (chat.roomMapCache?.[chat.theRoomId!]?.userList || [])) {
         for (const k of p.changeList) {
           if (k.userId === item.userId) {
             item.activeStatus = k.activeStatus;
@@ -312,12 +312,12 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   function onExitOrClearGroup() {
     if (isNotExistOrNorFriend.value) {
     // 不显示聊天
-      chat.deleteContactConfirm(chat.theContact.roomId, () => {
+      chat.deleteContactConfirm(chat.theRoomId!, () => {
       });
       return;
     }
-    chat.exitGroupConfirm(chat.theContact.roomId, isTheGroupOwner.value, () => {
-      chat.removeContact(chat.theContact.roomId);
+    chat.exitGroupConfirm(chat.theRoomId!, isTheGroupOwner.value, () => {
+      chat.removeContact(chat.theRoomId!);
     });
   }
 
@@ -347,7 +347,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     e.preventDefault();
 
     const isSelf = user.userInfo.id === item.userId;
-    const roomId = chat.theContact.roomId;
+    const roomId = chat.theRoomId!;
 
     ContextMenu.showContextMenu({
       x: e.x,
@@ -404,7 +404,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
               onClick: () => {
                 toggleAdminRole({
                   userId: item.userId,
-                  roomId: chat.theContact.roomId,
+                  roomId: chat.theRoomId!,
                 }, ChatRoomRoleEnum.ADMIN);
               },
             },
@@ -416,7 +416,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
               onClick: () => {
                 toggleAdminRole({
                   userId: item.userId,
-                  roomId: chat.theContact.roomId,
+                  roomId: chat.theRoomId!,
                 }, ChatRoomRoleEnum.MEMBER);
               },
             },

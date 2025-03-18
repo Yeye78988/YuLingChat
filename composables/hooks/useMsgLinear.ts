@@ -138,7 +138,7 @@ function resolveDeleteMsg(msg: WSMsgDelete) {
  */
 export function resolvePinContact(data: WSPinContactMsg) {
   const chat = useChatStore();
-  if (data.roomId !== chat.theContact.roomId) {
+  if (data.roomId !== chat.theRoomId!) {
     chat.reloadContact(data.roomId);
     return;
   }

@@ -60,14 +60,14 @@ async function loadData(roomId?: number, call?: (data?: ChatMessageVO[]) => void
     return;
     // 追加数据
   if (data?.list && data.list.length)
-    chat.theContact.msgList.unshift(...data.list);
+    chat?.theContact?.msgList?.unshift?.(...data.list);
   const oldSize = chat.scrollTopSize;
   nextTick(() => {
     // 更新滚动位置
     if (!chat.theContact)
       return;
     chat.saveScrollTop && chat.saveScrollTop();
-    if (pageInfo.value.cursor === null && !chat.theContact.msgList.length) { // 第一次加载默认没有动画
+    if (pageInfo.value.cursor === null && !chat?.theContact?.msgList?.length) { // 第一次加载默认没有动画
       chat.scrollBottom(false);
       call && call(chat.theContact.msgList || []);
     }
@@ -97,7 +97,7 @@ function reload(roomId?: number) {
     isLast: false,
     size: 20,
   };
-  chat.theContact.msgList.splice(0);
+  chat.theContact.msgList?.splice?.(0);
   isReload.value = true;
   isLoading.value = true;
   getChatMessagePage(roomId, 20, null, user.getToken).then(async ({ data }) => {
@@ -302,7 +302,7 @@ defineExpose({
           :key="msg.message.id"
           :index="i"
           :data="msg"
-          :prev-msg="i > 0 ? chat.theContact.msgList[i - 1] : {}"
+          :prev-msg="i > 0 ? chat.theContact?.msgList?.[i - 1] || {} : {}"
         />
       </ListDisAutoIncre>
     </div>

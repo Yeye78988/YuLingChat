@@ -18,7 +18,7 @@ const isShow = computed({
 const chat = useChatStore();
 const applyFormRef = ref();
 const applyForm = ref<ChatMessageDTO>({
-  roomId: chat.theContact.roomId,
+  roomId: chat.theRoomId!,
   msgType: MessageType.GROUP_NOTICE, // 系统消息
   content: "",
   body: {

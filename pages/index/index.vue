@@ -24,7 +24,7 @@ const openRoomDrawer = computed({
     />
     <!-- 聊天框 移动端动画 -->
     <ChatContent
-      v-if="chat.theContact.roomId"
+      v-if="chat.theRoomId"
       class="transition-anima absolute left-0 top-0 z-99 h-full flex-1 sm:(relative left-auto top-auto w-1/4 transform-none) border-default-l"
       :class="{
         'translate-x-full css-will-change': chat.isOpenContact,
@@ -36,7 +36,7 @@ const openRoomDrawer = computed({
       <small>快开始聊天吧 ✨</small>
     </div>
     <!-- 在线人数 -->
-    <template v-if="chat.theContact.roomId">
+    <template v-if="chat.theRoomId">
       <!-- 移动尺寸 popup -->
       <el-drawer
         v-if="setting.isMobileSize"

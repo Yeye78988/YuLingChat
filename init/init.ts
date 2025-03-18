@@ -177,7 +177,7 @@ export async function useMsgBoxWebViewInit() {
       await win.isMinimized() && await win.unminimize();
       const contact = chat.unReadContactList[0];
       chat.setContact(contact);
-      if (contact && chat.theContact.roomId === contact?.roomId)
+      if (contact && chat.theRoomId === contact?.roomId)
         chat.setReadList(contact?.roomId);
       await nextTick();
       chat.scrollBottom(false);
@@ -262,7 +262,7 @@ async function handleChannelMsg(event: MessageEvent) {
   const mainWin = await WebviewWindow?.getByLabel(MAIN_WINDOW_LABEL);
   if (type === "readContact") { // 读取单个
     chat.setContact(chat.contactMap[data.roomId]);
-    if (chat.theContact.roomId === data.roomId)
+    if (chat.theRoomId === data.roomId)
       chat.setReadList(data.roomId);
     if (mainWin) {
       await navigateTo("/");
@@ -280,7 +280,7 @@ async function handleChannelMsg(event: MessageEvent) {
           return false;
         p.unreadCount = 0;
         ws.wsMsgList.newMsg = ws.wsMsgList.newMsg.filter(k => k.message.roomId !== p.roomId);
-        if (p.roomId === chat.theContact.roomId) {
+        if (p.roomId === chat.theRoomId) {
           chat.theContact.unreadCount = 0;
           chat.theContact.unreadMsgList = [];
         }

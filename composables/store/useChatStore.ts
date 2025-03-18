@@ -19,6 +19,7 @@ export interface ChatContactExtra extends ChatContactDetailVO {
   pageInfo: Partial<PageInfo>,
   isReload: boolean
   isLoading: boolean
+  targetUid?: string
   saveTime?: number
 }
 // @unocss-include
@@ -57,55 +58,19 @@ export const useChatStore = defineStore(
     const isOpenContact = ref(true); // 用于移动尺寸
     const theRoomId = ref<number | undefined>(undefined); // 当前会话id
     const contactMap = ref<Record<number, ChatContactExtra>>({});
-    const theContact = computed<ChatContactExtra>({
-      get: () => {
-        if (!theRoomId.value) {
-          return {
-            roomId: -1,
-            name: "",
-            avatar: "",
+    const theContact = computed<Partial<ChatContactExtra>>({
+      get: () => (theRoomId.value
+        ? contactMap.value[theRoomId.value]
+        : {
             msgList: [],
-            unreadCount: 0,
             unreadMsgList: [],
             pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-            isReload: false,
-            isLoading: false,
-            saveTime: 0,
-            activeTime: 0,
-            pinTime: undefined,
-            member: undefined,
-            roomGroup: undefined,
-            hotFlag: isTrue.FALESE,
-            text: "",
-            type: RoomType.SELFT,
-          } as ChatContactExtra;
-        }
-        return contactMap.value[theRoomId!.value] || ({
-          roomId: -1,
-          name: "",
-          avatar: "",
-          msgList: [],
-          unreadCount: 0,
-          unreadMsgList: [],
-          pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-          isReload: false,
-          isLoading: false,
-          saveTime: 0,
-          activeTime: 0,
-          pinTime: undefined,
-          member: undefined,
-          roomGroup: undefined,
-          hotFlag: isTrue.FALESE,
-          text: "",
-          type: RoomType.SELFT,
-        } as ChatContactExtra
-        );
-      },
-      set: (val: ChatContactExtra) => {
+          }) as Partial<ChatContactExtra>,
+      set: (val: Partial<ChatContactExtra>) => {
         const roomId = val?.roomId;
         if (roomId) {
           theRoomId.value = roomId;
-          contactMap.value[roomId] = val;
+          contactMap.value[roomId] = val as ChatContactExtra;
         }
         else {
           theRoomId.value = undefined;
@@ -359,7 +324,6 @@ export const useChatStore = defineStore(
             isReload: false,
             isLoading: false,
             pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-            saveTime: Date.now(),
           }),
         ...vo, // 基础信息
       };
@@ -380,7 +344,6 @@ export const useChatStore = defineStore(
         isReload: contactMap.value?.[vo.roomId]?.isReload || false,
         isLoading: contactMap.value?.[vo.roomId]?.isLoading || false,
         pageInfo: contactMap.value?.[vo.roomId]?.pageInfo || { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-        saveTime: Date.now(),
       };
       // 补充会话详情 (5分钟更新一次)
       const lastSaveTime = contactMap.value?.[vo.roomId]?.saveTime;
@@ -396,6 +359,7 @@ export const useChatStore = defineStore(
           isReload: contactMap.value?.[vo.roomId]?.isReload || false,
           isLoading: contactMap.value?.[vo.roomId]?.isLoading || false,
           pageInfo: contactMap.value?.[vo.roomId]?.pageInfo || { cursor: undefined, isLast: false, size: 20 } as PageInfo,
+          saveTime: Date.now(),
         };
       }
     }
@@ -862,24 +826,10 @@ export const useChatStore = defineStore(
     function resetStore() {
       contactMap.value = {};
       theContact.value = {
-        roomId: -1,
-        name: "",
-        avatar: "",
         msgList: [],
-        unreadCount: 0,
         unreadMsgList: [],
         pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-        isReload: false,
-        isLoading: false,
-        saveTime: 0,
-        activeTime: 0,
-        pinTime: undefined,
-        member: undefined,
-        roomGroup: undefined,
-        hotFlag: isTrue.FALESE,
-        text: "",
-        type: RoomType.SELFT,
-      } as ChatContactExtra;
+      } as Partial<ChatContactExtra>;
       showExtension.value = false;
       isOpenContact.value = true;
       roomGroupPageInfo.value = {
