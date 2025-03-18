@@ -42,7 +42,6 @@ async function onHashHandle() {
   await nextTick();
   if (!document || !document.location.hash)
     return;
-
   const dom = document.querySelector(window.location.hash) as HTMLElement;
   if (!dom || showAnima.value)
     return;
@@ -57,10 +56,12 @@ async function onHashHandle() {
   // 计算滚动位置,使目标元素在容器中间
   top = offsetTop - (wrapHeight / 2) + (domRect.height / 2);
   clearTimeout(timer.value);
-  scrollbarRef.value?.wrapRef?.scrollTo({ // 缓动
-    top,
-    behavior: "smooth",
-  });
+  if (top !== 0) { // 缓动
+    scrollbarRef.value?.wrapRef?.scrollTo({
+      top,
+      behavior: "smooth",
+    });
+  }
   dom.classList.add("setting-hash-anim");
   timer.value = setTimeout(() => {
     dom.classList.remove("setting-hash-anim");
@@ -69,10 +70,14 @@ async function onHashHandle() {
   }, 2000);
 }
 
-
 onActivated(onHashHandle);
 onMounted(onHashHandle);
 onDeactivated(() => {
+  clearTimeout(timer.value);
+  showAnima.value = false;
+  timer.value = undefined;
+});
+onUnmounted(() => {
   clearTimeout(timer.value);
   showAnima.value = false;
   timer.value = undefined;

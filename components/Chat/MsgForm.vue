@@ -71,7 +71,7 @@ const isBtnLoading = computed(() => isSending.value || isUploadImg.value || isUp
 /**
  * 发送消息
  */
-async function onSubmit() {
+async function handleSubmit() {
   if (isSending.value)
     return;
   formRef.value?.validate(async (action: boolean) => {
@@ -79,91 +79,98 @@ async function onSubmit() {
       return;
     if (chat.msgForm.msgType === MessageType.TEXT && (!chat.msgForm.content || chat.msgForm.content?.trim().length > maxContentLen.value))
       return;
-
-    const formDataTemp = JSON.parse(JSON.stringify(chat.msgForm));
-    if (chat.msgForm.content) {
-      if (document.querySelector(".at-select")) // enter冲突at选择框
-        return;
-
-      if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
-        const { atUidList } = resolveAtUsers(formDataTemp.content, userOptions.value);
-        if (atUidList?.length) {
-          chat.atUserList = [...atUidList];
-          formDataTemp.body.atUidList = [...new Set(atUidList)];
-        }
-      }
-
-      // 处理 AI机器人
-      const { aiRobotList } = resolteAiReply(formDataTemp.content, aiOptions.value);
-      if (aiRobotList[0]) {
-        formDataTemp.content = formDataTemp.content.replace(formatAiReplyTxt(aiRobotList[0]), ""); // 剔除ai的显示
-        if (!formDataTemp.content.trim())
-          return;
-        formDataTemp.body = {
-          userId: aiRobotList[0].userId,
-          modelCode: 1,
-          businessCode: AiBusinessType.TEXT,
-        };
-        formDataTemp.msgType = MessageType.AI_CHAT; // 设置对应消息类型
-      }
-    };
-    // 图片
-    if (formDataTemp.msgType === MessageType.IMG) {
-      if (isUploadImg.value) {
-        ElMessage.warning("图片正在上传中，请稍等！");
-        return;
-      }
-      if (imgList.value.length > 1) {
-        await multiSubmitImg();
-        return;
-      }
-    }
-    // 文件
-    if (formDataTemp.msgType === MessageType.FILE && isUploadFile.value) {
-      ElMessage.warning("文件正在上传中，请稍等！");
-      return;
-    }
-    // 视频
-    if (formDataTemp.msgType === MessageType.VIDEO && isUploadVideo.value) {
-      ElMessage.warning("视频正在上传中，请稍等！");
-      return;
-    }
-    // 开始提交
-    isSending.value = true;
-    // 1) 语音消息
-    if (formDataTemp.msgType === MessageType.SOUND) {
-      await onSubmitSound((key) => {
-        formDataTemp.body.url = key;
-        formDataTemp.body.translation = audioTransfromText.value;
-        formDataTemp.body.second = second.value;
-        submit(formDataTemp);
-      });
-      return;
-    }
-    // 2) AI私聊房间
-    if (isAiRoom.value) {
-      const content = formDataTemp.content?.trim();
-      if (!content)
-        return;
-      if (!chat.theContact?.targetUid) {
-        ElMessage.error("房间信息不完整！");
-        return;
-      }
-      await submit({
-        roomId: chat.theContact.roomId,
-        msgType: MessageType.AI_CHAT, // AI消息
-        content,
-        body: {
-          userId: chat.theContact?.targetUid,
-          modelCode: 1,
-          businessCode: AiBusinessType.TEXT,
-        },
-      });
-      return;
-    }
-    // 3) 普通消息
-    submit(formDataTemp);
+    // 发送请求
+    await onSubmit().finally(() => {
+      isSending.value = false;
+    });
   });
+}
+
+async function onSubmit() {
+  const formDataTemp = JSON.parse(JSON.stringify(chat.msgForm));
+  if (chat.msgForm.content) {
+    if (document.querySelector(".at-select")) // enter冲突at选择框
+      return;
+
+    if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
+      const { atUidList } = resolveAtUsers(formDataTemp.content, userOptions.value);
+      if (atUidList?.length) {
+        chat.atUserList = [...atUidList];
+        formDataTemp.body.atUidList = [...new Set(atUidList)];
+      }
+    }
+
+    // 处理 AI机器人
+    const { aiRobotList } = resolteAiReply(formDataTemp.content, aiOptions.value);
+    if (aiRobotList[0]) {
+      formDataTemp.content = formDataTemp.content.replace(formatAiReplyTxt(aiRobotList[0]), ""); // 剔除ai的显示
+      if (!formDataTemp.content.trim())
+        return false;
+      formDataTemp.body = {
+        userId: aiRobotList[0].userId,
+        modelCode: 1,
+        businessCode: AiBusinessType.TEXT,
+      };
+      formDataTemp.msgType = MessageType.AI_CHAT; // 设置对应消息类型
+    }
+  };
+  // 图片
+  if (formDataTemp.msgType === MessageType.IMG) {
+    if (isUploadImg.value) {
+      ElMessage.warning("图片正在上传中，请稍等！");
+      return false;
+    }
+    if (imgList.value.length > 1) {
+      await multiSubmitImg();
+      return false;
+    }
+  }
+  // 文件
+  if (formDataTemp.msgType === MessageType.FILE && isUploadFile.value) {
+    ElMessage.warning("文件正在上传中，请稍等！");
+    return false;
+  }
+  // 视频
+  if (formDataTemp.msgType === MessageType.VIDEO && isUploadVideo.value) {
+    ElMessage.warning("视频正在上传中，请稍等！");
+    return false;
+  }
+  // 开始提交
+  isSending.value = true;
+  // 1) 语音消息
+  if (formDataTemp.msgType === MessageType.SOUND) {
+    await onSubmitSound((key) => {
+      formDataTemp.body.url = key;
+      formDataTemp.body.translation = audioTransfromText.value;
+      formDataTemp.body.second = second.value;
+      submit(formDataTemp);
+    });
+    return true;
+  }
+  // 2) AI私聊房间
+  if (isAiRoom.value) {
+    const content = formDataTemp.content?.trim();
+    if (!content)
+      return false;
+    if (!chat.theContact?.targetUid) {
+      ElMessage.error("房间信息不完整！");
+      return false;
+    }
+    await submit({
+      roomId: chat.theContact.roomId,
+      msgType: MessageType.AI_CHAT, // AI消息
+      content,
+      body: {
+        userId: chat.theContact?.targetUid,
+        modelCode: 1,
+        businessCode: AiBusinessType.TEXT,
+      },
+    });
+    return true;
+  }
+  // 3) 普通消息
+  await submit(formDataTemp);
+  return true;
 }
 
 /**
@@ -174,8 +181,9 @@ async function submit(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: 
   const res = await addChatMessage({
     ...formData,
     roomId,
-  }, user.getToken);
-  isSending.value = false;
+  }, user.getToken).finally(() => {
+    isSending.value = false;
+  });
   if (res.code === StatusCode.SUCCESS) {
     // 发送信息后触发
     emit("submit", res.data);
@@ -385,8 +393,8 @@ function removeOssFile(type: OssFileType = OssFileType.IMAGE, key?: string, inde
 
 // 到底部并消费消息
 function setReadAndScrollBottom() {
-  if (chat.theContactId) {
-    chat.setReadList(chat.theContactId);
+  if (chat.theRoomId) {
+    chat.setReadList(chat.theRoomId);
     chat.scrollBottom();
   }
 }
@@ -394,14 +402,15 @@ function setReadAndScrollBottom() {
 // watch
 // 房间号变化
 let timer: any = 0;
-watch(() => chat.theContactId, (newVal, oldVal) => {
+watch(() => chat.theRoomId, (newVal, oldVal) => {
   if (newVal === oldVal) {
     return;
   }
   resetForm();
   // 加载数据
   loadUser();
-  loadAi();
+  loadAi(newVal);
+  // 移动端与动画兼容
   loadInputTimer.value && clearTimeout(loadInputTimer.value);
   if (!setting.isMobileSize) {
     loadInputDone.value = true;
@@ -453,10 +462,10 @@ onMounted(() => {
       chat.msgForm.content += `@${user.nickName}(#${user.username}) `;
     }
     else if (type === "remove") {
-    // const atIndex = chat.msgForm.content.lastIndexOf(`@${payload.nickName}(#${payload.username}) `);
-    // if (atIndex > -1) {
-    //   chat.msgForm.content = chat.msgForm.content.slice(0, atIndex) + chat.msgForm.content.slice(atIndex + 3 + payload.username.length);
-    // }
+      const atIndex = chat?.msgForm?.content?.lastIndexOf?.(`@${user.nickName}(#${user.username}) `) ?? -1;
+      if (atIndex === -1 || !chat?.msgForm?.content)
+        return;
+      chat.msgForm.content = chat.msgForm.content?.slice(0, atIndex) + chat.msgForm.content?.slice(atIndex + `@${user.nickName}(#${user.username}) `.length);
     }
     else if (type === "clear") {
     //
@@ -826,7 +835,7 @@ onUnmounted(() => {
           :check-is-whole="(pattern: string, value: string) => isReplyAI ? checkAiReplyWhole(chat.msgForm.content, pattern, value) : checkAtUserWhole(chat.msgForm.content, pattern, value)"
           :rows="setting.isMobileSize ? 1 : 6"
           :maxlength="maxContentLen"
-          :placeholder="chat.theContact.hotFlag ? '输入 / 唤起AI助手' : ''"
+          :placeholder="aiOptions.length > 0 ? '输入 / 唤起AI助手' : ''"
           :autosize="setting.isMobileSize"
           type="textarea"
           resize="none"
@@ -842,7 +851,7 @@ onUnmounted(() => {
             placement: 'top-start',
           }"
           @paste.stop="onPaste($event)"
-          @keydown.exact.enter.stop.prevent="onSubmit()"
+          @keydown.exact.enter.stop.prevent="handleSubmit()"
           @keydown.exact.arrow-up.stop.prevent="onInputExactKey('ArrowUp')"
           @keydown.exact.arrow-down.stop.prevent="onInputExactKey('ArrowDown')"
         >
@@ -860,7 +869,7 @@ onUnmounted(() => {
           style="height: 2.2rem !important;"
           class="mb-1px ml-2 mr-2 w-4.5rem"
           :loading="isBtnLoading"
-          @click="onSubmit()"
+          @click="handleSubmit()"
         >
           发送
         </BtnElButton>
@@ -889,7 +898,7 @@ onUnmounted(() => {
           size="small"
           :loading="isBtnLoading"
           style="padding: 0.8rem;width: 6rem;"
-          @click="onSubmit()"
+          @click="handleSubmit()"
         >
           发送&nbsp;
         </BtnElButton>

@@ -43,7 +43,7 @@ async function loadData(dto?: ContactPageDTO) {
   }
   if (data && data.list) {
     for (const item of data.list) {
-      chat.contactMap[item.roomId] = item;
+      chat.refreshContact(item);
     }
   }
   pageInfo.value.isLast = data.isLast;
@@ -94,7 +94,7 @@ async function refreshItem(roomId: number) {
     if (item?.type === RoomType.GROUP) {
       const res = await getChatContactInfo(roomId, user.getToken, RoomType.GROUP);
       if (res)
-        chat.contactMap[roomId] = res.data;
+        chat.refreshContact(res.data);
     }
   }
   catch (error) {
@@ -274,23 +274,25 @@ const menuList = [
         :on-refresh="reload"
         @load="loadData(dto)"
       >
+        <!-- 添加骨架屏 -->
+        <div v-if="isReload" key="skeleton" class="main-bg-color absolute z-2 w-full overflow-y-auto">
+          <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
+        </div>
         <ListTransitionGroup
-          :immediate="false" tag="div" :class="{
+          :immediate="false"
+          tag="div"
+          :class="{
             reload: isReload,
           }"
           class="relative"
         >
-          <!-- 添加骨架屏 -->
-          <div v-if="isReload" class="main-bg-color absolute z-2 w-full overflow-y-auto">
-            <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
-          </div>
           <div
             v-for="room in chat.getContactList"
             :key="room.roomId"
             class="contact"
             :class="{
               'is-pin': room.pinTime,
-              'is-checked': room.roomId === chat.theContactId,
+              'is-checked': room.roomId === chat.theRoomId,
             }"
             @contextmenu.stop="onContextMenu($event, room)"
             @click="onClickContact(room)"

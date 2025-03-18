@@ -667,6 +667,7 @@ export interface AtConfigs {
   regExp?: RegExp
 }
 
+const CACHE_TIME = 5 * 60 * 1000; // 5分钟缓存时间
 
 /**
  * 加载@用户列表
@@ -681,6 +682,7 @@ export function useLoadAtUserList() {
   const user = useUserStore();
   const userOptions = ref<AtChatMemberOption[]>([]);
   const userAtOptions = computed(() => chat.theContact.type === RoomType.GROUP ? userOptions.value.filter(u => !chat.atUserList.find(a => a.userId === u.userId)) : []); // 过滤已存在的用户
+  const userRoomMap = ref<Record<number, { time: number, list: AtChatMemberOption[] }>>({});
 
   /**
    * 加载@用户列表
@@ -688,9 +690,20 @@ export function useLoadAtUserList() {
   async function loadUser() {
     if (!chat.theContact.roomId || chat.theContact.type !== RoomType.GROUP)
       return;
+
+    const roomId = chat.theContact.roomId;
+    const cache = userRoomMap.value[roomId];
+
+    // 如果缓存存在且未过期,直接使用缓存
+    if (cache && (Date.now() - cache.time < CACHE_TIME)) {
+      userOptions.value = cache.list;
+      // console.log("use cache user list");
+      return;
+    }
+
     const { data, code } = await getRoomGroupAllUser(chat.theContact.roomId, user.getToken);
     if (data && code === StatusCode.SUCCESS) {
-      userOptions.value = (data || []).map((u: ChatMemberSeVO) => ({
+      const list = (data || []).map((u: ChatMemberSeVO) => ({
         label: u.nickName,
         value: `${u.nickName}(#${u.username})`,
         userId: u.userId,
@@ -698,6 +711,13 @@ export function useLoadAtUserList() {
         username: u.username,
         nickName: u.nickName,
       })).filter((u: AtChatMemberOption) => u.userId !== user.userInfo.id);
+
+      userOptions.value = list;
+      // 更新缓存
+      userRoomMap.value[roomId] = {
+        time: Date.now(),
+        list,
+      };
     }
   }
 
@@ -706,9 +726,14 @@ export function useLoadAtUserList() {
   watchDebounced(() => ws.wsMsgList.memberMsg.length, (len) => {
     if (!len)
       return;
+    // 清除对应缓存
+    const roomId = chat.theContact.roomId;
+    if (userRoomMap.value[roomId]) {
+      delete userRoomMap.value[roomId];
+    }
     loadUser();
   }, {
-    debounce: 500,
+    debounce: 1000,
   });
   return {
     userOptions,
@@ -751,16 +776,30 @@ export function useLoadAiList() {
   const chat = useChatStore();
   const user = useUserStore();
   const aiOptions = ref<AskAiRobotOption[]>([]);
+  const aiRoomMap = ref<Record<number, { time: number, isLoading: boolean, list: AskAiRobotOption[] }>>({});
 
   /**
    * 加载AI列表
    */
-  async function loadAi() {
-    if (!chat.theContact.roomId)
+  async function loadAi(roomId?: number) {
+    if (!roomId)
       return;
-    const { data, code } = await getAiRobotList(user.getToken);
+
+    const cache = aiRoomMap.value[roomId];
+    if (chat.contactMap[roomId]?.type !== RoomType.GROUP) { // 单聊不查询
+      return;
+    }
+
+    // 如果缓存存在且未过期,直接使用缓存
+    if (cache && (Date.now() - cache.time < CACHE_TIME)) {
+      aiOptions.value = cache.list;
+      // console.log("use cache ai list");
+      return;
+    }
+
+    const { data, code } = await getAiRobotListByRoomId(roomId, user.getToken);
     if (data && code === StatusCode.SUCCESS) {
-      aiOptions.value = (data || []).map((u: RobotUserVO) => ({
+      const list = (data || []).map((u: RobotUserVO) => ({
         label: u.nickname,
         value: u.nickname,
         userId: u.userId,
@@ -769,18 +808,17 @@ export function useLoadAiList() {
         nickName: u.nickname,
         aiRobotInfo: u,
       }));
+
+      // 更新缓存
+      aiRoomMap.value[roomId] = {
+        time: Date.now(),
+        list,
+        isLoading: false,
+      };
+      aiOptions.value = list;
     }
   }
-  // 加载AI
-  const ws = useWsStore();
-  watchDebounced(() => ws.wsMsgList.memberMsg.length, (len) => {
-    if (!len)
-      return;
-    loadAi();
-  }, {
-    debounce: 500,
-    immediate: true,
-  });
+
   return {
     aiOptions,
     loadAi,

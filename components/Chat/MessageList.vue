@@ -5,20 +5,25 @@ const setting = useSettingStore();
 
 // 消息
 const pageInfo = computed({
-  get: () => chat.theContact.pageInfo,
+  get: () => chat?.theContact?.pageInfo || {},
   set: (val: PageInfo) => {
-    chat.theContact.pageInfo = val;
+    if (chat.theContact)
+      chat.theContact.pageInfo = val;
   },
 });
 const isLoading = computed({
-  get: () => chat.theContact.isLoading,
+  get: () => !!chat?.theContact?.isLoading,
   set: (val: boolean) => {
+    if (!chat.theContact)
+      return;
     chat.theContact.isLoading = val;
   },
 });
 const isReload = computed({
-  get: () => chat.theContact.isReload,
+  get: () => !!chat?.theContact?.isReload,
   set: (val: boolean) => {
+    if (!chat.theContact)
+      return;
     chat.theContact.isReload = val;
   },
 });
@@ -31,7 +36,10 @@ const timer = ref<any>(0);
  * 加载数据
  */
 async function loadData(roomId?: number, call?: (data?: ChatMessageVO[]) => void) {
-  roomId = roomId || chat.theContact.roomId;
+  roomId = roomId || chat.theRoomId;
+  if (!roomId || !pageInfo.value) {
+    return;
+  }
   if (isLoading.value || isReload.value || pageInfo.value.isLast || !roomId)
     return;
   if (chat.isMsgListScroll) {
@@ -48,7 +56,7 @@ async function loadData(roomId?: number, call?: (data?: ChatMessageVO[]) => void
     return;
   }
   const data = res.data;
-  if (roomId !== chat.theContact.roomId)
+  if (roomId !== chat.theRoomId || !chat.theContact)
     return;
     // 追加数据
   if (data?.list && data.list.length)
@@ -56,6 +64,8 @@ async function loadData(roomId?: number, call?: (data?: ChatMessageVO[]) => void
   const oldSize = chat.scrollTopSize;
   nextTick(() => {
     // 更新滚动位置
+    if (!chat.theContact)
+      return;
     chat.saveScrollTop && chat.saveScrollTop();
     if (pageInfo.value.cursor === null && !chat.theContact.msgList.length) { // 第一次加载默认没有动画
       chat.scrollBottom(false);
@@ -76,7 +86,9 @@ async function loadData(roomId?: number, call?: (data?: ChatMessageVO[]) => void
 }
 // 重新加载
 function reload(roomId?: number) {
-  roomId = roomId || chat.theContact.roomId;
+  roomId = roomId || chat.theRoomId;
+  if (!chat.theContact || !roomId)
+    return;
   //  TODO:判断缓存是否超过 10 分钟
   // 重置滚动位置
   chat.scrollTopSize = 0;
@@ -89,10 +101,10 @@ function reload(roomId?: number) {
   isReload.value = true;
   isLoading.value = true;
   getChatMessagePage(roomId, 20, null, user.getToken).then(async ({ data }) => {
-    if (roomId !== chat.theContact.roomId)
+    if (roomId !== chat.theRoomId)
       return;
     // 追加数据
-    if (!data?.list?.length)
+    if (!data?.list?.length || !chat.theContact)
       return;
     chat.theContact.msgList = data.list;
     pageInfo.value.isLast = data.isLast;
@@ -114,14 +126,14 @@ function reload(roomId?: number) {
 const requestAnimationFrameFn = window?.requestAnimationFrame || (callback => setTimeout(callback, 16));
 
 // 监听房间
-watch(() => chat.theContactId, async (val, oldVal) => {
+watch(() => chat.theRoomId, async (val, oldVal) => {
   if (val) {
     // 消息阅读上报
     chat.setReadList(val);
     nextTick(() => {
       scrollbarRef.value && scrollBottom(false);
     });
-    if (!chat.contactDetailMapCache[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactDetailMapCache[val].lastMsgId) { // 会话判断是否同步
+    if (!chat.contactMap[val]?.msgList.length || chat.contactMap[val]?.lastMsgId !== chat.contactMap[val].lastMsgId) { // 会话判断是否同步
       requestAnimationFrameFn(() => {
         reload(val);
       });
@@ -216,9 +228,9 @@ const offset = computed(() => setting.isMobileSize ? -730 : -678);
 // 滚动事件
 const onScroll = useDebounceFn((e) => {
   // 滚动到底部
-  if (e.scrollTop >= (scrollbarRef?.value?.wrapRef?.scrollHeight || 0) + offset.value) {
+  if (chat.theRoomId && e.scrollTop >= (scrollbarRef?.value?.wrapRef?.scrollHeight || 0) + offset.value) {
     // console.log(scrollbarRef?.value?.wrapRef?.scrollHeight - e.scrollTop);
-    chat.setReadList(chat.theContact.roomId);
+    chat.setReadList(chat.theRoomId);
   }
 }, 300);
 

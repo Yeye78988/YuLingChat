@@ -2,6 +2,7 @@
 /**
  * 获取AI机器人列表
  * @param token 登录令牌
+ * @param showDetail 是否显示详细信息
  */
 export function getAiRobotList(
   token: string,
@@ -10,6 +11,22 @@ export function getAiRobotList(
   return useHttp.get<Result<RobotUserVO[]>>(
     `/chat/ai/robot/list`,
     { showDetail: showDetail || isTrue.FALESE },
+    { headers: { Authorization: token } },
+  );
+}
+
+/**
+ * 获取AI机器人列表 （房间号）
+ * @param roomId 房间号
+ * @param token 登录令牌
+ */
+export function getAiRobotListByRoomId(
+  roomId: number,
+  token: string,
+) {
+  return useHttp.get<Result<RobotUserVO[]>>(
+    `/chat/ai/robot/list/${roomId}`,
+    { },
     { headers: { Authorization: token } },
   );
 }

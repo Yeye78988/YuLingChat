@@ -71,12 +71,12 @@ async function resolveNewMsg(msg: ChatMessageVO) {
   if (msg.message.roomId !== targetCtx.roomId || (setting.isMobileSize && !chat.isOpenContact)) {
     ws.wsMsgList.newMsg.splice(0);
   }
-  else if (msg.message.roomId === chat.theContactId) { // 阅读消息
+  else if (msg.message.roomId === chat.theRoomId) { // 阅读消息
     chat.setReadList(targetCtx.roomId);
   }
   // 3）本房间追加消息
   chat.appendMsg(msg); // 追加消息
-  msg.message.type === MessageType.RTC && msg.message.roomId === chat.theContactId && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
+  msg.message.type === MessageType.RTC && msg.message.roomId === chat.theRoomId && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
   ws.wsMsgList.newMsg.splice(0);
 }
 
@@ -235,7 +235,7 @@ function handleProgressUpdate(
   buffer.pendingContent += data.content;
   buffer.pendingReasoning += data.reasoningContent || "";
   const chat = useChatStore();
-  if (chat.theContactId === data.roomId) { // 不是当前房间
+  if (chat.theRoomId === data.roomId) { // 不是当前房间
     // 如果没有正在进行的更新，启动渐入效果
     // 同步一次
     applyBufferUpdate(contact, oldMsg, buffer);

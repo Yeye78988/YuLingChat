@@ -287,7 +287,7 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   }, { deep: true, immediate: true });
 
   // 监听房间变化
-  watch(() => chat.theContactId, async (newRoomId) => {
+  watch(() => chat.theRoomId, async (newRoomId) => {
     if (!newRoomId) {
       return;
     }
