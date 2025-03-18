@@ -160,12 +160,9 @@ function handleMobileWebNavigation(
  */
 function checkAndCleanupDialogs(): DialogCleanupFunction {
   const chat = useChatStore() as any;
-
-  if (chat.showVideoDialog || chat.showExtension || chat.inviteMemberForm.show) {
+  if (!chat.notDialogShow) {
     return () => {
-      chat.showVideoDialog = false;
-      chat.showExtension = false;
-      chat.inviteMemberForm.show = false;
+      chat.notDialogShow = false;
     };
   }
 

@@ -1,6 +1,9 @@
 import mitt from "mitt";
 
 export enum MittEventType {
+  // 全局快捷键
+  SHORTCUT_KEY = "js-shortcut-key",
+
   // Ws推送消息事件
   MESSAGE = "chat-new-msg", // 新消息
   ONLINE_OFFLINE_NOTIFY = "chat-online-offline-notify", // 上下线通知
@@ -72,6 +75,8 @@ export interface AskAiRobotPayload {
 
 // eslint-disable-next-line ts/consistent-type-definitions
 type EventPayloadMap = {
+  // 全局快捷键
+  [MittEventType.SHORTCUT_KEY]: { key: string, options: { ctrlKey?: boolean, shiftKey?: boolean, altKey?: boolean, metaKey?: boolean } };
   // ws接收消息事件
   [MittEventType.MESSAGE]: ChatMessageVO;
   [MittEventType.ONLINE_OFFLINE_NOTIFY]: WSOnlineOfflineNotify;
@@ -127,20 +132,21 @@ export function resolteChatPath(type: WsMsgBodyType): MittEventType {
 export const mitter = mitt<MittEvents>();
 
 export function removeAllEventListener() {
-  mitter.off(MittEventType.MESSAGE);
-  mitter.off(MittEventType.ONLINE_OFFLINE_NOTIFY);
-  mitter.off(MittEventType.RECALL);
-  mitter.off(MittEventType.APPLY);
-  mitter.off(MittEventType.MEMBER_CHANGE);
-  mitter.off(MittEventType.TOKEN_EXPIRED_ERR);
-  mitter.off(MittEventType.DELETE);
-  mitter.off(MittEventType.RTC_CALL);
-  mitter.off(MittEventType.PIN_CONTACT);
-  mitter.off(MittEventType.OTHER);
-  mitter.off(MittEventType.MSG_LIST_SCROLL);
-  mitter.off(MittEventType.MSG_FORM);
-  mitter.off(MittEventType.VIDEO_READY);
-  mitter.off(MittEventType.CHAT_AT_USER);
-  mitter.off(MittEventType.CAHT_ASK_AI_ROBOT);
-  mitter.off(MittEventType.RELOAD_MEMBER_LIST);
+  mitter.all.clear();
+  // mitter.off(MittEventType.MESSAGE);
+  // mitter.off(MittEventType.ONLINE_OFFLINE_NOTIFY);
+  // mitter.off(MittEventType.RECALL);
+  // mitter.off(MittEventType.APPLY);
+  // mitter.off(MittEventType.MEMBER_CHANGE);
+  // mitter.off(MittEventType.TOKEN_EXPIRED_ERR);
+  // mitter.off(MittEventType.DELETE);
+  // mitter.off(MittEventType.RTC_CALL);
+  // mitter.off(MittEventType.PIN_CONTACT);
+  // mitter.off(MittEventType.OTHER);
+  // mitter.off(MittEventType.MSG_LIST_SCROLL);
+  // mitter.off(MittEventType.MSG_FORM);
+  // mitter.off(MittEventType.VIDEO_READY);
+  // mitter.off(MittEventType.CHAT_AT_USER);
+  // mitter.off(MittEventType.CAHT_ASK_AI_ROBOT);
+  // mitter.off(MittEventType.RELOAD_MEMBER_LIST);
 }

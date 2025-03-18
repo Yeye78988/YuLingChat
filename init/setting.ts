@@ -1,33 +1,85 @@
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   disable as disableAutoStart,
   enable as enableAutoStart,
   isEnabled as isAutoStartEnabled,
 } from "@tauri-apps/plugin-autostart";
 
-// const dev = import.meta.env.MODE === "development";
+const shorcutKeyMap: Record<string, { name: string, action: () => void }> = {
+  // 切换主题
+  "alt+k": {
+    name: "切换主题",
+    action: () => {
+      const colorMode = useColorMode();
+      useModeToggle(colorMode.value === "light" ? "dark" : "light");
+    },
+  },
+  // 退出应用
+  "ctrl+q": {
+    name: "退出应用",
+    action: () => closeWindowHandler(true),
+  },
+  // esc 最小化窗口
+  "Escape": {
+    name: "最小化窗口",
+    action: () => {
+      const setting = useSettingStore();
+      const chat = useChatStore();
+      if (!setting.isDesktop)
+        return;
+      if (!chat.notDialogShow) {
+        chat.notDialogShow = false; // 关闭各类弹窗
+        return;
+      }
+      getCurrentWebviewWindow?.()?.minimize();
+    },
+  },
+};
+
+
+// 监听快捷键
+function checkAndExecuteShortcutKey(e: KeyboardEvent) {
+  const key = e.key;
+  const ctrlKey = e.ctrlKey;
+  const shiftKey = e.shiftKey;
+  const altKey = e.altKey;
+  const metaKey = e.metaKey;
+  const shorcutKey = `${ctrlKey ? "ctrl+" : ""}${shiftKey ? "shift+" : ""}${altKey ? "alt+" : ""}${metaKey ? "meta+" : ""}${key}`;
+  const shorcutAction = shorcutKeyMap[shorcutKey];
+  if (shorcutAction) {
+    shorcutAction.action();
+    e.preventDefault();
+    return true;
+  }
+  return false;
+}
+
 async function onKeyDown(e: KeyboardEvent) {
   const setting = useSettingStore();
   // 允许刷新
   // const isReload = e.key === "F5" || (e.key === "R" && e.ctrlKey) || (e.key === "F" && e.ctrlKey && e.shiftKey);
   if ((e.key === "p" && e.ctrlKey) || (e.key === "f" && e.ctrlKey))
     e.preventDefault();
-    // esc 最小化窗口
-  const disShortcuts = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;
-  if (e.key === "Escape" && disShortcuts && setting.settingPage.isEscMin && !document.querySelector(".el-image-viewer__wrapper")) {
-    e.stopPropagation();
+  if (!e.key)
+    return;
+  if (checkAndExecuteShortcutKey(e)) {
     e.preventDefault();
-    if (!setting.isWeb) {
-      const appWindow = getCurrentWindow();
-      if (await appWindow.isFullscreen()) {
-        await appWindow.setFullscreen(false);
-      }
-      else {
-        await appWindow.hide();
-      }
-    }
   }
+  // mitter.emit(MittEventType.SHORTCUT_KEY, {
+  //   key: e.key,
+  //   options: {
+  //     ctrlKey: e.ctrlKey,
+  //     shiftKey: e.shiftKey,
+  //     altKey: e.altKey,
+  //     metaKey: e.metaKey,
+  //   },
+  // });
+  // esc 最小化窗口
+  // const disShortcuts = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;
+  // if (e.key === "Escape" && disShortcuts && setting.settingPage.isEscMin && !document.querySelector(".el-image-viewer__wrapper")) {
+  //   e.stopPropagation();
+  //   e.preventDefault();
+  // }
 }
 
 function onContextMenu(e: MouseEvent) {
@@ -56,13 +108,6 @@ export function useSettingInit() {
   nextTick(() => {
     useModeToggle(setting.settingPage.modeToggle.value, undefined, true);
   });
-  // 主题切换快捷键
-  const onThemeKeyDown = (e: KeyboardEvent) => {
-    if (setting.isThemeChangeLoad)
-      return;
-    keyToggleTheme(e);
-  };
-  window.addEventListener("keydown", onThemeKeyDown);
   const unlistenStore = useSyncSettingStore();
   // 2、获取版本更新
   const route = useRoute();
@@ -167,7 +212,6 @@ export function useSettingInit() {
 
   return () => {
     window.removeEventListener("resize", onResize);
-    window.removeEventListener("keydown", onThemeKeyDown);
     unlistenStore();
     const setting = useSettingStore();
     setting.appUploader.isCheckUpdatateLoad = false;
@@ -176,34 +220,6 @@ export function useSettingInit() {
   };
 }
 
-function keyToggleTheme(e: KeyboardEvent) {
-  if (e?.altKey && e?.key && e?.key === "k") {
-    // 获取
-    const dom = document.querySelector("#toggle-theme-btn");
-    // 计算屏幕中心坐标
-    const centerY = (window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
-    const xy = dom?.getBoundingClientRect?.();
-    if (!xy) {
-      return;
-    }
-    const colorMode = useColorMode();
-    const mode = colorMode.value === "dark" ? "light" : "dark";
-    const setting = useSettingStore();
-    // 持久化
-    setting.settingPage.modeToggle.value = mode;
-
-    useModeToggle(mode, (dom && xy
-      ? {
-          // 按钮 x y 坐标、
-          clientX: xy.x + 10,
-          clientY: xy.y + 10,
-        }
-      : {
-          clientX: 40,
-          clientY: +centerY - 40,
-        }) as MouseEvent);
-  }
-}
 
 /**
  * 初始化快捷键

@@ -32,14 +32,21 @@ const keyDownFnMap: Record<string, () => void> = {
 };
 
 // 使用 localStorage 存储用户是否不再显示提示
-const hideShortcutTips = useLocalStorage<number | undefined>("image-viewer-hide-shortcut-tips", undefined);
+const hideShortcutTips = useLocalStorage<boolean>("image-viewer-hide-shortcut-tips", false);
 
-// 控制提示卡片的显示状态
-const showShortcutCard = ref(!hideShortcutTips.value);
+// 控制提示卡片是否折叠
+const isShortcutCardCollapsed = ref(false);
 
 // 关闭提示但不记住选择
 function closeShortcutCard() {
-  showShortcutCard.value = false;
+  if (!hideShortcutTips.value) {
+    isShortcutCardCollapsed.value = true;
+  }
+}
+
+// 折叠/展开提示卡片
+function toggleShortcutCard() {
+  isShortcutCardCollapsed.value = !isShortcutCardCollapsed.value;
 }
 
 interface ImageViewerState {
@@ -111,12 +118,14 @@ function open(options: Omit<ImageViewerState, "visible">) {
   resetImage();
 
   // 打开时如果用户没有选择隐藏提示，则显示提示
-  if (!hideShortcutTips.value && !setting.isMobileSize) {
-    showShortcutCard.value = false;
+  if (!hideShortcutTips.value && !setting.isMobileSize && !isShortcutCardCollapsed.value) {
     clearTimeout(timer.value);
     timer.value = setTimeout(() => {
-      showShortcutCard.value = true;
-    }, 1000);
+      // 显示1秒后自动折叠
+      timer.value = setTimeout(() => {
+        isShortcutCardCollapsed.value = true;
+      }, 2000);
+    }, 500);
   }
 }
 
@@ -333,8 +342,8 @@ defineExpose({
 <template>
   <DialogPopup
     v-model="state.visible"
-    :duration="300"
-    :min-scale="0.8"
+    :duration="200"
+    :min-scale="0.9"
     :show-close="false"
     :z-index="999"
     destroy-on-close
@@ -362,121 +371,131 @@ defineExpose({
         @click.stop
       >
     </div>
+  </DialogPopup>
 
+  <Teleport to="body">
     <!-- 控件容器 - 脱离布局流，确保控件不影响点击遮罩 -->
-    <div class="pointer-events-none absolute inset-0 z-10">
+    <div
+      v-show="state.visible" class="pointer-events-none fixed inset-0 animate-(fade-in duration-300)"
+      :style="{ 'z-index': 1000 }"
+    >
       <!-- 关闭按钮 -->
       <div
-        class="flex-center pointer-events-auto absolute right-5 top-5 h-10 w-10 cursor-pointer rounded-full text-6 bg-color-br text-color"
+        class="flex-center pointer-events-auto absolute right-5 top-5 h-10 w-10 cursor-pointer rounded-full text-6 btn-primary bg-color-br text-color"
         @click="close"
       >
-        <i class="i-carbon:close" />
+        <i class="i-carbon:close p-3" />
       </div>
-
       <!-- 工具栏 -->
-      <Teleport to="body">
-        <div class="pointer-events-auto fixed bottom-10 left-1/2 z-1000 flex transform gap-4 rounded-2 p-2.5 p-x-3.75 -translate-x-1/2 bg-color">
-          <el-icon-d-arrow-left
-            v-if="showPrev"
-            class="btn"
-            title="上一张"
-            @click.stop="prev"
-          />
-          <!-- zoom -->
-          <el-icon-zoom-in
-            class="btn"
-            title="放大"
-            @click.stop="zoomIn"
-          />
-          <el-icon-zoom-out
-            class="btn"
-            title="缩小"
-            @click.stop="zoomOut"
-          />
-          <!-- rotate -->
-          <el-icon-refresh-right
-            class="btn"
-            title="向前旋转"
-            @click.stop="rotateClockwise"
-          />
-          <!-- reset -->
-          <span
-            class="btn i-tabler:maximize"
-            @click.stop="resetImage"
-          />
-          <el-icon-refresh-left
-            class="btn"
-            title="重置"
-            @click.stop="rotateAnticlockwise"
-          />
-          <el-icon-download
-            v-if="currentImageUrl"
-            class="h-1.4rem w-1.4rem btn-primary dark:btn-info"
-            title="保存"
-            @click.stop="saveImage(currentImageUrl)"
-          />
-          <el-icon-d-arrow-right
-            v-if="showNext"
-            class="btn"
-            title="下一张"
-            @click.stop="next"
-          />
-        </div>
-        <!-- 左右切换箭头 -->
-        <div
+      <div class="pointer-events-auto absolute bottom-10 left-1/2 z-1000 flex transform gap-4 rounded-2 p-2.5 p-x-3.75 -translate-x-1/2 bg-color-br">
+        <el-icon-d-arrow-left
           v-if="showPrev"
-          class="flex-center pointer-events-auto fixed left-5 top-1/2 z-1000 h-12.5 w-12.5 transform cursor-pointer rounded-full text-7.5 -translate-y-1/2 bg-color-br text-color"
+          class="btn"
+          title="上一张"
           @click.stop="prev"
-        >
-          <i class="i-carbon:chevron-left" />
-        </div>
-        <div
+        />
+        <!-- zoom -->
+        <el-icon-zoom-in
+          class="btn"
+          title="放大"
+          @click.stop="zoomIn"
+        />
+        <el-icon-zoom-out
+          class="btn"
+          title="缩小"
+          @click.stop="zoomOut"
+        />
+        <!-- rotate -->
+        <el-icon-refresh-right
+          class="btn"
+          title="向前旋转"
+          @click.stop="rotateClockwise"
+        />
+        <!-- reset -->
+        <span
+          class="btn i-tabler:maximize"
+          @click.stop="resetImage"
+        />
+        <el-icon-refresh-left
+          class="btn"
+          title="重置"
+          @click.stop="rotateAnticlockwise"
+        />
+        <el-icon-download
+          v-if="currentImageUrl"
+          class="h-1.4rem w-1.4rem btn-primary dark:btn-info"
+          title="保存"
+          @click.stop="saveImage(currentImageUrl)"
+        />
+        <el-icon-d-arrow-right
           v-if="showNext"
-          class="flex-center pointer-events-auto fixed right-5 top-1/2 z-1000 h-12.5 w-12.5 transform cursor-pointer rounded-full text-7.5 -translate-y-1/2 bg-color-br text-color"
+          class="btn"
+          title="下一张"
           @click.stop="next"
-        >
-          <i class="i-carbon:chevron-right" />
-        </div>
-        <!-- 图片计数 -->
-        <div
-          v-if="state.urlList.length > 1"
-          class="pointer-events-auto fixed left-5 top-5 z-1000 rounded-1 px-2.5 py-1.25 text-3.5 bg-color text-color"
-        >
-          {{ state.index + 1 }} / {{ state.urlList.length }}
-        </div>
-      </Teleport>
+        />
+      </div>
+      <!-- 左右切换箭头 -->
+      <div
+        v-if="showPrev"
+        class="flex-center pointer-events-auto fixed left-5 top-1/2 z-1000 h-12.5 w-12.5 transform cursor-pointer rounded-full text-7.5 -translate-y-1/2 bg-color-br text-color"
+        @click.stop="prev"
+      >
+        <i class="i-carbon:chevron-left" />
+      </div>
+      <div
+        v-if="showNext"
+        class="flex-center pointer-events-auto fixed right-5 top-1/2 z-1000 h-12.5 w-12.5 transform cursor-pointer rounded-full text-7.5 -translate-y-1/2 bg-color-br text-color"
+        @click.stop="next"
+      >
+        <i class="i-carbon:chevron-right" />
+      </div>
+      <!-- 图片计数 -->
+      <div
+        v-if="state.urlList.length > 1"
+        class="pointer-events-auto fixed left-5 top-5 z-1000 rounded-1 px-2.5 py-1.25 text-3.5 bg-color text-color"
+      >
+        {{ state.index + 1 }} / {{ state.urlList.length }}
+      </div>
       <!-- 快捷键提示卡片 -->
-      <transition name="fade">
-        <div
-          v-if="showShortcutCard && !setting.isMobileSize"
-          class="pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df text-sm sm:(left-4 top-4 w-12rem) bg-color-br"
-        >
-          <div class="mb-2 flex-row-bt-c px-3 py-2 border-default-2-b">
-            <h4 class="text-3.5">
-              <i class="i-carbon:keyboard mr-2 p-2.6" />
-              快捷键
-            </h4>
-            <i class="i-carbon:close cursor-pointer p-2.6 hover:opacity-70" @click="closeShortcutCard" />
-          </div>
-          <div class="px-3 py-2 leading-1.6em border-default-2-b text-mini">
-            <div v-for="shortcut in KEYBOARD_SHORTCUTS" :key="shortcut.key" class="flex-row-bt-c">
-              <span>{{ shortcut.key }}</span>
-              <span>{{ shortcut.description }}</span>
-            </div>
-          </div>
-          <div class="flex-row-bt-c px-3 py-2">
-            <el-checkbox v-model="hideShortcutTips" size="small" class="mr-1">
-              不再提醒
-            </el-checkbox>
-            <span
-              class="text-xs btn-primary"
-              @click="closeShortcutCard"
-            >知道了</span>
+      <div
+        v-if="!setting.isMobileSize "
+        class="pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df text-sm shadow-md transition-200 sm:(left-4 top-4) bg-color-br"
+        :class="[isShortcutCardCollapsed ? 'transform -translate-x-full !left-0' : '']"
+      >
+        <div class="mb-2 flex-row-bt-c px-3 py-2 border-default-2-b">
+          <h4 class="text-3.5">
+            <i class="i-carbon:keyboard mr-2 p-2.6" />
+            快捷键
+          </h4>
+          <i class="i-carbon:close cursor-pointer p-2.6 hover:opacity-70" @click="isShortcutCardCollapsed = true" />
+        </div>
+        <div class="px-3 py-2 leading-1.6em border-default-2-b text-mini">
+          <div v-for="shortcut in KEYBOARD_SHORTCUTS" :key="shortcut.key" class="flex-row-bt-c">
+            <span>{{ shortcut.key }}</span>
+            <span>{{ shortcut.description }}</span>
           </div>
         </div>
-      </transition>
+        <div class="flex-row-bt-c px-3 py-2">
+          <el-checkbox v-model="hideShortcutTips" size="small" class="mr-1">
+            不再提醒
+          </el-checkbox>
+          <span
+            class="text-xs btn-primary"
+            @click="closeShortcutCard"
+          >知道了</span>
+        </div>
+        <!-- 折叠/展开按钮 -->
+        <div
+          v-show="isShortcutCardCollapsed && !setting.isMobileSize"
+          title="快捷键提示"
+          class="absolute right-0 top-1/2 translate-x-full rounded-r-md px-1 py-2 -translate-y-1/2 btn-primary-bg !rounded-l-0 bg-color"
+          @click="toggleShortcutCard"
+        >
+          <i :class="[isShortcutCardCollapsed ? 'i-carbon:chevron-right' : 'i-carbon:chevron-left']" class="p-2.6" />
+        </div>
+      </div>
     </div>
-  </DialogPopup>
+  </Teleport>
 </template>
 
 <style lang="scss">

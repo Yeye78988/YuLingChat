@@ -237,7 +237,7 @@ defineExpose({
 <template>
   <Teleport :to="teleportTo">
     <Transition
-      name="fade"
+      name="page-fade"
       @before-enter="onBeforeEnter"
       @enter="onEnter"
       @after-enter="onAfterEnter"

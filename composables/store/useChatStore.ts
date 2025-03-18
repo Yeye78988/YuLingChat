@@ -757,6 +757,19 @@ export const useChatStore = defineStore(
       });
     }
     const showVideoDialog = ref(false);
+    const showImageViewer = ref(false);
+    const notDialogShow = computed({ // 是否有dialog已经打开
+      get: () => !showVideoDialog.value && !showExtension.value && !showVideoDialog.value && !showImageViewer.value,
+      set: (val: boolean) => {
+        if (!val) {
+          showVideoDialog.value = false;
+          showVideoDialog.value = false;
+          showExtension.value = false;
+          showVideoDialog.value = false;
+          useImageViewer.close();
+        }
+      },
+    });
 
     /** ---------------------------- RTC通话 ---------------------------- */
     const showRtcCall = ref(false);
@@ -911,6 +924,8 @@ export const useChatStore = defineStore(
       isOpenContact,
       isMsgListScroll,
       showVideoDialog,
+      showImageViewer,
+      notDialogShow,
       roomGroupPageInfo,
       playSounder,
       isVisible,

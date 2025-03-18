@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { Window } from "@tauri-apps/api/window";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { platform } from "@tauri-apps/plugin-os";
-import { CLOSE_DESTORY_WINDOW_LABELS } from "~/composables/tauri/window";
-import { appName } from "~/constants";
+import { closeWindowHandler } from "~/composables/tauri/window";
+
 
 const {
   size = "default",
@@ -50,39 +49,7 @@ async function handleWindow(type: "min" | "max" | "close" | "alwaysOnTop") {
     isMaximized.value = !!isMax;
   };
   if (type === "close") {
-    if (destroyOnClose || EXIT_APP_WINDOW_LABELS.includes(appWindow?.value?.label)) {
-      ElMessageBox.confirm(`确定要关闭${appName}程序吗？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        center: true,
-        callback: async (action: string) => {
-          if (action === "confirm") {
-            await exitApp();
-          }
-        },
-      });
-      return;
-    }
-    else if (CLOSE_DESTORY_WINDOW_LABELS.includes(appWindow.value?.label)) {
-      ElMessageBox.confirm(`是否关闭当前扩展程序？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        center: true,
-        callback: async (action: string) => {
-          if (action === "confirm") {
-            // 聚焦到主窗口
-            const mainWindow = await WebviewWindow.getByLabel(MAIN_WINDOW_LABEL);
-            if (mainWindow) {
-              mainWindow.setFocus();
-            }
-            // 销毁当前窗口
-            await appWindow.value?.destroy();
-          }
-        },
-      });
-      return;
-    }
-    await appWindow.value?.hide();
+    await closeWindowHandler(destroyOnClose);
   }
   if (type === "alwaysOnTop") {
     isAlwaysOnTopVal.value = !isAlwaysOnTopVal.value;

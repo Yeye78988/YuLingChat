@@ -24,10 +24,10 @@ const getType = computed(() => {
     <div w-full flex items-center gap-3>
       <CardElImage
         loading="lazy"
-        :preview-src-list="[BaseUrlImg + chat.theContact.avatar]"
+        :preview-src-list="[BaseUrlImg + chat?.theContact?.avatar]"
         preview-teleported
         :alt="chat.theContact.name"
-        :src="BaseUrlImg + chat.theContact.avatar"
+        :default-src=" chat?.theContact?.avatar"
         class="h-2rem w-2rem flex-shrink-0 object-cover sm:(h-2.2rem w-2.2rem) border-default card-default"
       />
       <span truncate text-sm font-500>
