@@ -358,9 +358,11 @@ body .el-message {
 
 // el-image
 .el-image-viewer__wrapper:focus {
-  animation: fade-in-anim 0.3s ease-in-out;
+  animation: none;
+  // animation: fade-in-anim 0.3s ease-in-out;
   .el-image-viewer__canvas {
-    animation: fade-blur 0.2s ease-in-out;
+    animation: none;
+    // animation: fade-blur 0.2s ease-in-out;
   }
 }
 

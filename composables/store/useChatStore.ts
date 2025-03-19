@@ -757,9 +757,8 @@ export const useChatStore = defineStore(
       });
     }
     const showVideoDialog = ref(false);
-    const showImageViewer = ref(false);
     const notDialogShow = computed({ // 是否有dialog已经打开
-      get: () => !showVideoDialog.value && !showExtension.value && !showVideoDialog.value && !showImageViewer.value,
+      get: () => !showVideoDialog.value && !showExtension.value && !showVideoDialog.value && !useImageViewer.state.visible,
       set: (val: boolean) => {
         if (!val) {
           showVideoDialog.value = false;
@@ -924,7 +923,6 @@ export const useChatStore = defineStore(
       isOpenContact,
       isMsgListScroll,
       showVideoDialog,
-      showImageViewer,
       notDialogShow,
       roomGroupPageInfo,
       playSounder,

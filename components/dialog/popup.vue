@@ -236,8 +236,10 @@ defineExpose({
 
 <template>
   <Teleport :to="teleportTo">
+    <slot name="before" />
     <Transition
-      name="page-fade"
+      active-class="animate-(fade-in duration-300)"
+      leave-active-class="animate-(fade-out duration-300)"
       @before-enter="onBeforeEnter"
       @enter="onEnter"
       @after-enter="onAfterEnter"
@@ -255,11 +257,15 @@ defineExpose({
         @click.self="handleClose"
       >
         <!-- 背景遮罩 -->
-        <div
-          v-if="modelValue"
-          class="fixed inset-0 z-0 card-rounded-df bg-black/30 transition-opacity duration-300 border-default-2 dark:bg-black/40"
-          @click="handleClose"
-        />
+        <Transition name="page-fade">
+          <div
+            v-if="modelValue"
+            class="fixed inset-0 z-0 card-rounded-df bg-black/30 transition-opacity duration-300 border-default-2 dark:bg-black/40"
+            @click.stop.prevent="handleClose"
+          >
+            <slot name="mark-content" />
+          </div>
+        </Transition>
         <!-- 对话框 -->
         <div
           v-if="shouldRenderContent"
