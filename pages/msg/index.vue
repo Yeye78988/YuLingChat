@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+
 const unReadContactList = ref<ChatContactDetailVO[]>([]);
 const channel = new BroadcastChannel("main_channel");
 const unreadCount = computed(() => unReadContactList.value?.reduce((acc, cur) => acc + cur.unreadCount, 0) || 0);
@@ -30,6 +32,14 @@ onMounted(async () => {
     console.warn(error);
   }
 });
+
+
+// 隐藏窗口
+const appWindow = WebviewWindow.getCurrent();
+function handleMouseLeave() {
+  appWindow.hide();
+}
+
 onBeforeUnmount(() => {
   channel.close();
   window.removeEventListener("storage", () => {});
@@ -41,7 +51,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="h-100vh overflow-hidden text-0.8rem">
+  <div class="h-100vh overflow-hidden text-0.8rem" @mouseleave="handleMouseLeave">
     <NuxtLayout>
       <main class="h-100vh flex flex-col justify-between gap-3 truncate p-3">
         <div class="border-0 border-b-1px pb-2 border-default">

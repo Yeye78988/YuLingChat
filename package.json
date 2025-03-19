@@ -42,7 +42,7 @@
     "@tauri-apps/plugin-websocket": "2.3.0",
     "@tauri-apps/plugin-window-state": "2.2.1",
     "element-china-area-data": "6.1.0",
-    "md-editor-v3": "5.4.1",
+    "md-editor-v3": "5.4.2",
     "qiniu-js": "3.4.2",
     "streamsaver": "2.0.6"
   },
@@ -65,7 +65,7 @@
     "@tauri-apps/plugin-os": "2.2.1",
     "@tauri-apps/plugin-process": "2.2.0",
     "@tauri-apps/plugin-shell": "2.2.0",
-    "@tauri-apps/plugin-updater": "2.6.0",
+    "@tauri-apps/plugin-updater": "2.6.1",
     "@unocss/eslint-plugin": "66.0.0",
     "@unocss/nuxt": "66.0.0",
     "@vueuse/core": "13.0.0",

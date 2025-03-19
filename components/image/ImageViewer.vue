@@ -455,7 +455,7 @@ defineExpose({
           <i
             v-if="!showShortcutTips"
             title="提示"
-            class="i-solar:question-circle-linearbtn-primary inline-blcok h-1.4rem w-1.4rem dark:btn-info" @click.stop="showShortcutTips = true"
+            class="inline-blcok i-solar:question-circle-linearbtn-primary h-1.4rem w-1.4rem dark:btn-info" @click.stop="showShortcutTips = true"
           />
         </div>
         <!-- 左右切换箭头 -->

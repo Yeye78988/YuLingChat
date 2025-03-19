@@ -3,26 +3,25 @@ use std::path::PathBuf;
 use tauri::{command, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-#[tauri::command]
+#[command]
 pub async fn exist_file(path: PathBuf) -> bool {
     path.exists()
-} 
+}
 
-#[tauri::command]
+#[command]
 pub async fn remove_file(path: PathBuf) -> bool {
     std::fs::remove_file(path).is_ok()
 }
 
-#[tauri::command]
+#[command]
 pub async fn mkdir_file(path: PathBuf) -> bool {
     std::fs::create_dir(path).is_ok()
 }
 
-#[tauri::command]
+#[command]
 pub async fn exit_app() {
     std::process::exit(0);
 }
-// #[tauri::command(rename_all = "snake_case")]
 #[command]
 pub async fn create_window(
     app_handle: AppHandle,
@@ -86,10 +85,10 @@ pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
                     .clone()
                     .hide()
                     .unwrap_or_else(|e| eprintln!("隐藏窗口时出错: {:?}", e));
-            },
+            }
             WindowEvent::Destroyed => {
                 _app.save_window_state(StateFlags::all())
-                .unwrap_or_else(|e| eprintln!("保存窗口状态时出错: {:?}", e));
+                    .unwrap_or_else(|e| eprintln!("保存窗口状态时出错: {:?}", e));
             }
             _ => {}
         });
