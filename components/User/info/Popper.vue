@@ -94,7 +94,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
         <div class="mb-5 flex gap-4 pb-5 sm:gap-6 border-default-2-b">
           <div
             v-loading="isLoading"
-            class="avatar flex-shrink-0 shadow-md card-default-br"
+            class="avatar h-5em w-5em flex-row-c-c flex-shrink-0 shadow-md card-default-br"
           >
             <!-- 上传 -->
             <el-upload

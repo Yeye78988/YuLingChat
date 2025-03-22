@@ -240,7 +240,7 @@ const menuList = ref([
                 <BtnElButton
                   size="large"
                   type="danger"
-                  transition-icon plain ml-3
+                  plain transition-icon ml-3
                   icon-class="i-solar:logout-3-broken"
                   @click="user.exitLogin"
                 >
