@@ -21,7 +21,7 @@ const {
   isScrollTop = false,
   onRefresh,
 } = defineProps<{
-  noMore: boolean
+  noMore?: boolean
   immediate?: boolean
   delay?: number
   loading?: boolean

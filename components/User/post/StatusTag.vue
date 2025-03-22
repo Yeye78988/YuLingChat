@@ -3,7 +3,7 @@ import { PostStatus } from "@/composables/api/community/post";
 
 // props
 interface Props {
-  status: PostStatus
+  status?: PostStatus
   updateTime?: number
 }
 const props = withDefaults(defineProps<Props>(), {

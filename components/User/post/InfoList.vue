@@ -4,7 +4,7 @@ import { hardDelCommPost } from "@/composables/api/community/post";
 
 // props
 interface Props {
-  dto: SelectCommPostDTO
+  dto?: SelectCommPostDTO
   limit?: number
   class?: string
   immediate?: boolean
@@ -12,21 +12,20 @@ interface Props {
   isAutoStop?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  dto: () => {
-    return {};
-  },
-  class: "",
-  immediate: true,
-  isAutoStop: false,
-});
+const {
+  dto = {},
+  limit = 10,
+  status,
+  immediate = true,
+  isAutoStop = false,
+} = defineProps<Props>();
 const user = useUserStore();
 const isLoading = ref<boolean>(false);
 // 帖子列表
 const postList = ref<PostInfoVO[]>([]);
 // 分页器
 const page = ref<number>(0);
-const size = ref<number>(props.limit || 10);
+const size = ref<number>(limit);
 // 查询页信息
 const pageInfo = reactive({
   total: -1,
@@ -39,22 +38,22 @@ const isNot = computed<boolean>(() => {
 });
 // 无更多
 const isNoMore = computed<boolean>(() => {
-  return pageInfo.pages > 0 && (page.value >= pageInfo.pages || (props.limit !== undefined && props.limit <= postList.value.length));
+  return pageInfo.pages > 0 && (page.value >= pageInfo.pages || (limit !== undefined && limit <= postList.value.length));
 });
 
 async function loadPageData() {
   // 没有更多
   if (isLoading.value || isNoMore.value || isNot.value)
     return;
-  if (props.limit !== undefined && postList.value.length >= props.limit) {
+  if (limit !== undefined && postList.value.length >= limit) {
     isLoading.value = false;
     return;
   }
   isLoading.value = true;
   page.value++;
   const res = await getPostPageSelf(page.value, size.value, {
-    ...props?.dto,
-    status: props?.dto?.status && +props?.dto?.status < 0 ? undefined : props?.dto.status,
+    ...dto,
+    status: dto?.status && +dto?.status < 0 ? undefined : dto.status,
   }, user.getToken);
   // 展示结果
   if (res?.code !== StatusCode.SUCCESS)
@@ -81,9 +80,9 @@ function clearResult() {
 // 条件筛选
 const timer = ref();
 watch(
-  () => props.dto,
+  () => dto,
   async (newVal, oldVal) => {
-    if (timer.value || (newVal.status !== props.status))
+    if (timer.value || (newVal.status !== status))
       return;
     clearResult();
     await loadPageData();

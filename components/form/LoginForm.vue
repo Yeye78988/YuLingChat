@@ -395,10 +395,10 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           size="large"
           :fetch-suggestions="querySearchAccount"
           :trigger-on-focus="true"
-          clearable
-          select-when-unmatched
           placement="bottom"
+          clearable
           fit-input-width
+          select-when-unmatched
           teleported
           hide-loading
           value-key="account"

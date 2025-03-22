@@ -2,20 +2,19 @@
 /**
  * 文本消息
  */
-const props = withDefaults(defineProps<{
+const {
+  data,
+  showTranslation = false,
+} = defineProps<{
   data: ChatMessageVO<SoundBodyMsgVO>
   prevMsg: Partial<ChatMessageVO<TextBodyMsgVO>>
   index: number
-  showTranslation: boolean
-}>(), {
-  showTranslation: false,
-});
+  showTranslation?: boolean
+}>();
 
-const { data } = toRefs(props);
 const chat = useChatStore();
-const user = useUserStore();
 // 具体
-const body: Partial<SoundBodyMsgVO> = props.data.message.body || {};
+const body: Partial<SoundBodyMsgVO> = data.message.body || {};
 const theSecond = ref(body.second);
 const getSoundText = computed(() => {
   if (!theSecond.value)

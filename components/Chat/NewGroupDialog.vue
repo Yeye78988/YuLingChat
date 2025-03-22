@@ -6,7 +6,7 @@ const {
   modelValue = false,
   form: formData,
 } = defineProps<{
-  modelValue: boolean
+  modelValue?: boolean
   form?: {
     roomId: number | null | undefined
     uidList: string[]

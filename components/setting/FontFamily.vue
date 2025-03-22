@@ -31,15 +31,15 @@ function applyFontSettings() {
     字体设置
     <el-select
       v-model="setting.settingPage.fontFamily.value"
-      allow-create
+
       :teleported="false"
       placement="bottom"
       :show-arrow="false"
       v-bind="$attrs"
-      fit-input-width
-      filterable
+
+
       class="inputs"
-      default-first-option
+      fit-input-width allow-create filterable default-first-option
       placeholder="请选择主题字体"
     >
       <el-option
