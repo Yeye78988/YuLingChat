@@ -33,8 +33,8 @@ body.showHeight = height;
         ctx-name="img"
         :src="BaseUrlImg + body?.url"
         :style="{ width, height }"
-        load-class="sky-loading block  absolute top-0"
-        class="max-h-12rem max-w-12rem shadow-sm transition-shadow border-default-2 card-default hover:shadow"
+        load-class="sky-loading block absolute top-0"
+        class="max-h-12rem max-w-12rem shadow-sm transition-shadow sm:(max-h-16rem max-w-16rem) border-default-2 card-default hover:shadow"
         preview-teleported
         :alt="body?.url"
         :preview-src-list="[BaseUrlImg + body?.url]"
