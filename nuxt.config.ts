@@ -131,7 +131,7 @@ export default defineNuxtConfig({
   devServer: { host: process.env.TAURI_DEV_HOST || "localhost" },
   // nuxt开发者工具
   devtools: {
-    enabled: true,
+    enabled: false,
   },
   // hooks: {
   //   "vite:extend": function ({ config }) {
