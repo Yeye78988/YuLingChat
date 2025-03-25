@@ -7,7 +7,7 @@ import "dayjs/locale/zh-cn";
 
 const platform = process.env.TAURI_PLATFORM;
 const isMobile = !!/android|ios/.exec(platform || "");
-const BASE_URL = process.env.NUXT_PUBLIC_API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const isSSR = process.env.NUXT_PUBLIC_SPA;
 const mode = process.env.NUXT_PUBLIC_NODE_ENV as "development" | "production" | "test";
 const version = packageJson?.version;
