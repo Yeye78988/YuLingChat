@@ -228,6 +228,7 @@ onActivated(() => active());
     <p class="my-4 pl-4 text-[var(--el-color-primary)] font-600 tracking-0.2em sm:pl-0">
       <i class="i-solar:ghost-bold mr-2 p-0.8em" />
       极物AI
+      <span ml-a rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span>
     </p>
     <!-- 内容 -->
     <el-scrollbar ref="scollRef" view-class="h-full p-2 md:p-4" class="relative sm:card-rounded-df shadow shadow-inset bg-color-2">

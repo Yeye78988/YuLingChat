@@ -36,6 +36,7 @@ const getType = computed(() => {
       <el-tag effect="dark" size="small">
         {{ getType }}
       </el-tag>
+      <span ml-a rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span>
       <i
         v-if="chat.theContact.type === RoomType.GROUP"
         class="ml-a flex-row-c-c grid-gap-2 btn-primary"
