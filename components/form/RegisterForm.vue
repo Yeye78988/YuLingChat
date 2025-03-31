@@ -369,7 +369,11 @@ function toLoginForm() {
     :element-loading-text="loadingText"
     element-loading-background="transparent"
     :element-loading-spinner="defaultLoadingIcon"
-    hide-required-asterisk :rules="rules" :model="formUser" class="form relative"
+    autocomplete="off"
+    hide-required-asterisk
+    :rules="rules"
+    :model="formUser"
+    class="form relative"
   >
     <h4 mb-4 tracking-0.2em op-80 sm:mb-6>
       开启你的专属圈子✨

@@ -76,7 +76,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
     <template #reference>
       <div class="relative mx-a h-9 w-9 rounded-1/2 shadow card-default border-default-hover">
         <CardElImage
-          :default-src="data?.avatar"
+          :default-src="avatarUrl"
           error-class="i-solar-user-line-duotone p-2 "
           class="relative z-100 h-full w-full cursor-pointer overflow-hidden rounded-1/2" alt="头像"
         />

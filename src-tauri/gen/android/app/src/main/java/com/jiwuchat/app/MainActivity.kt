@@ -21,13 +21,17 @@ class MainActivity : TauriActivity() {
     super.onWebViewCreate(webView)
     // 字体不可缩放
     webView.settings.textZoom = 100;
+    webView.settings.saveFormData = false;
+    webView.settings.savePassword = false;
+    // 清除表单数据
+    webView.clearFormData()
   }
 
   @SuppressLint("SourceLockedOrientationActivity")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main);
-    requestedOrientation =ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     // 请求权限
     requestPermissions()
   }

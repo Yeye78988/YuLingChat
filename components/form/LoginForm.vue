@@ -302,6 +302,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
     :model="userForm"
     style="border: none;"
     class="form"
+    autocomplete="off"
   >
     <template v-if="!user.isLogin">
       <div mb-4 text-sm tracking-0.2em op-80>
@@ -324,7 +325,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.email"
           type="email"
-          autocomplete="off"
+          autocomplete="new-email"
           :prefix-icon="ElIconMessage"
           size="large"
           placeholder="请输入邮箱"
@@ -353,6 +354,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           :prefix-icon="ElIconIphone"
           size="large"
           type="tel"
+          autocomplete="new-phone"
           placeholder="请输入手机号"
           @keyup.enter="getLoginCode(loginType)"
         >
@@ -375,7 +377,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.code"
           :prefix-icon="ElIconChatDotSquare"
-          autocomplete="off"
+          autocomplete="new-code"
           size="large"
           placeholder="请输入验证码"
           @keyup.enter="onLogin(formRef)"
@@ -390,7 +392,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
       >
         <el-autocomplete
           v-model.trim="userForm.username"
-          autocomplete="off"
+          autocomplete="new-username"
           :prefix-icon="ElIconUser"
           size="large"
           :fetch-suggestions="querySearchAccount"
@@ -430,7 +432,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.password"
           :prefix-icon="ElIconLock"
-          autocomplete="off"
+          autocomplete="new-password"
           size="large"
           placeholder="请输入密码"
           show-password
