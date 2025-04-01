@@ -325,7 +325,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.email"
           type="email"
-          autocomplete="new-email"
+          autocomplete="off"
           :prefix-icon="ElIconMessage"
           size="large"
           placeholder="请输入邮箱"
@@ -354,7 +354,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           :prefix-icon="ElIconIphone"
           size="large"
           type="tel"
-          autocomplete="new-phone"
+          autocomplete="off"
           placeholder="请输入手机号"
           @keyup.enter="getLoginCode(loginType)"
         >
@@ -377,7 +377,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.code"
           :prefix-icon="ElIconChatDotSquare"
-          autocomplete="new-code"
+          autocomplete="off"
           size="large"
           placeholder="请输入验证码"
           @keyup.enter="onLogin(formRef)"
@@ -392,7 +392,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
       >
         <el-autocomplete
           v-model.trim="userForm.username"
-          autocomplete="new-username"
+          autocomplete="off"
           :prefix-icon="ElIconUser"
           size="large"
           :fetch-suggestions="querySearchAccount"
@@ -432,7 +432,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-input
           v-model.trim="userForm.password"
           :prefix-icon="ElIconLock"
-          autocomplete="new-password"
+          autocomplete="off"
           size="large"
           placeholder="请输入密码"
           show-password

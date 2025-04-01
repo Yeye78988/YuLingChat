@@ -389,11 +389,29 @@ function toLoginForm() {
     <!-- 验证码注册(客户端 ) -->
     <!-- 用户名 -->
     <el-form-item label="" prop="username" class="animated">
-      <el-input v-model.lazy="formUser.username" :prefix-icon="ElIconUser" :size="size" placeholder="请输入用户名" />
+      <el-input
+        v-model.lazy="formUser.username"
+        :prefix-icon="ElIconUser"
+        :size="size"
+        autocomplete="off"
+        placeholder="请输入用户名"
+      />
     </el-form-item>
     <!-- 邮箱 -->
-    <el-form-item v-if="registerType === RegisterType.EMAIL" prop="email" class="animated">
-      <el-input v-model.trim="formUser.email" type="email" :prefix-icon="ElIconMessage" :size="size" placeholder="请输入邮箱">
+    <el-form-item
+      v-if="registerType === RegisterType.EMAIL"
+      prop="email"
+      class="animated"
+      autocomplete="off"
+    >
+      <el-input
+        v-model.trim="formUser.email"
+        type="email"
+        :prefix-icon="ElIconMessage"
+        :size="size"
+        autocomplete="off"
+        placeholder="请输入邮箱"
+      >
         <template #append>
           <el-button type="primary" :disabled="emailCodeStorage > 0" @click="getRegCode(registerType)">
             {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
@@ -403,7 +421,7 @@ function toLoginForm() {
     </el-form-item>
     <!-- 手机号 -->
     <el-form-item v-if="registerType === RegisterType.PHONE" type="tel" prop="phone" class="animated">
-      <el-input v-model.trim="formUser.phone" :prefix-icon="ElIconIphone" :size="size" placeholder="请输入手机号">
+      <el-input v-model.trim="formUser.phone" :prefix-icon="ElIconIphone" autocomplete="off" :size="size" placeholder="请输入手机号">
         <template #append>
           <el-button type="primary" :disabled="phoneCodeStorage > 0" @click="getRegCode(registerType)">
             {{ phoneCodeStorage > 0 ? `${phoneCodeStorage}s后重新发送` : "获取验证码" }}
@@ -413,7 +431,7 @@ function toLoginForm() {
     </el-form-item>
     <!-- 验证码 -->
     <el-form-item v-if="registerType === RegisterType.PHONE || registerType === RegisterType.EMAIL" prop="code" class="animated">
-      <el-input v-model.trim="formUser.code" :prefix-icon="ElIconChatDotSquare" :size="size" placeholder="请输入验证码" />
+      <el-input v-model.trim="formUser.code" :prefix-icon="ElIconChatDotSquare" :size="size" autocomplete="off" placeholder="请输入验证码" />
     </el-form-item>
     <!-- 密 码 -->
     <el-form-item
@@ -421,8 +439,12 @@ function toLoginForm() {
       type="password" show-password label="" prop="password" class="animated"
     >
       <el-input
-        v-model.trim="formUser.password" :prefix-icon="ElIconLock" :size="size" placeholder="请输入密码（6-20位）" show-password
-        type="password"
+        v-model.trim="formUser.password"
+        :prefix-icon="ElIconLock"
+        :size="size"
+        placeholder="请输入密码（6-20位）"
+        show-password
+        type="password" autocomplete="off"
       />
     </el-form-item>
     <!-- 确认密码 -->
@@ -431,7 +453,11 @@ function toLoginForm() {
       type="password" show-password label="" prop="secondPassword" class="animated"
     >
       <el-input
-        v-model.trim="formUser.secondPassword" :prefix-icon="ElIconLock" :size="size" placeholder="再一次输入密码" show-password
+        v-model.trim="formUser.secondPassword"
+        :prefix-icon="ElIconLock"
+        :size="size"
+        placeholder="再一次输入密码" show-password
+        autocomplete="off"
         type="password"
       />
     </el-form-item>
@@ -449,63 +475,55 @@ function toLoginForm() {
         返回登录
       </span>
     </div>
-    <Teleport to="body">
-      <Transition name="popper-fade-up">
-        <div v-if="agreeDetail.showDetail" class="terms fixed left-0 top-0 z-1200 h-100vh w-100vw flex flex-col sm:(card-rounded-df left-50vw top-50vh h-500px w-400px border-default shadow-lg -translate-x-1/2 -translate-y-1/2) p-4 card-default bg-color">
-          <h3 class="relative mb-4 text-center text-1rem">
-            用户协议
-            <ElButton text size="small" class="absolute right-0 -top-1" style="width: 2rem;height: 1.4rem;" @click="agreeDetail.showDetail = false">
-              <i i-carbon:close p-3 btn-danger title="关闭" />
-            </ElButton>
-          </h3>
-          <div
-            class="flex-1 overflow-y-auto"
+    <DialogPopup
+      v-model="agreeDetail.showDetail"
+      :duration="360"
+      :show-close="false"
+      destroy-on-close
+      content-class="z-1200"
+    >
+      <div class="h-100vh w-100vw flex flex-col sm:(card-rounded-df h-500px w-400px border-default shadow-lg) p-4 border-default-2 card-default bg-color">
+        <h3 data-tauri-drag-region class="relative mb-4 select-none text-center text-1.2rem">
+          用户协议
+          <ElButton text size="small" class="absolute right-0 -top-1" style="width: 2rem;height: 1.4rem;" @click="agreeDetail.showDetail = false">
+            <i i-carbon:close p-3 btn-danger title="关闭" />
+          </ElButton>
+        </h3>
+        <el-scrollbar class="flex-1 px-2">
+          <MdPreview
+            language="zh-CN"
+            style="font-size: 0.8rem;"
+            :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
+            :code-foldable="false"
+            code-theme="a11y"
+            class="markdown"
+            :model-value="agreeDetail.detail"
+          />
+        </el-scrollbar>
+        <div class="mt-2 mt-4 flex-row-c-c">
+          <BtnElButton
+            :icon="ElIconCheck"
+            type="info"
+            plain
+            @click.stop="() => {
+              agreeDetail.showDetail = false;
+              agreeDetail.value = true;
+            }"
           >
-            <MdPreview
-              language="zh-CN"
-              style="font-size: 0.8rem;"
-              editor-id="notice-toast"
-              :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
-              :code-foldable="false"
-              code-theme="a11y"
-              class="!bg-transparent"
-              :model-value="agreeDetail.detail"
-            />
-          </div>
-          <div class="mt-2 mt-4 flex-row-c-c">
-            <BtnElButton
-              :icon="ElIconCheck"
-              type="info"
-              plain
-              @click.stop="() => {
-                agreeDetail.showDetail = false;
-                agreeDetail.value = true;
-              }"
-            >
-              我已阅读并同意
-            </BtnElButton>
-          </div>
+            我已阅读并同意
+          </BtnElButton>
         </div>
-      </Transition>
-      <div
-        v-if="agreeDetail.showDetail" class="terms-overlay hidden animate-[fade-in_0.3s_ease-in-out] sm:block" @click.self="() => {
-          agreeDetail.showDetail = false
-        }"
-      />
-    </Teleport>
+      </div>
+    </DialogPopup>
   </el-form>
 </template>
 
 <style scoped lang="scss">
-.terms-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  background-color: rgba(0, 0, 0, 0.2);
-  z-index: 1199;
+.markdown {
+  --at-apply: "!bg-transparent card-rounded-df";
+  :deep(.md-editor-preview) {
+    --at-apply: "text-0.76rem p-0";
+  }
 }
 .form {
   display: block;
