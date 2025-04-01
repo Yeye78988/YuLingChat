@@ -176,14 +176,6 @@ function toEditView() {
 </template>
 
 <style lang="scss" scoped>
-.text-overflow-5 {
-  display: -webkit-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-}
-
 .link-text {
   --at-apply: 'opacity-80 text-0.9rem hover:(text-[var(--el-color-info)] opacity-100) cursor-pointer transition-200 ';
 }

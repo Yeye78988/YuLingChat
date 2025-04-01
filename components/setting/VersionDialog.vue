@@ -66,7 +66,7 @@ const {
     v-model="showNotice"
     destroy-on-close
     :duration="300"
-    :z-index="2100"
+    :z-index="1100"
     width="fit-content"
   >
     <template #title>
@@ -99,7 +99,7 @@ const {
     v-model="showUpateNoticeLine"
     destroy-on-close
     :duration="300"
-    :z-index="2099"
+    :z-index="1099"
   >
     <template #title>
       <h4 mb-6 text-center text-1.2rem>

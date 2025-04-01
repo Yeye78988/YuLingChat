@@ -841,7 +841,7 @@ onUnmounted(() => {
           :check-is-whole="(pattern: string, value: string) => isReplyAI ? checkAiReplyWhole(chat.msgForm.content, pattern, value) : checkAtUserWhole(chat.msgForm.content, pattern, value)"
           :rows="setting.isMobileSize ? 1 : 6"
           :maxlength="maxContentLen"
-          :placeholder="aiOptions.length > 0 ? '输入 / 唤起AI助手' : ''"
+          :placeholder="aiOptions.length ? '输入 / 唤起AI助手' : ''"
           :autosize="setting.isMobileSize"
           type="textarea"
           resize="none"

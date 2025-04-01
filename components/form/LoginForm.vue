@@ -463,7 +463,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           class="mr-2 cursor-pointer border-r-(1px [var(--el-border-color-base)] solid) pr-2 transition-300"
           @click="loginType = loginType === LoginType.ADMIN ? LoginType.PHONE : LoginType.ADMIN"
         >
-          {{ loginType !== LoginType.ADMIN ? "切换管理" : "切换用户" }}
+          {{ loginType !== LoginType.ADMIN ? "管理员" : "用户登录" }}
         </span>
         <span
           cursor-pointer class="text-color-primary" transition-300

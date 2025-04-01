@@ -118,6 +118,10 @@ const showContentLoading = computed(() => (body.value?.status !== undefined && b
         max-width: 12rem !important;
         max-height: 12rem !important;
       }
+      h1 {
+        font-size: 1.5em;
+        margin: 0.8em 0 0.6em 0;
+      }
 
       p {
         margin: 0.4em 0;

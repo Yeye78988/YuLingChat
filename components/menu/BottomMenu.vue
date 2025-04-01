@@ -92,12 +92,12 @@ const menuList = ref<MenuItem[]>([
       //   loading: p.loading,
       //   onClick: () => openExtendMenu(p),
       // }) as MenuItem),
-      {
-        title: "扩展",
-        icon: " i-solar:widget-line-duotone hover:(i-solar:widget-bold-duotone ) ",
-        activeIcon: "i-solar:widget-bold-duotone",
-        onClick: () => chat.showExtension = true,
-      },
+      // {
+      //   title: "扩展",
+      //   icon: " i-solar:widget-line-duotone hover:(i-solar:widget-bold-duotone ) ",
+      //   activeIcon: "i-solar:widget-bold-duotone",
+      //   onClick: () => chat.showExtension = true,
+      // },
       {
         title: "账号",
         path: "/user/safe",

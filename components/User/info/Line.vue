@@ -123,12 +123,43 @@ function showInvitation() {
       ElMessage.error("链接分享失败！");
     });
 }
+const nicknameInputRef = useTemplateRef("nicknameInputRef");
+function onFocusNickname() {
+  isEditNickname.value = true;
+  nextTick(() => {
+    nicknameInputRef.value?.focus();
+  });
+}
 
 function onBlur() {
   setTimeout(() => {
+    if (!isEditNickname.value && !isEditNickname.value)
+      return;
     isEditNickname.value = false;
     isEditSlogan.value = false;
-  }, 300);
+    // 检查昵称是否修改
+    if (userCopy.nickname !== user?.nickname) {
+      ElMessageBox.confirm("是否确认修改昵称？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        center: true,
+      })
+        .then(() => submitUpdateUser("nickname"))
+        .catch(() => { userCopy.nickname = user?.nickname; });
+    }
+    // 检查个性签名是否修改
+    else if (userCopy.slogan !== user?.slogan) {
+      ElMessageBox.confirm("是否确认修改个性签名？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        center: true,
+      })
+        .then(() => submitUpdateUser("slogan"))
+        .catch(() => { userCopy.slogan = user?.slogan; });
+    }
+  }, 100);
 }
 
 onMounted(() => {
@@ -193,14 +224,9 @@ onMounted(() => {
         <h2
           v-show="!isEditNickname"
           key="nickname1"
-          class="group w-full flex"
+          class="group h-2rem w-full flex"
         >
-          <span @click="isEditNickname = true">{{ user?.nickname }}</span>
-          <span
-            v-if="isEdit"
-            class="i-solar:ruler-cross-pen-bold-duotone ml-2 cursor-pointer bg-bluegray p-3 group-hover:bg-[var(--el-color-success)]"
-            @click="isEditNickname = true"
-          />
+          <span max-w-50vw truncate sm:max-w-16em title="点击编辑" @click="onFocusNickname()">{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}</span>
           <el-button
             type="info"
             size="small"
@@ -215,9 +241,10 @@ onMounted(() => {
           v-show="isEditNickname"
           v-if="isEdit"
           key="nickname-input"
-          class="flex-row-c-c"
+          class="h-2rem flex-row-c-c"
         >
           <el-input
+            ref="nicknameInputRef"
             v-model.lazy="userCopy.nickname"
             class="mr-2"
             style="font-size: 0.9em; font-weight: 700"
