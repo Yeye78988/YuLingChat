@@ -75,7 +75,9 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     chat.setReadList(targetCtx.roomId);
   }
   // 3）本房间追加消息
-  chat.appendMsg(msg); // 追加消息
+  if (targetCtx.pageInfo.size && targetCtx.msgList.length) { // 存在消息列表 才追加 （避免再次加载导致消息显示重复）
+    chat.appendMsg(msg); // 追加消息
+  }
   msg.message.type === MessageType.RTC && msg.message.roomId === chat.theRoomId && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
   ws.wsMsgList.newMsg.splice(0);
 }
