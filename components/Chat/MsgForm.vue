@@ -68,6 +68,7 @@ const {
 } = useRecording({ pressHandleRefName: "pressHandleRef", timeslice: 1000 });
 // computed
 const isBtnLoading = computed(() => isSending.value || isUploadImg.value || isUploadFile.value || isUploadVideo.value);
+const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOUND);
 
 /**
  * 发送消息
@@ -696,134 +697,158 @@ onUnmounted(() => {
         v-if="!isAiRoom"
         class="relative m-b-2 flex items-center gap-4 px-2 sm:mb-0"
       >
-        <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="chat.msgForm.msgType !== MessageType.SOUND ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
+        <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
           <i
-            :class="chat.msgForm.msgType !== MessageType.SOUND ? 'i-solar:microphone-3-broken hover:animate-pulse' : 'i-solar:keyboard-broken'"
+            :class="!isSoundRecordMsg ? 'i-solar:microphone-3-broken hover:animate-pulse' : 'i-solar:keyboard-broken'"
             class="h-6 w-6 cursor-pointer btn-primary"
             @click="chat.msgForm.msgType = chat.msgForm.msgType === MessageType.TEXT ? MessageType.SOUND : MessageType.TEXT"
           />
         </el-tooltip>
         <!-- 语音 -->
-        <div v-show="chat.msgForm.msgType === MessageType.SOUND && !theAudioFile?.id" class="absolute-center-x">
+        <template v-if="isSoundRecordMsg">
+          <div v-show=" !theAudioFile?.id" class="absolute-center-x">
+            <BtnElButton
+              ref="pressHandleRef"
+              type="primary" class="group tracking-0.1em hover:shadow"
+              :class="{ 'is-chating': isChating }"
+              style="padding: 0.8rem 3rem;"
+              round
+              size="small"
+            >
+              <i i-solar:soundwave-line-duotone class="icon" p-2.5 />
+              <div class="text w-5rem truncate text-center transition-width group-hover:(w-6rem sm:w-8rem) sm:w-8rem">
+                <span class="chating-hidden">{{ isChating ? `正在输入 ${second}s` : (setting.isMobileSize ? '语音' : '语音 Ctrl+T') }}</span>
+                <span hidden class="chating-show">停止录音 {{ second ? `${second}s` : '' }}</span>
+              </div>
+            </BtnElButton>
+          </div>
+          <div v-show=" theAudioFile?.id" class="absolute-center-x">
+            <i p-2.4 />
+            <BtnElButton
+              type="primary"
+              class="group tracking-0.1em op-60 hover:op-100" :class="{ 'is-chating !op-100': isPalyAudio }"
+              style="padding: 0.8rem 3rem;" round size="small"
+              @click="handlePlayAudio(isPalyAudio ? 'stop' : 'play', theAudioFile?.id)"
+            >
+              {{ second ? `${second}s` : '' }}
+              <i :class="isPalyAudio ? 'i-solar:stop-bold' : 'i-solar:play-bold'" class="icon" ml-2 p-1 />
+            </BtnElButton>
+            <i
+              i-solar:trash-bin-minimalistic-broken ml-3 p-2.4 btn-danger
+              @click="handlePlayAudio('del')"
+            />
+          </div>
           <BtnElButton
-            ref="pressHandleRef"
-            type="primary" class="group tracking-0.1em hover:shadow"
-            :class="{ 'is-chating': isChating }"
-            style="padding: 0.8rem 3rem;"
-            round
-            size="small"
-          >
-            <i i-solar:soundwave-line-duotone class="icon" p-2.5 />
-            <div class="text w-5rem truncate text-center transition-width group-hover:(w-6rem sm:w-9rem) sm:w-8rem">
-              <span class="chating-hidden">{{ isChating ? `正在输入 ${second}s` : (setting.isMobileSize ? '语音' : '语音 Ctrl+T') }}</span>
-              <span hidden class="chating-show">停止录音 {{ second ? `${second}s` : '' }}</span>
-            </div>
-          </BtnElButton>
-        </div>
-        <div v-show="chat.msgForm.msgType === MessageType.SOUND && theAudioFile?.id" class="absolute-center-x">
-          <i p-2.4 />
-          <BtnElButton
+            v-if="setting.isMobileSize"
+            :disabled="!user.isLogin || isSending || isNotExistOrNorFriend"
             type="primary"
-            class="group tracking-0.1em op-60 hover:op-100" :class="{ 'is-chating !op-100': isPalyAudio }"
-            style="padding: 0.8rem 3rem;" round size="small"
-            @click="handlePlayAudio(isPalyAudio ? 'stop' : 'play', theAudioFile?.id)"
+            round
+            style="height: 1.8rem !important;"
+            class="ml-a w-3.6rem text-xs tracking-0.1em"
+            :loading="isBtnLoading"
+            @click="handleSubmit()"
           >
-            {{ second ? `${second}s` : '' }}
-            <i :class="isPalyAudio ? 'i-solar:stop-bold' : 'i-solar:play-bold'" class="icon" ml-2 p-1 />
+            发送
           </BtnElButton>
-          <i
-            i-solar:trash-bin-minimalistic-broken ml-3 p-2.4 btn-danger
-            @click="handlePlayAudio('del')"
+        </template>
+        <!-- 非语音 -->
+        <template v-else>
+          <div class="grid cols-4 items-center gap-4 sm:flex">
+            <!-- 图片 -->
+            <InputOssFileUpload
+              ref="inputOssImgUploadRef"
+              v-model="imgList"
+              :multiple="true"
+              :preview="false"
+              :size="setting.systemConstant.ossInfo?.image?.fileSize"
+              :min-size="1024"
+              :limit="9"
+              :disable="isDisabledFile"
+              class="i-solar:album-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+              pre-class="hidden"
+              :upload-type="OssFileType.IMAGE"
+              input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
+              :upload-quality="0.5"
+              @error-msg="(msg:string) => {
+                ElMessage.error(msg)
+              }"
+              @submit="onSubmitImg"
+            />
+            <!-- 视频 -->
+            <InputOssFileUpload
+              ref="inputOssVideoUploadRef"
+              v-model="videoList"
+              :multiple="false"
+              :size="setting.systemConstant.ossInfo?.video?.fileSize"
+              :min-size="1024"
+              :preview="false"
+              :limit="1"
+              :disable="isDisabledFile"
+              class="i-solar:video-library-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+              pre-class="hidden"
+              :upload-type="OssFileType.VIDEO"
+              input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
+              accept=".mp4,.webm,.mpeg,.flv"
+              @error-msg="(msg:string) => {
+                ElMessage.error(msg)
+              }"
+              @submit="onSubmitVideo"
+            />
+            <!-- 文件 -->
+            <InputOssFileUpload
+              ref="inputOssFileUploadRef"
+              v-model="fileList"
+              :multiple="false"
+              :size="setting.systemConstant.ossInfo?.file?.fileSize"
+              :min-size="1024"
+              :preview="false"
+              :limit="1"
+              :disable="isDisabledFile"
+              class="i-solar-folder-with-files-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+              pre-class="hidden"
+              :upload-type="OssFileType.FILE"
+              input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
+              :accept="FILE_UPLOAD_ACCEPT"
+              @error-msg="(msg:string) => {
+                ElMessage.error(msg)
+              }"
+              @submit="onSubmitFile"
+            />
+          </div>
+          <i ml-a block w-0 />
+          <!-- 群通知消息 -->
+          <div
+            v-if="isLord"
+            title="群通知消息"
+            class="i-carbon:bullhorn inline-block p-3.2 transition-200 btn-primary sm:p-2.8"
+            @click="showGroupNoticeDialog = true"
           />
-        </div>
-        <div v-show="chat.msgForm.msgType !== MessageType.SOUND" class="grid cols-4 items-center gap-4 sm:flex">
-          <!-- 图片 -->
-          <InputOssFileUpload
-            ref="inputOssImgUploadRef"
-            v-model="imgList"
-            :multiple="true"
-            :preview="false"
-            :size="setting.systemConstant.ossInfo?.image?.fileSize"
-            :min-size="1024"
-            :limit="9"
-            :disable="isDisabledFile"
-            class="i-solar:album-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
-            pre-class="hidden"
-            :upload-type="OssFileType.IMAGE"
-            input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
-            :upload-quality="0.5"
-            @error-msg="(msg:string) => {
-              ElMessage.error(msg)
-            }"
-            @submit="onSubmitImg"
-          />
-          <!-- 视频 -->
-          <InputOssFileUpload
-            ref="inputOssVideoUploadRef"
-            v-model="videoList"
-            :multiple="false"
-            :size="setting.systemConstant.ossInfo?.video?.fileSize"
-            :min-size="1024"
-            :preview="false"
-            :limit="1"
-            :disable="isDisabledFile"
-            class="i-solar:video-library-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
-            pre-class="hidden"
-            :upload-type="OssFileType.VIDEO"
-            input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
-            accept=".mp4,.webm,.mpeg,.flv"
-            @error-msg="(msg:string) => {
-              ElMessage.error(msg)
-            }"
-            @submit="onSubmitVideo"
-          />
-          <!-- 文件 -->
-          <InputOssFileUpload
-            ref="inputOssFileUploadRef"
-            v-model="fileList"
-            :multiple="false"
-            :size="setting.systemConstant.ossInfo?.file?.fileSize"
-            :min-size="1024"
-            :preview="false"
-            :limit="1"
-            :disable="isDisabledFile"
-            class="i-solar-folder-with-files-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
-            pre-class="hidden"
-            :upload-type="OssFileType.FILE"
-            input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
-            :accept="FILE_UPLOAD_ACCEPT"
-            @error-msg="(msg:string) => {
-              ElMessage.error(msg)
-            }"
-            @submit="onSubmitFile"
-          />
-        </div>
-        <i ml-a block w-0 />
-        <!-- 群通知消息 -->
-        <div
-          v-if="isLord"
-          title="群通知消息"
-          class="i-carbon:bullhorn inline-block p-3.2 transition-200 btn-primary sm:p-2.8"
-          @click="showGroupNoticeDialog = true"
-        />
-        <!-- 语音通话 -->
-        <div
-          v-if="isSelfRoom"
-          title="语音通话"
-          class="i-solar:phone-calling-outline p-3 transition-200 btn-primary sm:p-2.8"
-          @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.AUDIO)"
-        />
-        <!-- 视频通话 -->
-        <div
-          v-if="isSelfRoom"
-          title="视频通话"
-          class="i-solar:videocamera-record-line-duotone p-3.2 transition-200 btn-primary sm:p-2.8"
-          @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.VIDEO)"
-        />
+          <template v-if="isSelfRoom ">
+            <!-- 语音通话 -->
+            <div
+              title="语音通话"
+              class="i-solar:phone-calling-outline p-3 transition-200 btn-primary sm:p-2.8"
+              @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.AUDIO)"
+            />
+            <!-- 视频通话 -->
+            <div
+              title="视频通话"
+              class="i-solar:videocamera-record-line-duotone p-3.2 transition-200 btn-primary sm:p-2.8"
+              @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.VIDEO)"
+            />
+          </template>
+        </template>
       </div>
-      <!-- 内容 -->
+      <!-- 录音 -->
+      <p
+        v-if="isSoundRecordMsg"
+        class="relative max-h-3.1rem min-h-3.1rem w-full flex-row-c-c flex-1 overflow-y-auto text-wrap sm:(h-fit max-h-full p-6) text-small"
+      >
+        {{ (isChating && speechRecognition.isSupported || theAudioFile?.id) ? (audioTransfromText || '...') : `识别你的声音 🎧${speechRecognition.isSupported ? '' : '（不支持）'}` }}
+      </p>
+      <!-- 内容（文本） -->
       <el-form-item
-        v-if="chat.msgForm.msgType !== MessageType.SOUND"
+        v-else
         prop="content"
         class="input relative h-fit w-full !m-(b-2 t-2) sm:mt-0"
         style="padding: 0;margin:  0;"
@@ -880,13 +905,6 @@ onUnmounted(() => {
           发送
         </BtnElButton>
       </el-form-item>
-      <!-- 录音 -->
-      <p
-        v-if="chat.msgForm.msgType === MessageType.SOUND"
-        class="relative mt-2 h-fit w-full flex-row-c-c flex-1 overflow-y-auto p-4 text-wrap sm:p-6 text-small"
-      >
-        {{ (isChating && speechRecognition.isSupported || theAudioFile?.id) ? (audioTransfromText || '...') : `识别你的声音 🎧${speechRecognition.isSupported ? '' : '（不支持）'}` }}
-      </p>
       <!-- 工具栏 -->
       <div
         v-if="!setting.isMobileSize"
@@ -925,7 +943,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .form-tools {
-    --at-apply: "relative sm:h-62 flex flex-col justify-center p-2 border-default-t shadow-sm";
+    --at-apply: "relative sm:h-62 flex flex-col justify-between p-2 border-default-t shadow-sm";
     .tip {
     --at-apply: "op-0";
   }
@@ -1023,7 +1041,7 @@ onUnmounted(() => {
 
 // 语音
 .is-chating {
-  --at-apply: "shadow ";
+  --at-apply: "shadow";
   --shadow-color: var(--el-color-primary);
   --shadow-color2: var(--el-color-primary-light-3);
   outline: none !important;
@@ -1046,7 +1064,7 @@ onUnmounted(() => {
     --at-apply: "animate-pulse";
   }
   .text {
-    --at-apply: "!w-8rem";
+    --at-apply: "w-6rem !sm:w-8rem";
   }
   &:hover {
     --at-apply: "shadow-md";

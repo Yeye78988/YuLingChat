@@ -783,6 +783,7 @@ export function useLoadAiList() {
    * 加载AI列表
    */
   async function loadAi(roomId?: number) {
+    aiOptions.value = [];
     if (!roomId)
       return;
 

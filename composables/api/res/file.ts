@@ -114,7 +114,6 @@ export async function downloadFile(url: string, fileName: string, options: {
 } = {}, callback?: (progress: number) => void) {
   const { targetPath = "", mimeType = "" } = options;
   const setting = useSettingStore();
-  console.log(url, fileName, targetPath, mimeType);
 
   if (setting.isWeb || setting.isMobile) {
     // 移动端 | Web 使用 streamSaver 正在使用浏览器下载，请稍后 下载

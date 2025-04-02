@@ -4,10 +4,10 @@ import { useLocalStorage } from "@vueuse/core";
 interface ShortcutInfo {
   key: string;
   description: string;
+  disabled?: ComputedRef<boolean>;
 }
-
 // 定义快捷键列表
-const KEYBOARD_SHORTCUTS: ShortcutInfo[] = [
+const keyShortList = ref<ShortcutInfo[]>([
   { key: "←", description: "上一张图片" },
   { key: "→", description: "下一张图片" },
   { key: "+", description: "放大图片" },
@@ -17,7 +17,8 @@ const KEYBOARD_SHORTCUTS: ShortcutInfo[] = [
   { key: "0", description: "重置图片" },
   { key: "Esc", description: "关闭预览" },
   { key: "双击", description: "放大或重置图片" },
-];
+]);
+const filterKeyShortList = computed(() => keyShortList.value.filter(item => !item?.disabled));
 
 const keyDownFnMap: Record<string, () => void> = {
   "ArrowLeft": prev,
@@ -40,7 +41,7 @@ const hiddenShortcutTips = computed({
 });
 
 // 控制提示卡片是否折叠
-const isShortcutCardCollapsed = ref(false);
+const isShortcutCardCollapsed = useLocalStorage<boolean>("image-viewer-shortcut-card-collapsed", false); ;
 
 // 关闭提示但不记住选择
 function closeShortcutCard() {
@@ -122,11 +123,14 @@ const imageStyle = computed(() => {
 // 提供给外部的调用方法
 const timer = ref();
 function open(options: ViewerOptions) {
+  const setting = useSettingStore();
   state.index = options.index || 0;
   state.urlList = options.urlList || [];
   state.visible = true;
+  if (setting.isMobileSize && showShortcutTips.value) {
+    showShortcutTips.value = false;
+  }
   resetImage();
-  const setting = useSettingStore();
 
   // 打开时如果用户没有选择隐藏提示，则显示提示
   if (showShortcutTips.value && !setting.isMobileSize && !isShortcutCardCollapsed.value) {
@@ -494,7 +498,7 @@ defineExpose({
             <i class="i-carbon:close cursor-pointer p-2.6 hover:opacity-70" @click="isShortcutCardCollapsed = true" />
           </div>
           <div class="px-3 py-2 leading-1.6em border-default-2-b text-mini">
-            <div v-for="shortcut in KEYBOARD_SHORTCUTS" :key="shortcut.key" class="flex-row-bt-c">
+            <div v-for="shortcut in filterKeyShortList" :key="shortcut.key" class="flex-row-bt-c">
               <span>{{ shortcut.key }}</span>
               <span>{{ shortcut.description }}</span>
             </div>
