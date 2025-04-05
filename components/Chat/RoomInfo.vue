@@ -17,6 +17,32 @@ const getType = computed(() => {
   }
   return msg;
 });
+
+// 点击更多
+function onClickMore() {
+  switch (chat.theContact.type) {
+    case RoomType.GROUP:
+      setting.isOpenGroupMember = !setting.isOpenGroupMember;
+      break;
+    case RoomType.SELFT:
+    case RoomType.AICHAT:
+      const friendId = chat?.theContact?.targetUid;
+      if (!friendId) {
+        console.warn("friend userId is null");
+        return;
+      }
+      chat.setTheFriendOpt(FriendOptType.User, {
+        id: friendId,
+      });
+      navigateTo({
+        path: "/friend",
+        query: {
+          dis: 1,
+        },
+      });
+      break;
+  }
+}
 </script>
 
 <template>
@@ -38,15 +64,19 @@ const getType = computed(() => {
       </el-tag>
       <span v-if="chat.theContact.type === RoomType.AICHAT" ml-a rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span>
       <i
-        v-if="chat.theContact.type === RoomType.GROUP"
         class="ml-a flex-row-c-c grid-gap-2 btn-primary"
         transition="all  op-60 group-hover:op-100 300  cubic-bezier(0.61, 0.225, 0.195, 1.3)"
         i-solar:menu-dots-bold
-        p-2.2 @click="setting.isOpenGroupMember = !setting.isOpenGroupMember"
+        title="更多"
+        p-2.2
+        @click="onClickMore"
       />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+// .right-item:nth-of-type(1){
+//   --at-apply: "ml-a";
+// }
 </style>

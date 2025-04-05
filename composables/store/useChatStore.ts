@@ -364,20 +364,26 @@ export const useChatStore = defineStore(
       }
     }
     // 重新拉取会话
-    function reloadContact(roomId: number, callBack?: (contact: ChatContactVO) => void) {
-      getChatContactInfo(roomId, user.getToken)?.then((res) => {
+    async function reloadContact(roomId: number, callBack?: (contact: ChatContactDetailVO) => void) {
+      try {
+        const res = await getChatContactInfo(roomId, user.getToken);
+        if (!res) {
+          throw new Error("reloadContact error: res is undefined");
+        }
         if (res.code !== StatusCode.SUCCESS) {
           ElMessage.closeAll("error");
           console.error(res.message);
           return;
         }
         refreshContact(res.data, contactMap.value[roomId]); // 更新
-        callBack && callBack(res.data as ChatContactVO);
-      }).catch((res) => {
+        callBack && callBack(res.data as ChatContactDetailVO);
+      }
+      catch (e) {
         ElMessage.closeAll("error");
-      }).finally(() => {
+      }
+      finally {
         delete updateContactList.value[roomId];
-      });
+      }
     }
     // 更新会话消息
     function updateContact(roomId: number, data: Partial<ChatContactVO>, callBack?: (contact: ChatContactVO) => void) {
@@ -433,8 +439,12 @@ export const useChatStore = defineStore(
           }
           contact = newRes.data;
         }
+        contact = contactMap.value[id as number] as ChatContactDetailVO;
       }
-      contact && (await setContact(contact));
+      if (contact) {
+        console.log(contact);
+        await setContact(contact);
+      }
       if (setting.isMobileSize) { // 移动尺寸 - 清空模板 + 打开聊天页面
         setTheFriendOpt(FriendOptType.Empty);
         isOpenContact.value = false;

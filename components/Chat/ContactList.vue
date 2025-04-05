@@ -155,9 +155,21 @@ function onContextMenu(e: MouseEvent, item: ChatContactVO) {
       customClass: "group",
       icon: "i-solar:user-outline group-btn-info group-hover:i-solar:user-bold-duotone",
       label: "联系TA",
-      onClick: () => {
-        chat.setTheFriendOpt(FriendOptType.Empty);
-        navigateTo("/friend");
+      onClick: async () => {
+        // 跳转到好友页面
+        const friendId = chat.contactMap?.[item.roomId]?.targetUid;
+        if (!friendId) {
+          await chat.reloadContact(item.roomId);
+        }
+        chat.setTheFriendOpt(FriendOptType.User, {
+          id: chat.contactMap?.[item.roomId]?.targetUid,
+        });
+        navigateTo({
+          path: "/friend",
+          query: {
+            dis: 1,
+          },
+        });
       },
     });
   }
