@@ -59,7 +59,7 @@ watch(() => user.isLogin, (val) => {
       <div
         class="relative h-1 max-h-full flex flex-1"
       >
-        <MenuChatMenu class="hidden w-fit shrink-0 sm:block" />
+        <MenuChatMenu v-if="!setting.isMobileSize" class="w-fit shrink-0" />
         <!-- 缓存 页面内容 -->
         <NuxtPage
           keepalive
