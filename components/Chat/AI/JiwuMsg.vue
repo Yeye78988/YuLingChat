@@ -28,17 +28,21 @@ const user = useUserStore();
           {{ data.message?.content }}
         </p>
       </template>
-      <MdPreview
-        v-else
-        language="zh-CN"
-        show-code-row-number
-        :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
-        code-theme="a11y"
-        :code-foldable="false"
-        style="font-size: 1em;color: inherit;padding: 0.3em 0.8em;"
-        class="msg-popper markdown sm:max-w-40rem text-color"
-        :model-value="data.message?.content || ''"
-      />
+      <template v-else>
+        <div class="msg-popper relative sm:max-w-40rem text-color">
+          <MdPreview
+            language="zh-CN"
+            show-code-row-number
+            :theme="$colorMode.value === 'dark' ? 'dark' : 'light'"
+            code-theme="a11y"
+            class="markdown"
+            :code-foldable="false"
+            style="font-size: 1em;color: inherit;padding: 0;"
+            :model-value="data.message?.content || ''"
+          />
+          <slot name="actions" />
+        </div>
+      </template>
     </template>
   </ChatMsgTemplate>
 </template>
