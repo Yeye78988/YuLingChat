@@ -43,7 +43,7 @@ onUnmounted(useUmounted);
     <div
       class="h-full w-full overflow-hidden bg-color"
       :class="{
-        'sm:(w-1150px mx-a h-860px) md:(w-1360px mx-a h-860px) shadow-lg shadow-[#00000010]': !isIframe && setting.isWeb,
+        'sm:(w-1150px mx-a h-860px) md:(w-1360px mx-a h-860px max-w-86vw max-h-94vh) shadow-lg shadow-[#00000010]': !isIframe && setting.isWeb,
         'rounded-1.5 border-default': setting.isDesktop || !setting.isMobileSize,
       }"
     >

@@ -226,7 +226,7 @@ onMounted(() => {
           key="nickname1"
           class="group h-2rem w-full flex"
         >
-          <span max-w-50vw truncate sm:max-w-16em title="点击编辑" @click="onFocusNickname()">{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}{{ user?.nickname }}</span>
+          <span max-w-50vw truncate sm:max-w-16em title="点击编辑" @click="onFocusNickname()">{{ user.nickname }}</span>
           <el-button
             type="info"
             size="small"

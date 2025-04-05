@@ -875,7 +875,7 @@ onUnmounted(() => {
           }"
           placement="top"
           autofocus
-          show-word-limit
+          :show-word-limit="!setting.isMobileSize"
           whole
           :offset="10"
           :popper-options="{
