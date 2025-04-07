@@ -34,7 +34,7 @@ body.showHeight = height;
         :src="BaseUrlImg + body?.url"
         :style="{ width, height }"
         load-class="sky-loading block absolute top-0"
-        class="max-h-12rem max-w-12rem shadow-sm transition-shadow sm:(max-h-16rem max-w-16rem) border-default-2 card-default hover:shadow"
+        class="max-h-80vw max-w-50vh shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) border-default-2 card-default hover:shadow"
         preview-teleported
         :alt="body?.url"
         :preview-src-list="[BaseUrlImg + body?.url]"

@@ -506,7 +506,7 @@ export interface ImgSizeOptions {
  * @param {number} rawWeight - 原始高度
  * @returns {object} 图片尺寸对象
  */
-export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSizeOptions = { maxWidth: 300, maxHeight: 300, minWidth: 40, minHeight: 40 }) {
+export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSizeOptions = { maxWidth: 280, maxHeight: 280, minWidth: 40, minHeight: 40 }) {
   const width = rawWidth || 0;
   const height = rawWeight || 0;
   const { maxWidth = 300, maxHeight = 300, minWidth = 40, minHeight = 40 } = options;
