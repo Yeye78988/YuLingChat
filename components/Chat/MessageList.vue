@@ -224,17 +224,24 @@ async function scrollTop(size: number, animated = false) {
     chat.isMsgListScroll = false;
   }
 }
+
+// 滚动
 const offset = computed(() => setting.isMobileSize ? -730 : -678);
+const debounceReadList = useDebounceFn((theRoomId: number) => {
+  chat.setReadList(theRoomId);
+}, 500);
+
 // 滚动事件
-const onScroll = useDebounceFn((e) => {
+function onScroll(e: { scrollTop: number; scrollLeft: number; }) {
   // 滚动到底部
   if (chat.theRoomId && e.scrollTop >= (scrollbarRef?.value?.wrapRef?.scrollHeight || 0) + offset.value) {
-    // console.log(scrollbarRef?.value?.wrapRef?.scrollHeight - e.scrollTop);
-    chat.setReadList(chat.theRoomId);
+    chat.shouldAutoScroll = chat.theContact?.msgList?.[(chat.theContact.msgList?.length || 0) - 1]?.message?.type === MessageType.AI_CHAT_REPLY; // ai消息是否为会话最后一条
+    debounceReadList(chat.theRoomId);
   }
-}, 300);
-
-// 绑定事件 MSG_LIST_SCROLL
+  else {
+    chat.shouldAutoScroll = false;
+  }
+}
 onMounted(() => {
   mitter.on(MittEventType.MSG_LIST_SCROLL, ({ type, payload }) => {
     switch (type) {
@@ -253,6 +260,7 @@ onMounted(() => {
     }
   });
 });
+
 onBeforeUnmount(() => {
   timer.value && clearTimeout(timer.value);
   timer.value = null;

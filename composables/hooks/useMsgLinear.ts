@@ -67,19 +67,30 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     ws.wsMsgList.newMsg.splice(0);
     return;
   }
+  const isCurrentRoom = targetCtx.roomId === msg.message.roomId;
   // 2）更新消息列表
   if (msg.message.roomId !== targetCtx.roomId || (setting.isMobileSize && !chat.isOpenContact)) {
     ws.wsMsgList.newMsg.splice(0);
   }
-  else if (msg.message.roomId === chat.theRoomId) { // 阅读消息
+  else if (isCurrentRoom) { // 阅读消息
     chat.setReadList(targetCtx.roomId);
   }
   // 3）本房间追加消息
   if (targetCtx.pageInfo.size && targetCtx.msgList.length) { // 存在消息列表 才追加 （避免再次加载导致消息显示重复）
     chat.appendMsg(msg); // 追加消息
   }
-  msg.message.type === MessageType.RTC && msg.message.roomId === chat.theRoomId && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
+
+  // 本人问答的AI消息进行滚动
+  if (isCurrentRoom) {
+    msg.message.type === MessageType.AI_CHAT_REPLY && (msg as ChatMessageVO<AiChatReplyBodyMsgVO>).message.body?.reply?.uid === user.userInfo.id && handleAIReplayMsg(); // 处理AI回复消息 多一步滚动
+    msg.message.type === MessageType.RTC && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
+  }
   ws.wsMsgList.newMsg.splice(0);
+}
+function handleAIReplayMsg() {
+  nextTick(() => {
+    useChatStore().scrollBottom(true);
+  });
 }
 
 /**
@@ -216,8 +227,8 @@ function handleProgressUpdate(
   data: WSAiStreamMsg,
   contact: ChatContactDetailVO,
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
-  count = 2,
-  delay = 40,
+  count = 3,
+  delay = 30,
 ) {
   // 初始化缓冲区
   if (oldMsg && !bufferMap.has(oldMsg)) {
@@ -237,10 +248,14 @@ function handleProgressUpdate(
   buffer.pendingContent += data.content;
   buffer.pendingReasoning += data.reasoningContent || "";
   const chat = useChatStore();
-  if (chat.theRoomId === data.roomId) { // 不是当前房间
+  if (chat.theRoomId === data.roomId) { // 当前房间
     // 如果没有正在进行的更新，启动渐入效果
+    if (chat.shouldAutoScroll) { // AI消息更新时自动滚动到底部
+      chat.scrollBottom(true);
+    }
     // 同步一次
     applyBufferUpdate(contact, oldMsg, buffer);
+
     if (!buffer.updateInterval) {
       buffer.updateInterval = setInterval(() => {
       // 每次更新s字符
@@ -254,6 +269,11 @@ function handleProgressUpdate(
         // 从待处理内容中移除已处理的字符
         buffer.pendingContent = buffer.pendingContent.substring(contentChars.length);
         buffer.pendingReasoning = buffer.pendingReasoning.substring(reasoningChars.length);
+
+        // AI消息更新时自动滚动到底部
+        if (chat.shouldAutoScroll) {
+          chat.scrollBottom(true);
+        }
 
         // 应用更新
         applyBufferUpdate(contact, oldMsg, buffer);
@@ -345,6 +365,12 @@ function handleFinalState(
     if (oldMsg?.message) {
       oldMsg.message.body && (oldMsg.message.body.reasoningContent = data.reasoningContent || "");
       oldMsg.message.content = data.content;
+    }
+
+    // AI消息完成时，如果应该自动滚动，则滚动到底部
+    const chat = useChatStore();
+    if (chat.shouldAutoScroll && chat.theRoomId === data.roomId && (oldMsg as ChatMessageVO<AiChatReplyBodyMsgVO>).message.body?.reply?.uid === useUserStore().userInfo.id) {
+      chat.scrollBottom(true);
     }
   }
 }
