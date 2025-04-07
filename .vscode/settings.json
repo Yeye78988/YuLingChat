@@ -4,8 +4,7 @@
 
   "files.associations": {
     "*.css": "postcss"
-  },
-
+  }, 
   // Auto fix
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "never",
@@ -13,6 +12,7 @@
   },
 
   "prettier.enable": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
 
   // Silent the stylistic rules in you IDE, but still auto fix them
@@ -61,5 +61,8 @@
   "iconify.inplace": true,
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32s3"
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
   }
 }

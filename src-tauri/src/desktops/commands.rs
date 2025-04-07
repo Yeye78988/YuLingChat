@@ -41,6 +41,52 @@ pub async fn create_window(
     Ok(())
 }
 
+// 窗口大小渐变动画
+#[command]
+pub async fn animate_window_resize(
+    app_handle: AppHandle,
+    window_label: String,
+    to_width: f64,
+    to_height: f64,
+    duration: Option<u64>,
+    steps: Option<u64>,
+) -> Result<(), String> {
+    let window = app_handle
+        .get_webview_window(&window_label)
+        .ok_or_else(|| format!("找不到窗口: {}", window_label))?;
+
+    let duration = duration.unwrap_or(300);
+    let steps = steps.unwrap_or(30);
+
+    let size = window.inner_size().map_err(|e| e.to_string())?;
+    let from_width = size.width as f64;
+    let from_height = size.height as f64;
+
+    // 如果尺寸相同，无需动画
+    if (from_width - to_width).abs() < 1.0 && (from_height - to_height).abs() < 1.0 {
+        return Ok(());
+    }
+
+    let delay = duration / steps;
+
+    for i in 0..=steps {
+        let progress = i as f64 / steps as f64;
+        // 使用缓动函数使动画更自然 (ease-out-quad)
+        let eased_progress = progress * (2.0 - progress);
+
+        let w = from_width + (to_width - from_width) * eased_progress;
+        let h = from_height + (to_height - from_height) * eased_progress;
+
+        window
+            .set_size(tauri::LogicalSize::new(w.round(), h.round()))
+            .map_err(|e| e.to_string())?;
+
+        std::thread::sleep(std::time::Duration::from_millis(delay));
+    }
+
+    Ok(())
+}
+
 pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
     // 主窗口配置
     let mut main_builder =
@@ -170,7 +216,7 @@ async fn create_login_window(app_handle: AppHandle) -> tauri::Result<()> {
             .center()
             .shadow(false)
             .decorations(false)
-            .inner_size(380.0, 480.0)
+            .inner_size(360.0, 480.0)
             .visible(true);
 
     #[cfg(any(target_os = "windows", target_os = "linux"))]

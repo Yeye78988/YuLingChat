@@ -16,8 +16,8 @@ pub fn setup_mobile() {
             crate::mobiles::commands::exist_file,
             crate::mobiles::commands::remove_file,
             crate::mobiles::commands::mkdir_file,
-            crate::mobiles::commands::exit_app
+            crate::mobiles::commands::exit_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-} 
+}

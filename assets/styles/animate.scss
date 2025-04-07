@@ -153,6 +153,7 @@ html.stop-transition-all {
   &,
   * {
     transition: none !important;
+    -webkit-backdrop-filter: none!important;
     backdrop-filter: none !important;
     animation: none !important;
   }
@@ -1074,7 +1075,7 @@ html.stop-transition-all {
 .popper-fade-enter-from,
 .popper-fade-leave-to {
   opacity: 0;
-  transform: scale(0.8) translateY(-5%);
+  transform: scale(0.9) translateY(-5%);
 }
 .popper-fade-leave-active {
   position: absolute;
@@ -1090,7 +1091,7 @@ html.stop-transition-all {
 .popper-fade-down-enter-from,
 .popper-fade-down-leave-to {
   opacity: 0;
-  transform: scale(0.8) translateY(-5%);
+  transform: scale(0.9) translateY(-5%);
   transform-origin: center top;
 }
 .popper-fade-down-leave-active {
@@ -1108,7 +1109,7 @@ html.stop-transition-all {
 .popper-fade-up-enter-from,
 .popper-fade-up-leave-to {
   opacity: 0;
-  transform: scale(0.8) translateY(5%);
+  transform: scale(0.9) translateY(10%);
   transform-origin: center top;
 }
 .popper-fade-up-leave-active {
@@ -1210,7 +1211,7 @@ html.stop-transition-all {
 .el-zoom-in-top-enter-from,
 .el-zoom-in-top-leave-active {
   opacity: 0;
-  transform: translateY(-5%) scale(0.8) !important;
+  transform: translateY(-5%) scale(0.9) !important;
 }
 .el-zoom-in-bottom-enter-active,
 .el-zoom-in-bottom-leave-active {
@@ -1222,5 +1223,5 @@ html.stop-transition-all {
 .el-zoom-in-bottom-enter-from,
 .el-zoom-in-bottom-leave-active {
   opacity: 0;
-  transform: translateY(5%) scale(0.8) !important;
+  transform: translateY(10%) scale(0.9) !important;
 }

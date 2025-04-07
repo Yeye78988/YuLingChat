@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { appDescription, appKeywords, appName } from "@/constants/index";
+import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
 useSeoMeta({
   title: "登录 - 极物聊天",
@@ -16,6 +18,28 @@ const setting = useSettingStore();
 onMounted(async () => {
   user.showLoginAndRegister = "login";
 });
+
+if (setting.isDesktop) {
+  watch(() => user.showLoginAndRegister, async (val) => {
+    if (val !== "") {
+      // 关闭窗口动画
+      if (setting.settingPage.isCloseAllTransition) {
+        getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : 480));
+        return;
+      }
+      // 窗口动画
+      invoke("animate_window_resize", {
+        windowLabel: LOGIN_WINDOW_LABEL,
+        toWidth: 360,
+        toHeight: val === LOGIN_WINDOW_LABEL ? 450 : 480,
+        duration: 160,
+        steps: 12,
+      }).catch((err: any) => console.error("窗口动画失败:", err));
+    }
+  }, {
+    immediate: true,
+  });
+}
 </script>
 
 <template>
@@ -24,9 +48,17 @@ onMounted(async () => {
     grid="~ cols-1 md:cols-2"
     :class="{
       'img-none is-desktop': setting.isDesktop,
+      'is-mobile': setting.isMobileSize,
       'show-register': user.showLoginAndRegister === 'register',
     }"
   >
+    <!-- 添加背景动画球 -->
+    <div class="animated-background">
+      <div class="blob blob-1" />
+      <div class="blob blob-2" />
+      <div class="blob blob-3" />
+    </div>
+
     <div data-tauri-drag-region absolute right-0 z-1000 w-100vw flex cursor-move items-center gap-2 sm:w-50vw>
       <div class="group ml-a flex flex items-center gap-2 p-2 sm:p-4">
         <BtnTheme
@@ -52,7 +84,7 @@ onMounted(async () => {
       :class="setting.isDesktop ? 'w-full h-full !rounded-0 animate-none pt-4' : 'h-fit pt-16 pb-10 min-h-7/10 sm:static absolute bottom-0 left-0 w-full   shadow-lg border-default-t'"
       data-fade
     >
-      <div class="mx-a w-85/100 text-center sm:(w-3/5 text-left)">
+      <div class="form-main mx-a w-86/100 text-center sm:(w-3/5 text-left)">
         <div
           v-if="setting.isDesktop"
           key="login-bg"
@@ -62,7 +94,7 @@ onMounted(async () => {
           <div
             key="login-bg"
             style="--anima: blur-in;"
-            class="login-logo absolute left-6 top-6 mb-4 block flex items-center gap-3 sm:(static mb-6)"
+            class="login-logo absolute left-6 top-6 my-4 block flex items-center gap-3 sm:(static mb-6)"
           >
             <ElImage src="/logo.png" class="logo h-8 w-8" />
             <h3 class="app-name text-1.2rem font-bold tracking-0.2em">
@@ -100,7 +132,43 @@ onMounted(async () => {
     overflow: hidden;
   }
 }
+.main-box {
+  --el-border-radius-base: 0.5rem;
+
+  :deep(.el-form) {
+    --el-border-radius-base: 0.5rem;
+  }
+}
+.main-box {
+  --el-input-border: transparent;
+  --el-border-radius-base: 0.5rem;
+  :deep(.el-form) {
+    --el-border-radius-base: 0.5rem;
+
+    .el-button,
+    .el-input-group__append,
+    .el-input__wrapper {
+      --el-input-bg-color: rgba(245, 245, 245, 0.92);
+      --el-input-shadow: transparent;
+      box-shadow: 0 0 0 1px transparent inset;
+      &.is-focus {
+        box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
+      }
+    }
+  }
+}
+.dark .main-box {
+  :deep(.el-form) {
+    .el-input__wrapper {
+      --el-input-bg-color: rgba(26, 26, 26, 0.4);
+    }
+  }
+}
+
+
+/* 适配桌面版 */
 .is-desktop {
+
   .login-logo {
     --at-apply: ' !static mb-4 p-0  flex-row-c-c';
     .logo {
@@ -114,6 +182,7 @@ onMounted(async () => {
     --at-apply: 'pb-6';
   }
 }
+
 .show-register {
   .login-logo {
     --at-apply: 'hidden';
@@ -124,5 +193,84 @@ onMounted(async () => {
       --at-apply: 'text-1em';
     }
   }
+}
+
+/* 背景动画球样式 */
+.animated-background {
+  display: none;
+}
+.is-desktop {
+  .animated-background {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(4px);
+  }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(3rem);
+  opacity: 0.7;
+}
+.dark {
+  .blob {
+    opacity: 0.3;
+  }
+}
+
+.blob-1 {
+  width: 16rem;
+  height: 16rem;
+  background: radial-gradient(circle, rgba(74, 144, 226, 0.4) 0%, rgba(74, 144, 226, 0.2) 70%);
+  left: -30%;
+  top: -20%;
+  animation: float-blob-1 15s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 18rem;
+  height: 18rem;
+  background: radial-gradient(circle, rgba(107, 74, 226, 0.4) 0%, rgba(107, 74, 226, 0.2) 70%);
+  right: -40%;
+  top: 20%;
+  animation: float-blob-2 18s ease-in-out infinite;
+}
+
+.blob-3 {
+  width: 16rem;
+  height: 16rem;
+  background: radial-gradient(circle, rgba(103, 178, 240, 0.4) 0%, rgba(103, 178, 240, 0.2) 70%);
+  left: -40%;
+  bottom: -20%;
+  animation: float-blob-3 20s ease-in-out infinite;
+}
+
+@keyframes float-blob-1 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(80px, 60px) rotate(20deg); }
+  66% { transform: translate(20px, 120px) rotate(-10deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes float-blob-2 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-60px, 40px) rotate(-15deg); }
+  66% { transform: translate(-30px, -60px) rotate(10deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes float-blob-3 {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(50px, -50px) rotate(10deg); }
+  66% { transform: translate(-40px, -20px) rotate(-15deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
 }
 </style>
