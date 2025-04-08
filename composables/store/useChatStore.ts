@@ -511,7 +511,18 @@ export const useChatStore = defineStore(
       const roomId = data.message.roomId;
       const existsMsg = findMsg(roomId, data.message.id);
       if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
-        contactMap.value[roomId].msgList.push(data); // 追加消息
+        // 需要排序
+        const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
+        if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
+          const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
+          if (insertIndex !== -1)
+            contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
+          else
+            contactMap.value[roomId].msgList.push(data);
+        }
+        else { // 直接追加到末尾
+          contactMap.value[roomId].msgList.push(data);
+        }
       }
     }
     const findMsgCache = new Map<string, ChatMessageVO>();
@@ -542,7 +553,6 @@ export const useChatStore = defineStore(
       recallMsgMap.value[msg.message.roomId] = JSON.parse(JSON.stringify(msg));
       return true;
     }
-
 
     const readDebounceTimers: Record<string, NodeJS.Timeout> = {};
     /**
@@ -599,7 +609,6 @@ export const useChatStore = defineStore(
         }
       }
     };
-
 
     /* ------------------------------------------- 群聊操作 ------------------------------------------- */
     /**

@@ -27,7 +27,7 @@ const betteryInfo = useBattery(window);
         :duration="10"
         :striped-flow="betteryInfo.charging.value"
         :color="betteryInfo.charging.value ? 'var(--el-color-info)' : 'var(--el-color-warning)'"
-        :percentage="betteryInfo.level.value * 100"
+        :percentage="+(betteryInfo.level.value * 100).toFixed(2)"
       />
     </div>
   </div>
