@@ -109,6 +109,7 @@ watch(userId, (val: string) => {
         :preview-src-list="[BaseUrlImg + targetUserInfo.avatar]"
         preview-teleported
         loading="lazy"
+        error-class="i-solar:user-bold-duotone p-5"
         class="h-4rem w-4rem flex-shrink-0 overflow-auto object-cover shadow-sm sm:(h-4.8rem w-4.8rem) border-default card-default"
       />
       <div flex flex-col gap-1 py-1>

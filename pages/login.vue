@@ -52,13 +52,6 @@ if (setting.isDesktop) {
       'show-register': user.showLoginAndRegister === 'register',
     }"
   >
-    <!-- 添加背景动画球 -->
-    <div class="animated-background">
-      <div class="blob blob-1" />
-      <div class="blob blob-2" />
-      <div class="blob blob-3" />
-    </div>
-
     <div data-tauri-drag-region absolute right-0 z-1000 w-100vw flex cursor-move items-center gap-2 sm:w-50vw>
       <div class="group ml-a flex flex items-center gap-2 p-2 sm:p-4">
         <BtnTheme
@@ -85,6 +78,12 @@ if (setting.isDesktop) {
       data-fade
     >
       <div class="form-main mx-a w-86/100 text-center sm:(w-3/5 text-left)">
+        <!-- 添加背景动画球 -->
+        <div class="animated-background">
+          <div class="blob blob-1" />
+          <div class="blob blob-2" />
+          <div class="blob blob-3" />
+        </div>
         <div
           v-if="setting.isDesktop"
           key="login-bg"
@@ -148,9 +147,9 @@ if (setting.isDesktop) {
     .el-button,
     .el-input-group__append,
     .el-input__wrapper {
-      --el-input-bg-color: rgba(245, 245, 245, 0.92);
+      --el-input-bg-color: rgba(250, 250, 250, 0.95);
       --el-input-shadow: transparent;
-      box-shadow: 0 0 0 1px transparent inset;
+      box-shadow: 0 0 0 1px rgba(133, 133, 133, 0.05) inset;
       &.is-focus {
         box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
       }
@@ -197,21 +196,16 @@ if (setting.isDesktop) {
 
 /* 背景动画球样式 */
 .animated-background {
-  display: none;
-}
-.is-desktop {
-  .animated-background {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-    pointer-events: none;
-    filter: blur(4px);
-  }
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(4px);
 }
 
 .blob {
@@ -227,12 +221,12 @@ if (setting.isDesktop) {
 }
 
 .blob-1 {
-  width: 16rem;
-  height: 16rem;
+  width: 18rem;
+  height: 18rem;
   background: radial-gradient(circle, rgba(74, 144, 226, 0.4) 0%, rgba(74, 144, 226, 0.2) 70%);
-  left: -30%;
-  top: -20%;
-  animation: float-blob-1 15s ease-in-out infinite;
+  left: -50%;
+  top: -50%;
+  animation: float-blob-1 12s ease-in-out infinite;
 }
 
 .blob-2 {

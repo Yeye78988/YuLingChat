@@ -18,7 +18,7 @@ async function toFriendPage() {
   await navigateTo("/friend");
   setTimeout(async () => {
     chat.setTheFriendOpt(FriendOptType.Empty);
-    const com = document?.getElementById?.("user-search-apply-input");
+    const com = document?.getElementById?.(applyUserSearchInputDomId);
     if (com) {
       com?.focus();
     }

@@ -20,6 +20,7 @@ const pageInfo = ref({
 const historyContactId = useLocalStorage<number | undefined>(`${user.userId}-history-contact-id`, undefined);
 const isLoadRoomMap: Record<number, boolean> = {};
 // 滚动顶部触发
+const scrollbarRef = useTemplateRef("scrollbarRef");
 const isScrollTop = ref(true);
 function onScroll(e: {
   scrollTop: number;
@@ -184,7 +185,7 @@ async function toFriendPage() {
   await navigateTo("/friend");
   setTimeout(async () => {
     chat.setTheFriendOpt(FriendOptType.Empty);
-    const com = document?.getElementById?.("user-search-apply-input");
+    const com = document?.getElementById?.(applyUserSearchInputDomId);
     if (com) {
       com?.focus();
     }
@@ -195,7 +196,45 @@ function onClickContact(room: ChatContactVO) {
   chat.isOpenContact = false;
   historyContactId.value = room.roomId;
   chat.onChangeRoom(room.roomId);
+
+  // 添加延时确保DOM更新后再滚动
+  nextTick(() => {
+    // 查找当前选中的联系人元素
+    const selectedElement = document.querySelector(`#contact-${room.roomId}`);
+    if (selectedElement) {
+      // 使用scrollIntoView确保元素在视图中可见
+      selectedElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest", // 尽量保持在视图中，不会强制滚动到顶部或底部
+      });
+    }
+  });
 }
+
+// 监听当前选中的房间ID变化
+watch(() => chat.theRoomId, (newRoomId) => {
+  if (newRoomId) {
+    nextTick(() => {
+      // 查找当前选中的联系人元素
+      const selectedElement = document.querySelector(`#contact-${newRoomId}`);
+      if (selectedElement) {
+        // 检查元素是否在视图中可见
+        const rect = selectedElement.getBoundingClientRect();
+        const scrollContainer = scrollbarRef.value?.wrapRef;
+        if (scrollContainer) {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          // 如果元素不在视图中，则滚动到可见位置
+          if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
+            selectedElement.scrollIntoView({
+              behavior: "smooth",
+              block: "nearest",
+            });
+          }
+        }
+      }
+    });
+  }
+}, { immediate: true });
 
 reload();
 
@@ -267,6 +306,7 @@ const menuList = [
     </div>
     <!-- 会话列表 -->
     <el-scrollbar
+      ref="scrollbarRef"
       wrap-class="w-full h-full"
       class="contact-list"
       wrapper-class="relative"
@@ -300,6 +340,7 @@ const menuList = [
         >
           <div
             v-for="room in chat.getContactList"
+            :id="`contact-${room.roomId}`"
             :key="room.roomId"
             class="contact"
             :class="{
@@ -314,6 +355,7 @@ const menuList = [
               class="h-3em w-3em flex-shrink-0"
             >
               <CardElImage
+                :error-class="contactTypeIconClassMap[room.type]"
                 :default-src="room.avatar" fit="cover"
                 class="h-full w-full card-rounded-df object-cover shadow-sm card-bg-color-2"
               />

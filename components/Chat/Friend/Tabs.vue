@@ -21,7 +21,7 @@ const activeNames = useLocalStorage(`${route.fullPath}_activeNames`, {
       <div class="card-item border-0 border-b-1px pb-4 border-default-b">
         <div class="hover:bg-transparent">
           <ChatFriendApplySearch
-            @submit="val => chat.setTheFriendOpt(FriendOptType.User, val)"
+            @submit="(val: any) => chat.setTheFriendOpt(FriendOptType.User, val)"
           />
         </div>
       </div>

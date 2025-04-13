@@ -52,6 +52,7 @@ const getRoleText = computed(() => room.value.role !== undefined ? chatRoomRoleT
     <!-- 顶部信息 -->
     <div flex gap-4 pb-6 sm:gap-6 border-default-b>
       <CardElImage
+        error-class="i-solar:users-group-rounded-bold-duotone p-5"
         :src="BaseUrlImg + data.data.avatar" fit="cover"
         :preview-src-list="[BaseUrlImg + data.data.avatar]"
         preview-teleported

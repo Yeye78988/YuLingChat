@@ -146,6 +146,8 @@ export default defineConfig({
           import("@iconify-json/solar").then(i => i.icons as any),
         tabler: () =>
           import("@iconify-json/tabler").then(i => i.icons as any),
+        ri: () =>
+          import("@iconify-json/ri").then(i => i.icons as any),
       },
     }),
     presetTypography(),

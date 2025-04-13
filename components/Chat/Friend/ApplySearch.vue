@@ -147,7 +147,7 @@ onDeactivated(() => {
       class="search-input flex-row-c-c"
     >
       <el-input
-        id="user-search-apply-input"
+        :id="applyUserSearchInputDomId"
         v-model.trim="searchKeyWords"
         class="mr-2 text-0.8rem"
         style="height: 2rem;"

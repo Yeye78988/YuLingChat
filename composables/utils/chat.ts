@@ -3,6 +3,14 @@
 import type { ShallowRef } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+// @unocss-include
+export const contactTypeIconClassMap: Record<RoomType, string> = {
+  [RoomType.GROUP]: "i-solar:users-group-rounded-bold-duotone",
+  [RoomType.SELFT]: "i-solar:user-bold-duotone",
+  [RoomType.AICHAT]: "i-ri:robot-2-line",
+};
+export const applyUserSearchInputDomId = "user-search-apply-input";
+
 /**
  * 解析消息内容（会话文本）
  * @param msg 消息
