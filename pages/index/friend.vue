@@ -29,7 +29,7 @@ async function clearHistory() {
       class="w-full transition-all sm:(relative mx-auto w-320px border-default-r p-0)"
     >
       <!-- 好友列表 -->
-      <ChatFriendTabs class="relative mx-a h-full flex-shrink-0 p-4" />
+      <ChatFriendTabs class="relative mx-a h-full flex-shrink-0 p-4 pb-0" />
     </div>
     <div
       class="z-1 h-full flex-1 flex-shrink-0 flex-col card-bg-color-2"

@@ -152,7 +152,7 @@ pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
                 50.0 / 255.0,
                 158.0 / 255.0,
                 163.5 / 255.0,
-                1.0,
+                0.0,
             );
             ns_window_main.setBackgroundColor_(bg_color);
         }
@@ -255,7 +255,7 @@ async fn create_login_window(app_handle: AppHandle) -> tauri::Result<()> {
                 50.0 / 255.0,
                 158.0 / 255.0,
                 163.5 / 255.0,
-                1.0,
+                0.0,
             );
             ns_window_login.setBackgroundColor_(bg_color);
         }
@@ -308,7 +308,7 @@ async fn create_extend_window(
                 50.0 / 255.0,
                 158.0 / 255.0,
                 163.5 / 255.0,
-                1.0,
+                0.0,
             );
             ns_window_main.setBackgroundColor_(bg_color);
         }

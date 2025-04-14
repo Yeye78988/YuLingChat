@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { getImgSize } from ".";
+
 /**
  * 视频消息
  */
@@ -40,7 +42,7 @@ const {
   width,
   height,
 } = body?.thumbWidth !== undefined && body?.thumbHeight !== undefined
-  ? computedImgScaleSize(body.thumbWidth, body.thumbHeight, { maxWidth: 256, maxHeight: 256 })
+  ? getImgSize(body.thumbWidth, body.thumbHeight, { maxWidth: 256, maxHeight: 256 })
   : { width: 0, height: 0 };
 </script>
 
@@ -53,7 +55,7 @@ const {
   >
     <template #body>
       <div
-        class="relative max-h-16em max-w-16em min-h-8em min-w-8em flex-row-c-c cursor-pointer"
+        class="relative max-h-50vh max-w-76vw flex-row-c-c cursor-pointer shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) border-default-2 card-default hover:shadow"
         title="点击播放[视频]"
         ctx-name="video"
         :style="{ width: width ? `${width}px` : 'auto', height: height ? `${height}px` : 'auto' }"

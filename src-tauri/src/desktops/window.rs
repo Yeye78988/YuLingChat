@@ -48,7 +48,7 @@ pub fn setup_desktop_window(app: &AppHandle) -> tauri::Result<()> {
                 50.0 / 255.0,
                 158.0 / 255.0,
                 163.5 / 255.0,
-                1.0,
+                0.0,
             );
             ns_window_login.setBackgroundColor_(bg_color);
         }
