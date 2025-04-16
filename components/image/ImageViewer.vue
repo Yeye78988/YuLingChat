@@ -6,6 +6,8 @@ interface ShortcutInfo {
   description: string;
   disabled?: ComputedRef<boolean>;
 }
+const MAX_SCALE = 20; // 最大缩放倍数
+const MIN_SCALE = 0.1; // 最小缩放倍数
 // 定义快捷键列表
 const keyShortList = ref<ShortcutInfo[]>([
   { key: "←", description: "上一张图片" },
@@ -156,12 +158,12 @@ function saveImage(url: string) {
 
 // 放大
 function zoomIn() {
-  imageState.scale = Math.min(imageState.scale * 1.2, 10);
+  imageState.scale = Math.min(imageState.scale * 1.2, MAX_SCALE);
 }
 
 // 缩小
 function zoomOut() {
-  imageState.scale = Math.max(imageState.scale / 1.2, 0.1);
+  imageState.scale = Math.max(imageState.scale / 1.2, MIN_SCALE);
 }
 
 // 顺时针旋转
@@ -386,7 +388,7 @@ defineExpose({
         ref="imageRef"
         :src="currentImageUrl"
         :style="imageStyle"
-        class="max-h-full max-w-full cursor-move select-none object-contain md:max-h-50vh md:max-w-70vw"
+        class="max-h-full max-w-full cursor-move select-none object-contain md:max-w-70vw"
         @mousedown="handleMouseDown"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"
