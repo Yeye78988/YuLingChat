@@ -48,21 +48,21 @@ const menuList = computed<MenuItem[]>(() => ([
     title: "聊天",
     path: "/",
     icon: "i-solar:chat-line-broken",
-    activeIcon: "i-solar:chat-line-bold-duotone",
+    activeIcon: "i-solar:chat-line-bold p-2.8",
     tipValue: chat.getContactList.reduce((acc, cur) => acc + cur.unreadCount, 0),
   },
   {
     title: "好友",
     path: "/friend",
     icon: "i-solar:users-group-rounded-line-duotone",
-    activeIcon: "i-solar:users-group-rounded-bold-duotone",
+    activeIcon: "i-solar:users-group-rounded-bold p-2.8",
     tipValue: chat.applyUnReadCount,
   },
   {
     title: "AI客服",
     path: "/ai",
     icon: "i-solar:ghost-outline",
-    activeIcon: "i-solar:ghost-bold-duotone",
+    activeIcon: "i-solar:ghost-bold p-2.8",
   },
   ...(setting.selectExtendMenuList || []).map(p => ({
     title: p.title,
@@ -73,22 +73,22 @@ const menuList = computed<MenuItem[]>(() => ([
   }) as MenuItem),
   {
     title: "扩展",
-    icon: " i-solar:widget-line-duotone hover:(i-solar:widget-bold-duotone ) ",
-    activeIcon: "i-solar:widget-bold-duotone",
+    icon: " i-solar:widget-line-duotone hover:(i-solar:widget-bold p-2.8) ",
+    activeIcon: "i-solar:widget-bold p-2.8",
     onClick: () => chat.showExtension = true,
   },
   {
     title: "账号",
     path: "/user/safe",
     icon: "i-solar:devices-outline",
-    activeIcon: "i-solar:devices-bold-duotone",
+    activeIcon: "i-solar:devices-bold p-2.8",
     class: "absolute bg-color-br bottom-15 diabled-bg",
   },
   {
     title: "设置",
     path: "/setting",
     icon: "i-solar:settings-linear hover:animate-spin block",
-    activeIcon: "i-solar:settings-bold-duotone hover:animate-spin block",
+    activeIcon: "i-solar:settings-bold p-2.8 hover:animate-spin block",
     class: "absolute bg-color-br bottom-2 diabled-bg",
     tipValue: +setting.appUploader.isUpload,
     isDot: true,
@@ -134,7 +134,7 @@ export interface MenuItem {
           [`${p.class}`]: p.class,
         }"
         :title="p.title"
-        class="item group"
+        class="group item"
         @click="(e: MouseEvent) => {
           if (p.onClick) {
             e.stopPropagation();
@@ -143,7 +143,7 @@ export interface MenuItem {
         }"
       >
         <el-badge :value="p.tipValue" :hidden="!p?.tipValue" :is-dot="!!p?.isDot" :offset="[-2, -2]" :max="99">
-          <i class="icon p-2.5" :class="route.path === p.path ? p.activeIcon : p.icon" />
+          <i class="icon p-2.6" :class="route.path === p.path ? p.activeIcon : p.icon" />
         </el-badge>
       </component>
     </el-scrollbar>
@@ -163,11 +163,12 @@ export interface MenuItem {
   top:0;
 }
 .item {
-  --at-apply: "card-rounded-df hover:(bg-color-3 text-color-[--el-color-primary]) h-10 w-10 flex-row-c-c cursor-pointer transition-200";
+  --at-apply: "card-rounded-df hover:(bg-gray-3 bg-op-30 dark:bg-dark-3 text-color-theme-primary) h-10 w-10 flex-row-c-c cursor-pointer transition-200";
   &.action {
-    --at-apply: "shadow !bg-[--el-color-primary]";
+    --at-apply: "text-theme-primary bg-gray-3 bg-op-30 dark:bg-dark-3";
     .icon {
-      --at-apply: "bg-light dark:bg-light";
+      --at-apply: "text-theme-primary block";
+      filter: drop-shadow(0 0 8px var(--el-color-primary));
     }
   }
   :deep(.el-badge) {

@@ -35,7 +35,7 @@ async function onSearch() {
     clearSearch();
     return;
   }
-  if (currentFocus.value > -1) { // 打开
+  if (currentFocus.value > -1 && searchPageList?.[currentFocus?.value]) { // 打开
     if (!searchPageList?.[currentFocus.value]) {
       return;
     }
@@ -233,6 +233,7 @@ onDeactivated(() => {
           <ListAutoIncre
             :immediate="false"
             :no-more="noMore"
+            :auto-stop="false"
             @load="onLoadMore"
           >
             <ListTransitionGroup tag="div">
@@ -251,6 +252,7 @@ onDeactivated(() => {
                 <CardElImage
                   :src="BaseUrlImg + p.avatar"
                   fit="cover"
+                  error-class="i-solar:user-bold-duotone"
                   class="mr-2 h-2.2rem w-2.2rem object-cover border-default card-default"
                 />
                 <small>{{ p.nickname || p.username }}</small>

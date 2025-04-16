@@ -221,8 +221,8 @@ if (setting.isDesktop) {
 }
 
 .blob-1 {
-  width: 18rem;
-  height: 18rem;
+  width: 22rem;
+  height: 22rem;
   background: radial-gradient(circle, rgba(74, 144, 226, 0.4) 0%, rgba(74, 144, 226, 0.2) 70%);
   left: -50%;
   top: -50%;

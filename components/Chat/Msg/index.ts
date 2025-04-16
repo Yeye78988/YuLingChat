@@ -99,12 +99,12 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         onClick: async () => {
           if (translation) {
             closeTranslation(data.message.id, translation.targetLang);
-            data.message.body.translation = null;
+            data.message.body._textTranslation = null;
           }
           else {
             const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
             if (res) {
-              data.message.body.translation = res;
+              data.message.body._textTranslation = res;
             }
             else {
               ElMessage.error("翻译失败，请稍后再试！");
@@ -148,16 +148,16 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     translation: [
       {
         label: "复制翻译",
-        hidden: !txt || !data.message.body.translation,
+        hidden: !txt || !data.message.body._textTranslation,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: () => {
-          useCopyText(data.message.body.translation?.result as string);
+          useCopyText(data.message.body._textTranslation?.result as string);
         },
       },
       {
         label: "关闭翻译",
-        hidden: !txt || !data.message.body.translation,
+        hidden: !txt || !data.message.body._textTranslation,
         customClass: "group",
         icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-danger",
         onClick: async () => {
@@ -165,7 +165,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
             return;
           if (closeTranslation(data.message.id, translation.targetLang)) {
             //
-            data.message.body.translation = null;
+            data.message.body._textTranslation = null;
           }
         },
       },
@@ -385,12 +385,12 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         onClick: async () => {
           if (translation) {
             closeTranslation(data.message.id, translation.targetLang);
-            data.message.body.translation = null;
+            data.message.body._textTranslation = null;
           }
           else {
             const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
             if (res) {
-              data.message.body.translation = res;
+              data.message.body._textTranslation = res;
             }
             else {
               ElMessage.error("翻译失败，请稍后再试！");

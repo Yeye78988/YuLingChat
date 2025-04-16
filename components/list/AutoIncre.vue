@@ -92,6 +92,8 @@ watch(isIntersecting, (val) => {
   else {
     clearInterval(timer.value);
   }
+}, {
+  immediate: true,
 });
 
 if (immediate) {

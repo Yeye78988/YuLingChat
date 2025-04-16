@@ -15,7 +15,9 @@ const route = useRoute();
 // 读取@用户列表 hook
 const { userOptions, userAtOptions, loadUser } = useLoadAtUserList();
 const { aiOptions, loadAi } = useLoadAiList();
-const isReplyAI = computed(() => chat.msgForm.content?.startsWith("/") && chat.theContact.hotFlag);
+const isReplyAI = computed(() => chat.msgForm.content?.startsWith("/") && aiOptions.value?.length > 0);
+const isReplyAT = computed(() => chat.msgForm.content?.startsWith("@") && userOptions.value?.length > 0);
+const mentionList = computed(() => isReplyAI.value ? aiOptions.value : isReplyAT.value ? userAtOptions.value : []);
 // 表单
 const isSending = ref(false);
 const isDisabledFile = computed(() => !user?.isLogin || chat.theContact.selfExist === 0);
@@ -102,7 +104,7 @@ async function onSubmit() {
       }
     }
 
-    // 处理 AI机器人
+    // 处理 AI机器人 TODO: 可改为全体呼叫
     const { aiRobotList } = resolteAiReply(formDataTemp.content, aiOptions.value);
     if (aiRobotList[0]) {
       formDataTemp.content = formDataTemp.content.replace(formatAiReplyTxt(aiRobotList[0]), ""); // 剔除ai的显示
@@ -692,10 +694,10 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="form-tools">
-      <!-- 工具栏 TODO: AI机器人张不支持 -->
+      <!-- 工具栏 TODO: AI机器人暂不支持 -->
       <div
         v-if="!isAiRoom"
-        class="relative m-b-2 flex items-center gap-4 px-2 sm:mb-0"
+        class="relative m-b-2 flex items-center gap-3 px-2 sm:mb-0 sm:gap-4"
       >
         <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
           <i
@@ -753,7 +755,7 @@ onUnmounted(() => {
         </template>
         <!-- 非语音 -->
         <template v-else>
-          <div class="grid cols-4 items-center gap-4 sm:flex">
+          <div class="grid cols-4 items-center gap-3 sm:flex sm:gap-4">
             <!-- 图片 -->
             <InputOssFileUpload
               ref="inputOssImgUploadRef"
@@ -860,7 +862,7 @@ onUnmounted(() => {
           v-if="loadInputDone"
           ref="inputAllRef"
           v-model.lazy="chat.msgForm.content"
-          :options="isReplyAI ? aiOptions : userAtOptions"
+          :options="mentionList"
           :prefix="isReplyAI ? ['/'] : ['@']"
           popper-class="at-select border-default"
           :check-is-whole="(pattern: string, value: string) => isReplyAI ? checkAiReplyWhole(chat.msgForm.content, pattern, value) : checkAtUserWhole(chat.msgForm.content, pattern, value)"

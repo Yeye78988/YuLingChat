@@ -386,7 +386,7 @@ defineExpose({
         ref="imageRef"
         :src="currentImageUrl"
         :style="imageStyle"
-        class="max-h-full max-w-full cursor-move select-none object-contain"
+        class="max-h-full max-w-full cursor-move select-none object-contain md:max-h-50vh md:max-w-70vw"
         @mousedown="handleMouseDown"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"

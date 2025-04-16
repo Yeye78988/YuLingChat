@@ -32,7 +32,9 @@ async function toggleContactOpen() {
         <NuxtLink to="/" class="hidden flex-row-c-c sm:flex">
           <img src="/logo.png" class="h-2rem w-2rem" alt="logo">
         </NuxtLink>
-        <strong hidden sm:block>极物聊天</strong>
+        <h4 hidden sm:block>
+          极物聊天
+        </h4>
         <div
           class="btn-primary"
           :class="!chat.isOpenContact ? 'flex-row-c-c animate-zoom-in animate-duration-200 sm:hidden' : 'hidden '" @click="toggleContactOpen"
