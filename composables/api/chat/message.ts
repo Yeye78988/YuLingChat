@@ -413,8 +413,10 @@ export interface AiChatBodyMsgVO {
    * 机器人信息
    */
   robotInfo: RobotUserVO;
-
-  modelCode: number;
+  /**
+   * 机器人列表
+   */
+  robotList: RobotUserVO[];
   /**
    * 机器人业务类型
    * 文生 1：文本 2：图片 3：视频
@@ -549,7 +551,7 @@ export interface VideoBodyDTO {
 }
 
 export interface AiChatBodyDTO {
-  modelCode: number;
+  // modelCode: number;
   businessCode: AiBusinessType;
   content: string;
 }

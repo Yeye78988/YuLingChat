@@ -207,7 +207,13 @@ export enum AiReplyStatusEnum {
    * 对话中
    */
   IN_PROGRESS = 1,
+  /**
+   * 结束
+   */
   FINISHED = 2,
+  /**
+   * 错误
+   */
   ERROR = 3,
   /**
    * 继续对话

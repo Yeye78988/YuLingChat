@@ -280,7 +280,7 @@ defineExpose({
     class="max-w-full flex-1"
     height="100%"
     wrap-class="px-0 shadow-inner-bg"
-    view-class="pb-10"
+    view-class="pb-8 pt-4"
     @scroll="onScroll"
   >
     <div

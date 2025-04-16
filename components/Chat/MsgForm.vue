@@ -105,14 +105,15 @@ async function onSubmit() {
     }
 
     // 处理 AI机器人 TODO: 可改为全体呼叫
-    const { aiRobotList } = resolteAiReply(formDataTemp.content, aiOptions.value);
-    if (aiRobotList[0]) {
-      formDataTemp.content = formDataTemp.content.replace(formatAiReplyTxt(aiRobotList[0]), ""); // 剔除ai的显示
-      if (!formDataTemp.content.trim())
+    const { replaceText, aiRobitUidList } = resolteAiReply(formDataTemp.content, aiOptions.value);
+    if (aiRobitUidList.length > 0) {
+      if (!replaceText)
         return false;
+      formDataTemp.content = replaceText;
       formDataTemp.body = {
-        userId: aiRobotList[0].userId,
-        modelCode: 1,
+        // userId: aiRobitUidList?.[0],
+        // modelCode: 1,
+        userIds: aiRobitUidList.length > 0 ? aiRobitUidList : undefined,
         businessCode: AiBusinessType.TEXT,
       };
       formDataTemp.msgType = MessageType.AI_CHAT; // 设置对应消息类型
@@ -166,7 +167,6 @@ async function onSubmit() {
       content,
       body: {
         userId: chat.theContact?.targetUid,
-        modelCode: 1,
         businessCode: AiBusinessType.TEXT,
       },
     });

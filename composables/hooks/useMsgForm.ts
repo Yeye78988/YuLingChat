@@ -817,7 +817,18 @@ export function useLoadAiList() {
         list,
         isLoading: false,
       };
-      aiOptions.value = list;
+      aiOptions.value = [
+        // {
+        //   label: "AI风暴",
+        //   value: "AI风暴",
+        //   userId: "AI风暴",
+        //   avatar: "",
+        //   username: "AI风暴",
+        //   nickName: "AI风暴",
+        //   aiRobotInfo: undefined,
+        // }, // 问答全部
+        ...list,
+      ];
     }
   }
 
@@ -858,22 +869,41 @@ export function checkAiReplyWhole(context: string | undefined | null, pattern: s
  * @returns
  *  aiReply: 识别到的/AI回复
  */
-export function resolteAiReply(text: string, aiOptions: AskAiRobotOption[], configs: AtConfigs = { regExp: /^\/(\S+)\s/ }): { aiRobitUidList: string[]; aiRobotList: AskAiRobotOption[], replaceText: string } {
-  const { regExp = /\/(\S+)\s/ } = configs;
+export function resolteAiReply(
+  text: string,
+  aiOptions: AskAiRobotOption[],
+  configs: AtConfigs = { regExp: /\/(\S+?)(?=\/|\s|$)/g },
+): { aiRobitUidList: string[]; aiRobotList: AskAiRobotOption[]; replaceText: string } {
+  const { regExp = /\/(\S+?)(?=\/|\s|$)/g } = configs;
   if (!regExp || !text)
     throw new Error("regExp is required");
   const aiRobotList: AskAiRobotOption[] = [];
-  const matches = text.match(regExp);
-  // 测试
-  if (matches && matches?.[1]) {
-    const aiRobot = aiOptions.find(u => u.nickName === matches[1]);
-    if (aiRobot)
-      aiRobotList.push(aiRobot);
+
+  // 匹配所有以/开头的AI名称
+  const matches = Array.from(text.matchAll(regExp));
+
+  // 遍历所有匹配项
+  for (const match of matches) {
+    if (match && match[1]) {
+      const aiRobot = aiOptions.find(u => u.nickName === match[1]);
+      if (aiRobot && !aiRobotList.some(a => a.userId === aiRobot.userId)) {
+        aiRobotList.push(aiRobot);
+      }
+    }
   }
+
+  // 替换所有匹配的AI昵称文本
+  let replaceText = text;
+  matches.forEach((match) => {
+    if (match && match[0]) {
+      replaceText = replaceText.replace(match[0], "").trim();
+    }
+  });
+
   return {
-    aiRobitUidList: aiRobotList.map(p => p.userId) || [],
+    aiRobitUidList: aiRobotList.map(p => p.userId),
     aiRobotList: JSON.parse(JSON.stringify(aiRobotList)),
-    replaceText: matches?.[1] || "",
+    replaceText,
   };
 }
 

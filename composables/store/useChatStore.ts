@@ -571,8 +571,8 @@ export const useChatStore = defineStore(
       if (roomId === contact?.roomId) {
         const msg = contact?.msgList[contact?.msgList.length - 1];
         // contact.unreadCount = 0;
+        // contact.text = msg ? resolveMsgContactText(msg) : contact?.text;
         contact.unreadMsgList = [];
-        contact.text = msg ? resolveMsgContactText(msg) : contact?.text;
         contact.lastMsgId = msg?.message?.id || contact?.lastMsgId;
       }
       if (readDebounceTimers[roomId])

@@ -82,7 +82,11 @@ async function resolveNewMsg(msg: ChatMessageVO) {
 
   // 本人问答的AI消息进行滚动
   if (isCurrentRoom) {
-    msg.message.type === MessageType.AI_CHAT_REPLY && (msg as ChatMessageVO<AiChatReplyBodyMsgVO>).message.body?.reply?.uid === user.userInfo.id && handleAIReplayMsg(); // 处理AI回复消息 多一步滚动
+    if (msg.message.type === MessageType.AI_CHAT_REPLY) {
+      (msg as ChatMessageVO<AiChatReplyBodyMsgVO>).message.body?.reply?.uid === user.userInfo.id && handleAIReplayMsg(); // 处理AI回复消息 多一步滚动
+      const contact = useChatStore().contactMap[msg.message.roomId];
+      contact && (contact.text = contact.type === RoomType.GROUP ? `${msg.fromUser.nickName}: 回答中...` : "AI回答中...");
+    }
     msg.message.type === MessageType.RTC && handleRTCMsg((msg as any)); // 处理rtc消息 多一步滚动
   }
   ws.wsMsgList.newMsg.splice(0);
@@ -180,7 +184,7 @@ function handleRTCMsg(msg: ChatMessageVO<RtcLiteBodyMsgVO>) {
 }
 
 // 创建消息缓冲区
-const bufferMap = new WeakMap<ChatMessageVO<AiChatReplyBodyMsgVO>, {
+interface BufferItem {
   content: string
   reasoning: string
   timer: number | NodeJS.Timeout
@@ -188,7 +192,8 @@ const bufferMap = new WeakMap<ChatMessageVO<AiChatReplyBodyMsgVO>, {
   pendingReasoning: string
   charIndex: number
   updateInterval: any
-}>();
+}
+const bufferMap = new WeakMap<ChatMessageVO<AiChatReplyBodyMsgVO>, BufferItem>();
 
 /**
  * 6. ai推送消息处理
@@ -210,11 +215,11 @@ function resolveAiStream(data: WSAiStreamMsg) {
 
   // 处理不同状态
   switch (data.status) {
-    case AiReplyStatusEnum.IN_PROGRESS:
-      handleProgressUpdate(data, contact, oldMsg);
-      break;
     case AiReplyStatusEnum.START:
       handleStartState(oldMsg);
+      break;
+    case AiReplyStatusEnum.IN_PROGRESS:
+      handleProgressUpdate(data, contact, oldMsg);
       break;
     default:
       handleFinalState(data, contact, oldMsg);
@@ -253,40 +258,41 @@ function handleProgressUpdate(
     if (chat.shouldAutoScroll) { // AI消息更新时自动滚动到底部
       chat.scrollBottom(true);
     }
-    // 同步一次
-    applyBufferUpdate(contact, oldMsg, buffer);
-
-    if (!buffer.updateInterval) {
-      buffer.updateInterval = setInterval(() => {
+    function handleAiFlowIntervalFn() {
       // 每次更新s字符
-        const contentChars = buffer.pendingContent.length > 0 ? buffer.pendingContent.substring(0, count) : "";
-        const reasoningChars = buffer.pendingReasoning.length > 0 ? buffer.pendingReasoning.substring(0, count) : "";
+      const contentChars = buffer.pendingContent.length > 0 ? buffer.pendingContent.substring(0, count) : "";
+      const reasoningChars = buffer.pendingReasoning.length > 0 ? buffer.pendingReasoning.substring(0, count) : "";
 
-        // 添加到显示内容
-        buffer.content += contentChars;
-        buffer.reasoning += reasoningChars;
+      // 添加到显示内容
+      buffer.content += contentChars;
+      buffer.reasoning += reasoningChars;
 
-        // 从待处理内容中移除已处理的字符
-        buffer.pendingContent = buffer.pendingContent.substring(contentChars.length);
-        buffer.pendingReasoning = buffer.pendingReasoning.substring(reasoningChars.length);
+      // 从待处理内容中移除已处理的字符
+      buffer.pendingContent = buffer.pendingContent.substring(contentChars.length);
+      buffer.pendingReasoning = buffer.pendingReasoning.substring(reasoningChars.length);
 
-        // AI消息更新时自动滚动到底部
-        if (chat.shouldAutoScroll) {
-          chat.scrollBottom(true);
+      // AI消息更新时自动滚动到底部
+      const chat = useChatStore();
+      if (chat.shouldAutoScroll) {
+        chat.scrollBottom(true);
+      }
+
+      // 应用更新
+      applyBufferUpdate(oldMsg, buffer);
+
+      // 如果没有待处理内容且收到了结束信号，清除定时器
+      if (buffer.pendingContent.length === 0 && buffer.pendingReasoning.length === 0) {
+        if (oldMsg?.message?.body?.status !== AiReplyStatusEnum.IN_PROGRESS) {
+          clearInterval(buffer.updateInterval);
+          buffer.updateInterval = null;
+          oldMsg && bufferMap.delete(oldMsg);
         }
-
-        // 应用更新
-        applyBufferUpdate(contact, oldMsg, buffer);
-
-        // 如果没有待处理内容且收到了结束信号，清除定时器
-        if (buffer.pendingContent.length === 0 && buffer.pendingReasoning.length === 0) {
-          if (oldMsg?.message?.body?.status !== AiReplyStatusEnum.IN_PROGRESS) {
-            clearInterval(buffer.updateInterval);
-            buffer.updateInterval = null;
-            oldMsg && bufferMap.delete(oldMsg);
-          }
-        }
-      }, delay); // 调整速度，50ms更新s字符
+      }
+    }
+    // 同步一次
+    handleAiFlowIntervalFn();
+    if (!buffer.updateInterval) {
+      buffer.updateInterval = setInterval(handleAiFlowIntervalFn, delay); // 调整速度，50ms更新s字符
     }
   }
   else {
@@ -297,13 +303,13 @@ function handleProgressUpdate(
     buffer.reasoning += data.reasoningContent || "";
     clearTimeout(buffer.timer);
     buffer.timer = setTimeout(() => {
-      applyBufferUpdate(contact, oldMsg, buffer);
+      applyBufferUpdate(oldMsg, buffer);
     }, 1000); // 延迟1s更新
   }
 }
 
+
 function applyBufferUpdate(
-  contact: ChatContactDetailVO,
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
   buffer?: { content: string; reasoning: string; pendingContent?: string; pendingReasoning?: string; updateInterval?: any },
 ) {
@@ -321,11 +327,6 @@ function applyBufferUpdate(
     oldMsg.message.body && (oldMsg.message.body.reasoningContent = update.reasoning);
     oldMsg.message.content = update.content;
   }
-
-  // 更新联系人文本（截断处理）
-  if (contact.text?.length < 100) {
-    contact.text = update.content.substring(0, 100);
-  }
 }
 
 function handleStartState(
@@ -342,6 +343,9 @@ function handleStartState(
       charIndex: 0,
       updateInterval: null,
     });
+    // 更新联系人文本(AI回答中...)
+    const contact = useChatStore().contactMap[oldMsg.message.roomId];
+    contact && (contact.text = contact.type === RoomType.GROUP ? `${oldMsg.fromUser.nickName}: 回答中...` : "AI回答中...");
   }
 }
 
@@ -352,7 +356,7 @@ function handleFinalState(
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
 ) {
   const finalContent = (data.content || "...").substring(0, 100);
-  contact.text = finalContent;
+  contact.text = contact.type === RoomType.GROUP ? `${oldMsg?.fromUser.nickName || "机器人"}: ${finalContent}` : finalContent;
 
   if (oldMsg) {
     const buffer = bufferMap.get(oldMsg);
