@@ -281,7 +281,7 @@ defineExpose({
           v-bind="$attrs"
         >
           <!-- 标题区 -->
-          <div v-if="title || showClose" class="relative pr-4">
+          <div v-if="title || showClose || $slots.title" class="relative pr-4">
             <slot name="title">
               <div mb-4>
                 {{ title }}

@@ -192,12 +192,15 @@ defineExpose({
 <template>
   <DialogPopup
     v-model="show"
+    :min-scale="0.96"
+    :duration="300"
     destroy-on-close
-    content-class="max-w-95vw overflow-hidden rounded-2 sm:w-fit p-4 border-default-2 dialog-bg-color"
+    :show-close="false"
+    content-class="max-w-95vw sm:w-fit shadow-lg border-default-2  rounded-2 dialog-bg-color"
   >
-    <template #title>
-      <div data-tauri-drag-region select-none text-center>
-        <i :class="form.roomId ? 'i-solar:users-group-rounded-bold' : 'i-solar:users-group-rounded-line-duotone'" class="mr-2 p-3 text-small" />
+    <template v-if="setting.isMobileSize" #title>
+      <div data-tauri-drag-region select-none p-4 pb-0 text-center text-sm>
+        <i :class="form.roomId ? 'i-solar:users-group-rounded-bold' : 'i-solar:users-group-rounded-line-duotone'" class="mr-2 p-2.6 text-small" />
         {{ form.roomId ? '邀请成员' : '新建群聊' }}
       </div>
     </template>
@@ -205,16 +208,14 @@ defineExpose({
       ref="formRef"
       label-position="top"
       :model="form"
-      class="relative pt-4"
+      class="relative overflow-hidden rounded-2"
     >
       <div ref="autoAnimateRef">
-        <div v-show="!imgStep" key="first" class="mt-4 w-82vw flex flex flex-col gap-4 md:w-800px md:flex-row">
+        <div v-show="!imgStep" key="first" class="w-82vw flex flex flex-col md:w-45rem md:flex-row">
           <!-- 未选列表 -->
-          <el-form-item
-            class="left flex-1"
-          >
+          <el-form-item class="left flex-1 p-4 sm:p-6">
             <template #label>
-              <div class="w-full flex-row-bt-c">
+              <div class="w-full flex-row-bt-c sm:pr-1.8">
                 好友列表
                 <el-input
                   v-model.lazy="dto.keyWord"
@@ -225,8 +226,8 @@ defineExpose({
                 />
               </div>
             </template>
-            <el-checkbox-group v-model="form.uidList" class="w-full">
-              <div class="scroll-bar max-h-40vh min-h-40vh flex flex-col overflow-y-auto sm:(max-h-300px min-h-300px pr-2)">
+            <el-checkbox-group v-model="form.uidList" class="w-full card-rounded-df bg-color-2 sm:!bg-transparent">
+              <div class="scroll-bar max-h-40vh min-h-40vh flex flex-col overflow-y-auto sm:(max-h-22rem min-h-22rem)">
                 <ListAutoIncre
                   :immediate="false"
                   :auto-stop="false"
@@ -244,6 +245,19 @@ defineExpose({
                 </ListAutoIncre>
               </div>
             </el-checkbox-group>
+            <!-- 第一步 -->
+            <div v-if="setting.isMobileSize" key="1" class="mt-4 w-full flex justify-between">
+              <el-button class="w-1/2" @click="show = false">
+                取消
+              </el-button>
+              <el-button
+                class="w-1/2"
+                :disabled="form.uidList.length <= 0"
+                :type="form.roomId ? 'info' : 'warning'" @click="next()"
+              >
+                {{ form.roomId ? '邀请' : '下一步' }}
+              </el-button>
+            </div>
           </el-form-item>
           <!-- 已选列表 -->
           <el-form-item
@@ -256,11 +270,11 @@ defineExpose({
                 trigger: ['blur'],
                 message: '群成员不能为空！',
               }]"
-            class="right h-fit flex-1 sm:pr-4"
-            style="display: flex;;flex-direction: column;"
+            class="right h-fit flex-1 p-4 bg-color-2 sm:p-6"
+            style="display: flex;;flex-direction: column;margin: 0;"
           >
             <ListTransitionGroup
-              v-show="getCheckList.length > 0" tag="div" class="scroll-bar grid grid-cols-3 mt-0 max-h-200px min-h-200px w-full items-start gap-col-2 overflow-y-auto card-rounded-df p-2 sm:(grid-cols-4 max-h-300px min-h-300px) bg-color-2"
+              v-show="getCheckList.length > 0" tag="div" class="scroll-bar grid grid-cols-3 mt-0 max-h-200px min-h-200px w-full items-start gap-col-2 overflow-y-auto card-rounded-df sm:(grid-cols-4 max-h-300px min-h-300px)"
             >
               <div v-for="p in getCheckList" :key="p.userId" class="item" :label="p.userId">
                 <i i-solar:close-circle-bold p-2 btn-primary class="absolute right-2px top-2px z-1" @click="remove(p.userId)" />
@@ -271,9 +285,22 @@ defineExpose({
               </div>
             </ListTransitionGroup>
             <!-- 空白 -->
-            <div v-show="getCheckList.length <= 0" class="h-200px w-full flex-row-c-c card-rounded-df sm:h-300px bg-color-2 text-small-50">
+            <div v-show="getCheckList.length <= 0" class="h-200px w-full flex-row-c-c card-rounded-df sm:h-300px text-small-50">
               <i i-solar:user-plus-broken mr-2 p-2.5 />
               <p>未选择成员</p>
+            </div>
+            <!-- 第一步 -->
+            <div key="1" class="w-full flex justify-center p-3 sm:justify-between">
+              <el-button class="w-2/5" @click="show = false">
+                取消
+              </el-button>
+              <el-button
+                class="w-2/5"
+                :disabled="form.uidList.length <= 0"
+                :type="form.roomId ? 'info' : 'warning'" @click="next()"
+              >
+                {{ form.roomId ? '邀请' : '下一步' }}
+              </el-button>
             </div>
           </el-form-item>
         </div>
@@ -294,7 +321,7 @@ defineExpose({
                 trigger: ['blur'],
                 message: '群头像不能为空！',
               }]"
-            style="height: fit-content;margin: auto;margin-bottom: 0;"
+            style="height: fit-content;margin: auto auto 0 auto;"
           >
             <div class="flex-row-c-c flex-col">
               <InputOssFileUpload
@@ -314,27 +341,14 @@ defineExpose({
               </div>
             </div>
           </el-form-item>
-          <div mb-4 mt-a w-full flex-row-c-c>
-            <el-button class="mr-2 w-5rem" @click="imgStep = false">
+          <div w-full flex-row-c-c p-4 sm:p-6>
+            <el-button class="mr-2 w-1/2" @click="imgStep = false">
               上一步
             </el-button>
-            <el-button class="w-5rem" :type="form.roomId ? 'warning' : 'info'" @click=" addGroupApply()">
-              完成
+            <el-button class="w-1/2" :type="form.roomId ? 'info' : 'warning'" @click="addGroupApply()">
+              {{ form.roomId ? '邀请' : "新建" }}
             </el-button>
           </div>
-        </div>
-        <!-- 第一步 -->
-        <div v-else key="1" class="flex justify-center px-4 py-2 sm:justify-end">
-          <el-button class="w-6em sm:w-8em" @click="show = false">
-            取消
-          </el-button>
-          <el-button
-            class="w-6em sm:w-8em"
-            :disabled="form.uidList.length <= 0"
-            :type="form.roomId ? 'warning' : 'info'" @click="next()"
-          >
-            {{ form.roomId ? '邀请' : '下一步' }}
-          </el-button>
         </div>
       </div>
     </el-form>
@@ -347,9 +361,11 @@ defineExpose({
   line-height: 1.1em;
 }
 :deep(.el-form-item) {
+  margin: 0;
   .el-form-item__label {
     display: block;
     width: 100%;
+    padding: 0;
   }
   .el-form-item__content {
     align-items: start;
@@ -369,7 +385,7 @@ defineExpose({
   --at-apply:"h-2.4rem card-default  w-2.4rem flex-row-c-c rounded-6px  shadow-sm border-default"
 }
 .item {
-  --at-apply:"flex flex-col relative items-center gap-4 px-2 py-3.6 page-pointer rounded-6px hover:(bg-color-3 ) transition-300"
+  --at-apply:"flex flex-col relative items-center gap-4 px-2 pt-3.6 page-pointer rounded-6px hover:(bg-color) transition-300"
 }
 .check-item {
   --at-apply:"flex items-center px-4 gap-2 page-pointer rounded-6px p-2 hover:(bg-color-3 dark:bg-dark-8) transition-300"

@@ -44,7 +44,7 @@ async function addMsg() {
 <template>
   <DialogPopup
     v-model="isShow"
-    :duration="360"
+    :duration="300"
     destroy-on-close
     content-class="rounded-2 p-4 w-fit border-default-2 dialog-bg-color"
   >

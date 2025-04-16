@@ -341,7 +341,7 @@ html.stop-transition-all {
 .group-list-move, /* 对移动中的元素应用的过渡 */
 .group-list-enter-active,
 .group-list-leave-active {
-  transition: all 0.3s;
+  transition: all 0.3s $animate-cubic-bount;
 }
 
 .group-list-enter-from,

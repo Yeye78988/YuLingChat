@@ -58,8 +58,8 @@ function handleImagePreview() {
       >
         <CardElImage
           :src="BaseUrlImg + body?.url"
-          load-class="sky-loading block absolute top-0"
-          class="h-full w-full"
+          load-class="sky-loading block absolute  top-0"
+          class="h-full w-full card-rounded-df"
           :alt="body?.url"
           fit="cover"
           :preview="false"
