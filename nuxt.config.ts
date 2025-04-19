@@ -11,6 +11,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const isSSR = process.env.NUXT_PUBLIC_SPA;
 const mode = process.env.NUXT_PUBLIC_NODE_ENV as "development" | "production" | "test";
 const version = packageJson?.version;
+const host = process.env.TAURI_DEV_HOST;
 // 打印
 console.log(`mode:${mode} api_url:${BASE_URL} SSR:${isSSR} platform: ${platform}`);
 export default defineNuxtConfig({
@@ -129,7 +130,7 @@ export default defineNuxtConfig({
   },
   // pwa
   // pwa,
-  devServer: { host: process.env.TAURI_DEV_HOST || "localhost" },
+  devServer: { host: host || "localhost" },
   // nuxt开发者工具
   devtools: {
     enabled: false,
@@ -152,6 +153,13 @@ export default defineNuxtConfig({
     server: {
       // Tauri需要一个确定的端口
       strictPort: true,
+      hmr: host
+        ? {
+            protocol: "ws",
+            host,
+            port: 1421,
+          }
+        : undefined,
       // hmr: {
       //   host: "192.168.31.14",
       //   port: 3000,
