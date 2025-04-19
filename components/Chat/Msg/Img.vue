@@ -62,6 +62,7 @@ function handleImagePreview() {
           class="h-full w-full card-rounded-df"
           :alt="body?.url"
           fit="cover"
+          ctx-name="img"
           :preview="false"
         />
       </div>

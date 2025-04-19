@@ -8,8 +8,8 @@ import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { disable as disableAutostart, isEnabled as isAutostartEnabled } from "@tauri-apps/plugin-autostart";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory } from "@tauri-apps/plugin-fs";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { open as openUrl } from "@tauri-apps/plugin-shell";
 import { check } from "@tauri-apps/plugin-updater";
 import { filename as windowStateFilename } from "@tauri-apps/plugin-window-state";
 import { acceptHMRUpdate, defineStore } from "pinia";
@@ -230,7 +230,7 @@ export const useSettingStore = defineStore(
         return;
       }
       try {
-        await openUrl(item.localPath);
+        await openPath(item.localPath);
       }
       catch (error) {
         console.warn(error);
@@ -281,7 +281,7 @@ export const useSettingStore = defineStore(
           ElMessage.error("文件夹不存在！");
           return;
         }
-        openUrl(folderPath);
+        openPath(folderPath);
       }
       catch (error) {
         console.warn(error);
