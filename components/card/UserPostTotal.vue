@@ -40,13 +40,9 @@ async function loadData() {
     }, store.getToken);
 
     if (res.code === StatusCode.SUCCESS) {
-      // @ts-expect-error
       dataList.value[0].value = res.data.postCount;
-      // @ts-expect-error
       dataList.value[1].value = res.data.postCommentCount;
-      // @ts-expect-error
       dataList.value[2].value = res.data.postCollectCount;
-      // @ts-expect-error
       dataList.value[3].value = res.data.postLikeCount;
     }
   }

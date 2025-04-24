@@ -240,7 +240,6 @@ export const useChatStore = defineStore(
       get: () => !!currentRoomCache?.value?.isLoading,
       set: (val) => {
         if (theRoomId.value && roomMapCache.value?.[theRoomId.value]) {
-          // @ts-expect-error
           roomMapCache.value[theRoomId.value].isLoading = val;
         }
       },
@@ -249,7 +248,6 @@ export const useChatStore = defineStore(
       get: () => !!currentRoomCache?.value?.isReload,
       set: (val) => {
         if (theRoomId.value && roomMapCache.value?.[theRoomId.value]) {
-          // @ts-expect-error
           roomMapCache.value[theRoomId.value].isReload = val;
         }
       },
@@ -270,7 +268,6 @@ export const useChatStore = defineStore(
           };
           return;
         }
-        // @ts-expect-error
         roomMapCache.value[theRoomId.value].pageInfo = newPageInfo;
       },
     });
