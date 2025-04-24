@@ -239,17 +239,15 @@ export const useChatStore = defineStore(
     const isMemberLoading = computed({
       get: () => !!currentRoomCache?.value?.isLoading,
       set: (val) => {
-        if (theRoomId.value && roomMapCache.value?.[theRoomId.value]) {
-          roomMapCache.value[theRoomId.value].isLoading = val;
-        }
+        if (theRoomId.value && roomMapCache.value?.[theRoomId.value])
+          roomMapCache.value[theRoomId.value]!.isLoading = val;
       },
     });
     const isMemberReload = computed({
       get: () => !!currentRoomCache?.value?.isReload,
       set: (val) => {
-        if (theRoomId.value && roomMapCache.value?.[theRoomId.value]) {
-          roomMapCache.value[theRoomId.value].isReload = val;
-        }
+        if (theRoomId.value && roomMapCache.value?.[theRoomId.value])
+          roomMapCache.value[theRoomId.value]!.isReload = val;
       },
     });
     const memberPageInfo = computed({ // 缓存当前房间的分页信息
@@ -268,7 +266,7 @@ export const useChatStore = defineStore(
           };
           return;
         }
-        roomMapCache.value[theRoomId.value].pageInfo = newPageInfo;
+        roomMapCache.value[theRoomId.value]!.pageInfo = newPageInfo;
       },
     });
     const roomGroupPageInfo = ref({
