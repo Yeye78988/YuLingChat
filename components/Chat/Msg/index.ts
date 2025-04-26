@@ -53,7 +53,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     return;
   }
 
-  const translation = data?.message.body?.translation as TranslationVO | null;
+  const translation = data?.message.body?._textTranslation as TranslationVO | null;
 
   // 大多数消息类型的默认上下文菜单选项
   const defaultContextMenu = [
@@ -158,6 +158,27 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: () => {
           useCopyText(data.message.body._textTranslation?.result as string);
+        },
+      },
+      {
+        label: "重新翻译",
+        hidden: !txt || !data.message.body._textTranslation,
+        customClass: "group",
+        icon: "i-solar:refresh-outline group-hover:(rotate-180 i-solar:refresh-bold) group-btn-info",
+        onClick: async () => {
+          if (translation) {
+            closeTranslation(data.message.id, translation.targetLang);
+            data.message.body._textTranslation = null;
+          }
+          else {
+            const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
+            if (res) {
+              data.message.body._textTranslation = res;
+            }
+            else {
+              ElMessage.error("翻译失败，请稍后再试！");
+            }
+          }
         },
       },
       {

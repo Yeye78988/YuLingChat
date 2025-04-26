@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core";
 
+const SHOW_SHORTCUT_TIPS_KEY = "image-viewer-show-shortcut-tips";
+const IS_SHORTCUT_CARD_COLLAPSED_KEY = "image-viewer-is-shortcut-card-collapsed";
+
+// 快捷键信息
 interface ShortcutInfo {
   key: string;
   description: string;
@@ -34,7 +38,7 @@ const keyDownFnMap: Record<string, () => void> = {
 };
 
 // 使用 localStorage 存储用户是否不再显示提示
-const showShortcutTips = useLocalStorage<boolean>("image-viewer-show-shortcut-tips", true);
+const showShortcutTips = useLocalStorage<boolean>(SHOW_SHORTCUT_TIPS_KEY, true);
 const hiddenShortcutTips = computed({
   get: () => !showShortcutTips.value,
   set: (val) => {
@@ -43,7 +47,7 @@ const hiddenShortcutTips = computed({
 });
 
 // 控制提示卡片是否折叠
-const isShortcutCardCollapsed = useLocalStorage<boolean>("image-viewer-shortcut-card-collapsed", false); ;
+const isShortcutCardCollapsed = useLocalStorage<boolean>(IS_SHORTCUT_CARD_COLLAPSED_KEY, false); ;
 
 // 关闭提示但不记住选择
 function closeShortcutCard() {
@@ -353,7 +357,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", handleKeydown);
-  console.log("unmounted");
+  console.log("unmounted ImageViewer");
 });
 
 // 暴露方法给外部使用

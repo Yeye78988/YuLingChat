@@ -190,6 +190,7 @@ export interface ChatUserFriendApplyVO {
 export enum ChatApplyStatusType {
   Load = 0,
   Argee = 1,
+  Reject = 2,
 }
 
 
@@ -343,8 +344,33 @@ export enum FriendOptType {
 }
 
 
+/**
+ * 同意好友申请
+ * @param dto 参数
+ * @param token token
+ * @returns 结果
+ */
 export function argeeFriendApply(dto: ChatUserFriendApproveDTO, token: string) {
   return useHttp.put<Result<number>>(
+    "/chat/user/friend/apply",
+    {
+      ...dto,
+    },
+    {
+      headers: {
+        Authorization: token,
+      },
+    },
+  );
+}
+/**
+ * 拒绝好友申请
+ * @param dto 参数
+ * @param token token
+ * @returns 结果
+ */
+export function rejectFriendApply(dto: ChatUserFriendRejectDTO, token: string) {
+  return useHttp.deleted<Result<number>>(
     "/chat/user/friend/apply",
     {
       ...dto,
@@ -360,6 +386,15 @@ export function argeeFriendApply(dto: ChatUserFriendApproveDTO, token: string) {
  * ChatUserFriendApproveDTO
  */
 export interface ChatUserFriendApproveDTO {
+  /**
+   * 申请id
+   */
+  applyId: number;
+}
+/**
+ * ChatUserFriendRejectDTO
+ */
+export interface ChatUserFriendRejectDTO {
   /**
    * 申请id
    */

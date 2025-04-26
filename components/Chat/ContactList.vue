@@ -221,7 +221,7 @@ watchDebounced(() => chat.theRoomId, (newRoomId) => {
       }
     });
   }
-}, { immediate: false, debounce: 80 });
+}, { immediate: false, debounce: 300 });
 
 reload();
 

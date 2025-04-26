@@ -14,6 +14,9 @@ defineProps<{
       <strong text-0.9em font-500>
         新的朋友
       </strong>
+      <!-- TODO 申请记录 -->
+      <!-- <div class="i-solar:sort-by-time-bold ml-2 p-3 btn-info" title="申请记录"/> -->
+      <slot name="control" />
     </div>
     <el-scrollbar view-class="p-2rem md:w-2/3 mx-a" wrap-class="w-full flex-1 h-full">
       <ChatFriendApplyList />

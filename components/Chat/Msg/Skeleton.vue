@@ -20,7 +20,7 @@ const randon = Math.random();
     <!-- 头像 -->
     <div
       :class="animteClass"
-      class="avatar h-2.4rem w-2.4rem flex-shrink-0 cursor-pointer rounded-1/2 object-cover border-default-hover"
+      class="avatar h-2.4rem w-2.4rem flex-shrink-0 cursor-pointer rounded-1/2 object-cover"
     />
     <!-- 消息体 -->
     <div
@@ -31,7 +31,7 @@ const randon = Math.random();
       <!-- 内容 -->
       <p
         :class="animteClass"
-        class="msg-popper !bg-color-br border-default-hover" :style="{ width: `${5 + Math.floor(randon * 10) * 2}em`, height: `${3 * Math.floor(randon * 5)}em` }"
+        class="msg-popper !bg-color-br" :style="{ width: `${5 + Math.floor(randon * 10) * 2}em`, height: `${3 * Math.floor(randon * 5)}em` }"
       />
     </div>
   </div>

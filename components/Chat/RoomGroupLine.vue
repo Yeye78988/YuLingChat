@@ -256,7 +256,6 @@ function onInviteMember() {
   <!-- <i class="block h-1.8em w-1.8em rounded-2rem sm:(h-1.6em w-1.6em) btn-info border-default" i-carbon:add-large @click="onAdd" /> -->
   <div class="relative">
     <div v-if="!isReload" class="h-42px w-500px overflow-hidden" v-bind="wrapperProps">
-      <!-- you can get current item of list here -->
       <div class="w-500px flex items-center overflow-x-auto" v-bind="containerProps">
         <div
           v-for="p in vMemberList"
@@ -265,6 +264,9 @@ function onInviteMember() {
           :class="p.data.activeStatus === ChatOfflineType.ONLINE ? 'live' : 'op-50 filter-grayscale filter-grayscale-100 '"
           :title="p.data.nickName"
           @contextmenu="($event) => onContextMenu($event, p.data)"
+          @click="chat.setTheFriendOpt(FriendOptType.User, {
+            id: p.data.userId,
+          })"
         >
           <CardElImage
             :default-src="p.data.avatar"

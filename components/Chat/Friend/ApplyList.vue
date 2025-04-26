@@ -35,6 +35,19 @@ async function loadData(call?: () => void) {
   call && call();
 }
 
+// 刷新数据
+async function reload() {
+  pageInfo.value = {
+    cursor: null as null | string,
+    isLast: false,
+    size: 10,
+    page: 0,
+    total: -1,
+  };
+  list.value = [];
+  await loadData();
+}
+
 
 // 会话store
 const chat = useChatStore();
@@ -65,6 +78,48 @@ function onArgeeFriend(applyId: number) {
     },
   });
 }
+
+// 添加拒绝好友申请的处理函数
+function onRejectFriend(applyId: number) {
+  ElMessageBox.confirm("是否拒绝好友申请？", {
+    title: "拒绝申请",
+    type: "warning",
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    lockScroll: false,
+    center: true,
+    callback: async (action: string) => {
+      if (action === "confirm") {
+        const res = await rejectFriendApply({ applyId }, user.getToken);
+        if (res.code === StatusCode.SUCCESS) {
+          const item = list.value.find(p => p.applyId === applyId);
+          if (item) {
+            item.status = ChatApplyStatusType.Reject;
+          }
+        }
+      }
+    },
+  });
+}
+
+const applyStatusTextMap = {
+  [ChatApplyStatusType.Load]: "待处理",
+  [ChatApplyStatusType.Argee]: "已同意",
+  [ChatApplyStatusType.Reject]: "已拒绝",
+};
+
+const openItemId = ref<number>();
+
+
+watch(() => chat.applyUnReadCount, (newVal, oldVal) => {
+  if (newVal && newVal > 0) {
+    reload();
+  }
+});
+
+onBeforeUnmount(() => {
+  chat.applyUnReadCount = 0;
+});
 </script>
 
 <template>
@@ -105,10 +160,46 @@ function onArgeeFriend(applyId: number) {
           </small>
         </div>
         <div class="ml-a flex-row-c-c flex-shrink-0">
-          <el-button v-if="p.status === ChatApplyStatusType.Load" size="small" @click="onArgeeFriend(p.applyId)">
-            同意
-          </el-button>
-          <small v-else-if="p.status === ChatApplyStatusType.Argee">已同意</small>
+          <template v-if="p.status === ChatApplyStatusType.Load">
+            <el-button-group>
+              <BtnElButton size="small" @click="onArgeeFriend(p.applyId)">
+                同意
+              </BtnElButton>
+              <BtnElButton
+                size="small"
+                style="padding: 0 0.3em;"
+                @click="openItemId = openItemId === p.applyId ? undefined : p.applyId"
+              >
+                <el-popover
+                  :visible="openItemId === p.applyId"
+                  popper-class="!border-default !p-1 !min-w-fit"
+                  width="fit-content"
+                  transition="popper-fade"
+                  :teleported="true"
+                  :trigger-keys="['Enter']"
+                  append-to-body
+                  placement="bottom"
+                  trigger="click"
+                >
+                  <template #reference>
+                    <i
+                      :class="openItemId === p.applyId ? 'i-solar:alt-arrow-up-line-duotone' : 'i-solar:alt-arrow-down-line-duotone'"
+                      class="p-2"
+                    />
+                  </template>
+                  <template #default>
+                    <div
+                      class="w-fit px-3 py-1 text-sm tracking-0.1em btn-primary-bg"
+                      @click="onRejectFriend(p.applyId)"
+                    >
+                      拒绝
+                    </div>
+                  </template>
+                </el-popover>
+              </BtnElButton>
+            </el-button-group>
+          </template>
+          <small v-else>{{ applyStatusTextMap[p.status] }}</small>
         </div>
       </div>
       <template #done>
