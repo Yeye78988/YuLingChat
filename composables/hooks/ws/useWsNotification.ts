@@ -43,6 +43,8 @@ export function useWsNotification() {
    * 发送系统通知
    */
   function sendMessageNotification(msg: ChatMessageVO) {
+    if (!checkNotice(msg))
+      return;
     // web 通知
     if (setting.isWeb) {
       sendWebNotification(msg.fromUser.nickName, `${msg.message.content || "消息通知"}`, {
@@ -69,4 +71,11 @@ export function useWsNotification() {
     handleNotification,
     sendMessageNotification,
   };
+}
+
+function checkNotice(msg: ChatMessageVO) {
+  const chat = useChatStore();
+  if (chat?.contactMap?.[msg?.message?.roomId as any]?.shieldStatus === isTrue.TRUE)
+    return false;
+  return true;
 }

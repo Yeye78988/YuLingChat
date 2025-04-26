@@ -110,18 +110,25 @@ async function refreshItem(roomId: number) {
 function onContextMenu(e: MouseEvent, item: ChatContactVO) {
   e.preventDefault();
   const isPin = !!chat.contactMap?.[item.roomId]?.pinTime;
+  const isShield = !!chat.contactMap?.[item.roomId]?.shieldStatus;
   const opt = {
     x: e.x,
     y: e.y,
     theme: setting.contextMenuTheme,
     items: [
-      { // 置顶功能
+      // 置顶功能
+      {
         customClass: "group",
         icon: isPin ? "i-solar:pin-bold-duotone  group-hover:(i-solar:pin-outline scale-110)" : "i-solar:pin-outline group-hover:i-solar:pin-bold-duotone",
         label: isPin ? "取消置顶" : "置顶",
-        onClick: () => {
-          chat.setPinContact(item.roomId, isPin ? isTrue.FALESE : isTrue.TRUE);
-        },
+        onClick: () => chat.setPinContact(item.roomId, isPin ? isTrue.FALESE : isTrue.TRUE),
+      },
+      // 免打扰功能
+      {
+        customClass: "group",
+        icon: isShield ? "i-carbon:notification-filled group-hover:i-carbon:notification" : "i-carbon:notification-off group-hover:(i-carbon:notification-off-filled scale-110)",
+        label: isShield ? "取消免打扰" : "免打扰",
+        onClick: () => chat.setShieldContact(item.roomId, !isShield ? isTrue.TRUE : isTrue.FALESE),
       },
       {
         customClass: "group",
@@ -259,7 +266,7 @@ const menuList = [
   >
     <!-- 搜索群聊 -->
     <div
-      class="nav-padding-top-8 header"
+      class="header nav-padding-top-8"
       :class="setting.isMobileSize && !setting.isOpenContactSearch ? '!h-0 overflow-y-hidden' : ''"
     >
       <ElInput
@@ -333,13 +340,14 @@ const menuList = [
             :class="{
               'is-pin': room.pinTime,
               'is-checked': room.roomId === chat.theRoomId,
+              'is-shield': room.shieldStatus === isTrue.TRUE,
             }"
             @contextmenu.stop="onContextMenu($event, room)"
             @click="onClickContact(room)"
           >
             <el-badge
               :hidden="!room.unreadCount" :max="99" :value="room.unreadCount"
-              class="h-3em w-3em flex-shrink-0"
+              class="badge h-3em w-3em flex-shrink-0"
             >
               <CardElImage
                 :error-class="contactTypeIconClassMap[room.type]"
@@ -361,13 +369,12 @@ const menuList = [
               <p class="text mt-1 flex text-small">
                 <small
                   class="h-1.5em flex-1 truncate"
-                  :class="{ 'text-[var(--el-color-info)] font-600': room.unreadCount }"
+                  :class="{ 'text-[var(--el-color-info)] font-600': room.unreadCount && room.shieldStatus !== isTrue.TRUE }"
                 >
                   {{ room.text }}
                 </small>
-                <small v-if="room.pinTime" class="text ml-a flex-shrink-0 overflow-hidden text-color">
-                  &nbsp;置顶
-                </small>
+                <small v-if="room.shieldStatus === isTrue.TRUE" class="text i-carbon:notification-off ml-1 flex-shrink-0 overflow-hidden text-3 text-small" />
+                <small v-if="room.pinTime" class="text i-solar:pin-bold-duotone ml-1 flex-shrink-0 overflow-hidden text-3 text-color" />
               </p>
             </div>
           </div>
@@ -412,6 +419,15 @@ const menuList = [
       }
       .ai-icon {
         --at-apply: "sm:!text-light";
+      }
+    }
+
+    // :deep(.el-badge__content) {
+    //   --at-apply: "border-none";
+    // }
+    &.is-shield {
+      :deep(.el-badge__content) {
+        --at-apply: "bg-gray text-white border-none dark:(bg-dark-2)";
       }
     }
   }

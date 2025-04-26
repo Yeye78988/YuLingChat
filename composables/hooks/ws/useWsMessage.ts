@@ -1,3 +1,4 @@
+import type { WSUpdateContactInfoMsg } from "~/types/chat/WsType";
 import { WsMsgBodyType } from "~/types/chat/WsType";
 
 
@@ -12,6 +13,7 @@ export interface WsMsgItemMap {
   rtcMsg: WSRtcCallMsg[];
   pinContactMsg: WSPinContactMsg[];
   aiStreamMsg: WSAiStreamMsg[];
+  updateContactInfoMsg: WSUpdateContactInfoMsg[]
   other: object[];
 }
 
@@ -31,6 +33,7 @@ export function useWsMessage() {
     [WsMsgBodyType.RTC_CALL]: "rtcMsg",
     [WsMsgBodyType.PIN_CONTACT]: "pinContactMsg",
     [WsMsgBodyType.AI_STREAM]: "aiStreamMsg",
+    [WsMsgBodyType.UPDATE_CONTACT_INFO]: "updateContactInfoMsg",
   };
 
   // 创建空消息列表
@@ -51,10 +54,12 @@ export function useWsMessage() {
     tokenMsg: [],
     /** 8 RTC消息 */
     rtcMsg: [],
-    /** 9 置顶联系人 */
+    /** 10 置顶联系人 */
     pinContactMsg: [],
-    /** 10 AI流式消息 */
+    /** 11 AI流式消息 */
     aiStreamMsg: [],
+    /** 12 会话更新 */
+    updateContactInfoMsg: [],
     /** 其他消息 */
     other: [],
   });

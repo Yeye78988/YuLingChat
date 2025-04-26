@@ -15,6 +15,7 @@ export enum MittEventType {
   DELETE = "chat-delete", // 删除通知
   RTC_CALL = "chat-rtc-call", // 视频通话通知
   PIN_CONTACT = "chat-pin-contact", // 置顶通知
+  UPDATE_CONTACT_INFO = "chat-update-contact-info", // 更新会话信息通知
   AI_STREAM = "chat-ai-msg", // AI消息
   OTHER = "chat-other",
 
@@ -104,6 +105,7 @@ type EventPayloadMap = {
   [MittEventType.DELETE]: WSMsgDelete;
   [MittEventType.RTC_CALL]: WSRtcCallMsg;
   [MittEventType.PIN_CONTACT]: WSPinContactMsg;
+  [MittEventType.UPDATE_CONTACT_INFO]: WSUpdateContactInfoMsg;
   [MittEventType.AI_STREAM]: WSAiStreamMsg;
   [MittEventType.OTHER]: object;
   // 消息列表组件事件
@@ -141,6 +143,7 @@ const eventAndWsMap: Readonly<Record<WsMsgBodyType, MittEventType>> = {
   [WsMsgBodyType.RTC_CALL]: MittEventType.RTC_CALL,
   [WsMsgBodyType.PIN_CONTACT]: MittEventType.PIN_CONTACT,
   [WsMsgBodyType.AI_STREAM]: MittEventType.AI_STREAM,
+  [WsMsgBodyType.UPDATE_CONTACT_INFO]: MittEventType.UPDATE_CONTACT_INFO,
 } as const;
 export function resolteChatPath(type: WsMsgBodyType): MittEventType {
   return eventAndWsMap[type] || MittEventType.OTHER;

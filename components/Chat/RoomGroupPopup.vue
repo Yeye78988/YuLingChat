@@ -63,13 +63,40 @@ function showJoinGroup() {
     uidList: [],
   };
 };
+
+const isPin = computed(() => !!chat.theContact?.pinTime);
+const isPinLoading = ref(false);
+async function changIsPin() {
+  isPinLoading.value = true;
+  try {
+    const val = isPin.value ? isTrue.FALESE : isTrue.TRUE;
+    await chat.setPinContact(chat.theRoomId!, val);
+    return !!val;
+  }
+  finally {
+    isPinLoading.value = false;
+  }
+}
+const shieldStatus = computed(() => chat.theContact?.shieldStatus === isTrue.TRUE);
+const shieldStatusLoading = ref(false);
+async function changShieldStatus() {
+  shieldStatusLoading.value = true;
+  try {
+    const val = chat.theContact?.shieldStatus === isTrue.TRUE ? isTrue.FALESE : isTrue.TRUE;
+    await chat.setShieldContact(chat.theRoomId!, val);
+    return !!val;
+  }
+  finally {
+    shieldStatusLoading.value = false;
+  }
+}
 </script>
 
 <template>
-  <div
+  <el-scrollbar
     v-if="setting.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
-    class="group relative"
+    class="group scroll relative"
   >
     <div flex-row-bt-c flex-shrink-0 flex-row truncate>
       <i
@@ -153,7 +180,7 @@ function showJoinGroup() {
       </small> -->
       </div>
     </div>
-    <div class="mt-2 w-full flex-1 overflow-y-auto border-0 border-t-1px px-2 pt-2 text-3.5 leading-1.8em border-default">
+    <div class="mt-2 w-full flex-1 overflow-y-auto border-0 border-t-1px pt-2 text-3.5 leading-1.8em border-default">
       <div relative mt-3>
         群头像
         <InputOssFileUpload
@@ -212,7 +239,7 @@ function showJoinGroup() {
           autofocus
           :rows="8"
           :maxlength="200"
-          class="mt-2 border-0 bg-transparent"
+          class="scroll-bar mt-2 card-rounded-df bg-transparent p-3 border-default-2"
           type="textarea"
           style="resize:none;width: 100%;"
           placeholder="未填写"
@@ -221,12 +248,33 @@ function showJoinGroup() {
           @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
         />
       </div>
+      <div class="label-item mt-3">
+        会话设置
+        <div class="mt-3 card-rounded-df px-3 py-2 border-default-2">
+          <div mb-2 flex-row-bt-c pb-2 text-xs border-default-b>
+            设为置顶
+            <el-switch
+              :model-value="isPin"
+              :loading="isPinLoading"
+              :before-change="changIsPin"
+            />
+          </div>
+          <div flex-row-bt-c text-xs>
+            消息免打扰
+            <el-switch
+              :model-value="shieldStatus"
+              :loading="shieldStatusLoading"
+              :before-change="changShieldStatus"
+            />
+          </div>
+        </div>
+      </div>
     </div>
     <btn-el-button
-      v-show="!chat.contactMap[chat.theRoomId!]?.hotFlag" v-memo="[isNotExistOrNorFriend, isTheGroupOwner]" class="group-hover:op-100 sm:op-0" icon-class="i-solar:logout-3-broken mr-2"
+      v-show="!chat.contactMap[chat.theRoomId!]?.hotFlag" v-memo="[isNotExistOrNorFriend, isTheGroupOwner]" icon-class="i-solar:logout-3-broken mr-2"
       type="danger"
-      round
       plain
+      class="mt-3 w-full"
       @click="onExitOrClearGroup"
     >
       <span>
@@ -235,7 +283,7 @@ function showJoinGroup() {
     </btn-el-button>
     <!-- 好友申请 -->
     <LazyChatFriendApplyDialog v-model:show="isShowApply" :user-id="theUser?.userId" />
-  </div>
+  </el-scrollbar>
 </template>
 
 <style lang="scss" scoped>
@@ -318,6 +366,11 @@ function showJoinGroup() {
   }
   .icon {
     --at-apply: "h-2rem w-2rem flex-row-c-c btn-primary-bg  input-bg-color";
+  }
+}
+.scroll {
+  :deep(.el-scrollbar__thumb) {
+    display: none;
   }
 }
 </style>

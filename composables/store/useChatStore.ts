@@ -97,7 +97,7 @@ export const useChatStore = defineStore(
       return sortedContacts.value;
     });
     const unReadContactList = computed(() => {
-      const list = sortedContacts.value.filter(p => p.unreadCount);
+      const list = sortedContacts.value.filter(p => p.unreadCount && p.shieldStatus !== isTrue.TRUE);
       localStorage.setItem("unReadContactList", JSON.stringify(list));
       return list;
     });
@@ -387,7 +387,6 @@ export const useChatStore = defineStore(
         return;
       }
       // vo.unreadCount = 0;
-      theRoomId.value = vo.roomId;
       contactMap.value[vo.roomId] = {
         ...(vo || {}),
         // 消息列表
@@ -399,7 +398,8 @@ export const useChatStore = defineStore(
       };
       // 补充会话详情 (5分钟更新一次)
       const lastSaveTime = contactMap.value?.[vo.roomId]?.saveTime;
-      if (lastSaveTime && (Date.now() - lastSaveTime < CONTACT_CACHE_TIME)) {
+      if (lastSaveTime && ((Date.now() - lastSaveTime) < CONTACT_CACHE_TIME)) {
+        theRoomId.value = vo.roomId;
         return;
       }
       const res = await getChatContactInfo(vo.roomId, user.getToken, vo.type)?.catch(() => {});
@@ -414,6 +414,7 @@ export const useChatStore = defineStore(
           saveTime: Date.now(),
         };
       }
+      theRoomId.value = vo.roomId;
     }
     // 重新拉取会话
     async function reloadContact(roomId: number, callBack?: (contact: ChatContactDetailVO) => void) {
@@ -482,7 +483,7 @@ export const useChatStore = defineStore(
         const res = await getChatContactInfo(id as number, user.getToken, RoomType.GROUP);
         if (!res)
           return;
-        if (res.code === StatusCode.DELETE_NOEXIST_ERR) { // 发送消息拉取会话
+        if (!res.data) { // 发送消息拉取会话
           ElMessage.closeAll("error");
           // 记录已删除，重新拉取会话
           const newRes = await restoreGroupContact(id as number, user.getToken);
@@ -491,10 +492,11 @@ export const useChatStore = defineStore(
           }
           contact = newRes.data;
         }
-        contact = contactMap.value[id as number] as ChatContactDetailVO;
+        else {
+          contact = contactMap.value[id as number] as ChatContactDetailVO;
+        }
       }
       if (contact) {
-        console.log(contact);
         await setContact(contact);
       }
       if (setting.isMobileSize) { // 移动尺寸 - 清空模板 + 打开聊天页面
@@ -553,6 +555,22 @@ export const useChatStore = defineStore(
         resolvePinContact(res.data);
         callBack && callBack(contactMap.value[roomId]);
       }
+      return isPin;
+    }
+
+    /**
+     * 设置更新会话
+     * @param roomId 房间id
+     * @param shield 免打扰状态
+     * @param callBack 回调
+     */
+    async function setShieldContact(roomId: number, shield: number, callBack?: (contact?: Partial<ChatContactVO>) => void) {
+      const res = await shieldContact(roomId, shield, user.getToken);
+      if (res.code === StatusCode.SUCCESS && res.data) {
+        resolveUpdateContactInfo(res.data);
+        callBack && callBack(contactMap.value[roomId]);
+      }
+      return shield;
     }
 
 
@@ -1054,6 +1072,7 @@ export const useChatStore = defineStore(
       rollbackCall,
       useChatWebRTC,
       setPinContact,
+      setShieldContact,
       appendMsg,
       removeMsgCache,
       confirmRtcFn,

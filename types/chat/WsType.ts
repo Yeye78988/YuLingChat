@@ -103,6 +103,10 @@ export enum WsMsgBodyType {
    * AI推送消息
    */
   AI_STREAM = 11,
+  /**
+   * 会话信息更新通知
+   */
+  UPDATE_CONTACT_INFO = 12,
 }
 
 // 上下线通知类型定义
@@ -179,6 +183,12 @@ export interface WSPinContactMsg {
   pinTime: number
   roomId: number
   isPin: isTrue
+}
+// 免打扰通知类型定义
+export interface WSUpdateContactInfoMsg {
+  roomId: number
+  noticeStatus: number
+  shieldStatus: number
 }
 
 export enum AiRoleEnums {
@@ -265,4 +275,7 @@ export interface WsMsgDataTypeMap<T> {
   [WsMsgBodyType.RTC_CALL]: WSRtcCallMsg
   [WsMsgBodyType.PIN_CONTACT]: WSPinContactMsg
   [WsMsgBodyType.AI_STREAM]: WSAiStreamMsg
+  [WsMsgBodyType.UPDATE_CONTACT_INFO]: WSUpdateContactInfoMsg
 }
+
+

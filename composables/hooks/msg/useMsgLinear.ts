@@ -21,7 +21,11 @@ export function useMsgLinear() {
     mitter.on(MittEventType.AI_STREAM, (data: WSAiStreamMsg) => {
       resolveAiStream(data);
     });
-  };
+    // 6、会话信息更新消息 type=12 UPDATE_CONTACT_INFO
+    mitter.on(MittEventType.UPDATE_CONTACT_INFO, (data: WSUpdateContactInfoMsg) => {
+      resolveUpdateContactInfo(data);
+    });
+  }
 
   // 移除监听
   function removeListeners() {
@@ -30,6 +34,7 @@ export function useMsgLinear() {
     mitter.off(MittEventType.DELETE);
     mitter.off(MittEventType.PIN_CONTACT);
     mitter.off(MittEventType.AI_STREAM);
+    mitter.off(MittEventType.UPDATE_CONTACT_INFO);
   }
 
   // 监听
@@ -377,5 +382,17 @@ function handleFinalState(
       chat.scrollBottom(true);
     }
   }
+}
+
+/**
+ * 处理会话信息更新消息
+ * @param data 数据
+ */
+export function resolveUpdateContactInfo(data: WSUpdateContactInfoMsg) {
+  const chat = useChatStore();
+  chat.updateContact(data.roomId, {}, (contact) => {
+    data.shieldStatus !== null && data.shieldStatus !== undefined && (contact.shieldStatus = data.shieldStatus);
+    data.noticeStatus !== null && data.noticeStatus !== undefined && (contact.noticeStatus = data.noticeStatus);
+  });
 }
 

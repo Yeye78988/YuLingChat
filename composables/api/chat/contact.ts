@@ -204,6 +204,13 @@ export interface ChatContactVO {
    */
   pinTime?: number
 
+  noticeStatus?: NoticeStatusEnums
+
+  /**
+   * 免打扰状态
+   */
+  shieldStatus?: isTrue
+
   /**
    * 最后一条消息id
    */
@@ -323,4 +330,43 @@ export interface RoomGroupExtJson {
    */
   notice?: null | string
   [property: string]: any
+}
+
+
+/**
+ * 免打扰会话
+ * @param roomId 房间号
+ * @param shield 免打扰状态
+ * @param token 身份
+ * @returns 影响
+ */
+export function shieldContact(roomId: number, shield: number, token: string) {
+  return useHttp.put<Result<WSUpdateContactInfoMsg>>(
+    `/chat/contact/notice/shield/${roomId}/${shield}`,
+    { },
+    { headers: { Authorization: token } },
+  );
+}
+
+
+/**
+ * 提醒状态枚举
+ */
+export enum NoticeStatusEnums {
+  // /**
+  //  * 默认提醒
+  //  */
+  // DEFAULT = 0,
+  /**
+   * 接收消息但不提醒
+   */
+  NOT_NOTICE = 1,
+  /**
+   * 收进群助手且不提醒
+   */
+  NOT_NOTICE_BY_GROUP = 2,
+  /**
+   * 屏蔽群消息
+   */
+  SHIELD_GROUP = 3,
 }

@@ -51,7 +51,7 @@ export default defineConfig({
     ["border-default-l", "border-solid border-gray-200 border-0 border-l-1px  dark:border-dark-300"],
     ["border-default-t", "border-solid border-gray-200 border-0 border-t-1px  dark:border-dark-300"],
     ["border-default-b", "border-solid border-gray-200 border-0 border-b-1px  dark:border-dark-300"],
-    ["border-default-2", "border-1px border-solid border-[rgba(22,_22,_22,_0.1)]  dark:border-[rgba(73,_73,_73,_0.2)]"],
+    ["border-default-2", "border-1px border-solid border-[rgba(100,_100,_100,_0.1)]  dark:border-[rgba(73,_73,_73,_0.2)]"],
     ["border-default-2-r", "border-r-(1px #7e7e7e0e solid) dark:border-dark-300 border-opacity-5"],
     ["border-default-2-l", "border-l-(1px #7e7e7e0e solid) dark:border-dark-300 border-opacity-5"],
     ["border-default-2-t", "border-t-(1px #7e7e7e0e solid) dark:border-dark-300 border-opacity-5"],
