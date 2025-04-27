@@ -29,14 +29,13 @@ export function useWebSocket() {
   function initBrowserWebSocket(url: string, call: () => any) {
     status.value = WsStatusEnum.CONNECTION;
     webSocketHandler.value = new WebSocket(url);
-    status.value = WsStatusEnum.OPEN;
-
     if (!webSocketHandler.value) {
       status.value = WsStatusEnum.SAFE_CLOSE;
       return null;
     }
 
     // 设置事件处理器
+    status.value = WsStatusEnum.OPEN;
     webSocketHandler.value.onopen = call;
     webSocketHandler.value.addEventListener("error", handleSocketEvent("error", WsStatusEnum.CLOSE));
     webSocketHandler.value.addEventListener("close", handleSocketEvent("close", WsStatusEnum.SAFE_CLOSE));

@@ -60,16 +60,15 @@ export const useWsStore = defineStore(
         return webSocketHandler.value;
       }
 
-      const callFn = () => {
-        console.log(1);
 
-        call();
+      const callFn = () => {
         // 记录连接时刻
         connectTime.value = Date.now();
         // 检查是否需要触发同步事件（断开后快速重连）
         if (lastDisconnectTime.value > 0) {
           const reconnectDelay = connectTime.value - lastDisconnectTime.value;
           if (reconnectDelay >= WS_SYNC_DELAY) {
+          // 延迟小于200ms，触发同步事件
             mitter.emit(MittEventType.WS_SYNC, {
               lastDisconnectTime: lastDisconnectTime.value,
               reconnectTime: connectTime.value,
@@ -77,7 +76,6 @@ export const useWsStore = defineStore(
           }
         }
       };
-
       // 根据设置选择WebSocket实现
       return setting.isUseWebsocket
         ? initBrowserWebSocket(fullWsUrl.value, callFn)
