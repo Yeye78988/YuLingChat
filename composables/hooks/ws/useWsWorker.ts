@@ -81,7 +81,6 @@ export function useWsWorker() {
     ws.initDefault(() => {
       // 设置消息处理
       setupMessageHandlers();
-
       // 发送状态到Worker
       sendStatusToWorker();
     });

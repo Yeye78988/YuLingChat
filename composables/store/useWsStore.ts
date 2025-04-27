@@ -61,27 +61,28 @@ export const useWsStore = defineStore(
         return webSocketHandler.value;
       }
 
-      // 记录连接时刻
-      connectTime.value = Date.now();
 
-      // 检查是否需要触发同步事件（断开后快速重连）
-      if (lastDisconnectTime.value > 0) {
-        const reconnectDelay = connectTime.value - lastDisconnectTime.value;
-        if (reconnectDelay >= WS_SYNC_DELAY) {
+      const callFn = () => {
+        // 记录连接时刻
+        connectTime.value = Date.now();
+        // 检查是否需要触发同步事件（断开后快速重连）
+        if (lastDisconnectTime.value > 0) {
+          const reconnectDelay = connectTime.value - lastDisconnectTime.value;
+          if (reconnectDelay >= WS_SYNC_DELAY) {
           // 延迟小于200ms，触发同步事件
-          mitter.emit(MittEventType.WS_SYNC, {
-            lastDisconnectTime: lastDisconnectTime.value,
-            reconnectTime: connectTime.value,
-          });
+            mitter.emit(MittEventType.WS_SYNC, {
+              lastDisconnectTime: lastDisconnectTime.value,
+              reconnectTime: connectTime.value,
+            });
+          }
         }
-      }
-
+      };
       // 根据设置选择WebSocket实现
       if (setting.isUseWebsocket) {
-        return initBrowserWebSocket(fullWsUrl.value, call);
+        return initBrowserWebSocket(fullWsUrl.value, callFn);
       }
       else {
-        return initTauriWebSocket(fullWsUrl.value, call);
+        return initTauriWebSocket(fullWsUrl.value, callFn);
       }
     }
 
