@@ -22,7 +22,7 @@ const getStatusText = computed(() => {
     data-fade
     style="--anima: latter-slice-bottom;"
   >
-    <small truncate text-0.625rem tracking-0.1em el-color-danger>
+    <small truncate text-0.6rem tracking-0.1em el-color-danger>
       {{ getStatusText }}
       <span v-if="online" class="text-[var(--el-color-danger)]">(无网络)</span>
     </small>
@@ -33,7 +33,7 @@ const getStatusText = computed(() => {
         type="primary"
         round
         size="small"
-        style="padding: 0 0.8em;height: 1.8em;line-height: 1.8em;"
+        style="padding: 0 0.8em;height: 1.6em;line-height: 1.6em;"
         @click="ws.reload()"
       >
         重连
@@ -44,7 +44,7 @@ const getStatusText = computed(() => {
         type="danger"
         round
         size="small"
-        style="padding: 0 0.8em;height: 1.8em;line-height: 1.8em;"
+        style="padding: 0 0.8em;height: 1.6em;line-height: 1.6em;margin:0;"
         @click="navigateTo('/login')"
       >
         登录
@@ -55,9 +55,9 @@ const getStatusText = computed(() => {
 
 <style lang="scss" scoped>
 .offline {
-  --at-apply: "fixed left-1/2 !-translate-x-1/2 z-9999 h-2em w-10em flex-row-c-c overflow-hidden rounded-8 px-2 text-center shadow-sm shadow-inset border-default card-bg-color sm:px-4";
+  --at-apply: "fixed left-1/2 !-translate-x-1/2 z-9999 h-1.8em w-9em flex-row-c-c overflow-hidden rounded-8 px-1 text-center shadow-sm shadow-inset border-default card-bg-color sm:px-4";
   .btns {
-    --at-apply: "absolute h-full w-full flex-row-bt-c scale-80 px-1.5 op-0 transition-all bg-color";
+    --at-apply: "absolute h-full w-full flex-row-bt-c scale-80 px-1 op-0 transition-all bg-color";
   }
 }
 </style>

@@ -147,20 +147,25 @@ async function onUpload(ossFile: OssFile) {
     resetInput();
     return;
   }
-  if (size !== undefined && ossFile?.file?.size && ossFile?.file?.size > size) {
-    error.value = `文件大小不能超过${formatFileSize(size)}`;
-    emit("errorMsg", error.value);
-    resetInput();
-    return;
-  }
-  if (minSize !== undefined && ossFile?.file?.size && ossFile?.file?.size < minSize) {
-    error.value = `文件大小不能小于${formatFileSize(minSize)}`;
-    emit("errorMsg", error.value);
-    resetInput();
-    return;
-  }
-  else {
-    error.value = "";
+  // 保留其他错误检查
+  error.value = "";
+  // 非图片先校验
+  if (uploadType !== OssFileType.IMAGE) {
+    if (size !== undefined && ossFile?.file?.size && ossFile?.file?.size > size) {
+      error.value = `文件大小不能超过${formatFileSize(size)}`;
+      emit("errorMsg", error.value);
+      resetInput();
+      return;
+    }
+    if (minSize !== undefined && ossFile?.file?.size && ossFile?.file?.size < minSize) {
+      error.value = `文件大小不能小于${formatFileSize(minSize)}`;
+      emit("errorMsg", error.value);
+      resetInput();
+      return;
+    }
+    else {
+      error.value = "";
+    }
   }
 
   // 1）获取凭证
@@ -195,7 +200,24 @@ async function onUpload(ossFile: OssFile) {
     });
 
     qiniu.compressImage(ossFile?.file, options).then((res) => {
-      qiniuUpload(res.dist as File, ossFile?.key || "", upToken.data.uploadToken, ossFile);
+      // 压缩后检查文件大小
+      const compressedFile = res.dist as File;
+
+      if (size !== undefined && compressedFile.size > size) {
+        error.value = `文件大小不能超过${formatFileSize(size)}`;
+        emit("errorMsg", error.value);
+        resetInput();
+        return;
+      }
+      if (minSize !== undefined && compressedFile.size < minSize) {
+        error.value = `文件大小不能小于${formatFileSize(minSize)}`;
+        emit("errorMsg", error.value);
+        resetInput();
+        return;
+      }
+
+      // 如果通过大小检查，继续上传
+      qiniuUpload(compressedFile, ossFile?.key || "", upToken.data.uploadToken, ossFile);
     }).catch((e) => {
       console.warn(e);
       ossFile.status = "warning";

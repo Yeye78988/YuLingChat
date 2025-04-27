@@ -7,7 +7,7 @@ const user = useUserStore();
 const ws = useWsStore();
 const setting = useSettingStore();
 const chat = useChatStore();
-const showWsStatusBtns = computed(() => ws.status !== WsStatusEnum.OPEN || !user.isLogin);
+const showWsStatusBtns = computed(() => !setting.isMobileSize && (ws.status !== WsStatusEnum.OPEN || !user.isLogin));
 const showGroupDialog = computed({
   get() {
     return chat.inviteMemberForm.show;
@@ -54,6 +54,7 @@ watch(() => user.isLogin, (val) => {
           <div v-if="setting.isMobile" class="block tracking-0.1em absolute-center-center sm:hidden" :data-tauri-drag-region="setting.isDesktop">
             {{ appTitle || appName }}
           </div>
+          <!-- 连接状态 -->
           <BtnWsStatusBtns v-if="showWsStatusBtns" class="offline" />
         </template>
       </MenuHeaderMenuBar>

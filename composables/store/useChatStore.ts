@@ -21,6 +21,7 @@ export interface ChatContactExtra extends ChatContactDetailVO {
   pageInfo: Partial<PageInfo>,
   isReload: boolean
   isLoading: boolean
+  isSyncing?: boolean
   targetUid?: string
   saveTime?: number
 }

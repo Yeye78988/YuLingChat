@@ -111,9 +111,6 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
             if (res) {
               data.message.body._textTranslation = res;
             }
-            else {
-              ElMessage.error("翻译失败，请稍后再试！");
-            }
           }
         },
       },
@@ -152,7 +149,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     // 翻译
     translation: [
       {
-        label: "复制翻译",
+        label: "复制",
         hidden: !txt || !data.message.body._textTranslation,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
@@ -161,7 +158,7 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
-        label: "重新翻译",
+        label: "重新",
         hidden: !txt || !data.message.body._textTranslation,
         customClass: "group",
         icon: "i-solar:refresh-outline group-hover:(rotate-180 i-solar:refresh-bold) group-btn-info",
@@ -170,19 +167,14 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
             closeTranslation(data.message.id, translation.targetLang);
             data.message.body._textTranslation = null;
           }
-          else {
-            const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
-            if (res) {
-              data.message.body._textTranslation = res;
-            }
-            else {
-              ElMessage.error("翻译失败，请稍后再试！");
-            }
+          const res = await useTranslateTxt(data.message.id, data.message.content as string, user.getToken);
+          if (res) {
+            data.message.body._textTranslation = res;
           }
         },
       },
       {
-        label: "关闭翻译",
+        label: "关闭",
         hidden: !txt || !data.message.body._textTranslation,
         customClass: "group",
         icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-danger",

@@ -233,6 +233,14 @@ export async function useMsgBoxWebViewInit() {
     await win.setFocus();
   });
 
+  // 移出托盘
+  // const trayMouseoutUnlisten = await listen("tray_mouseleave", async (event) => {
+  //   const win = await WebviewWindow.getByLabel("msgbox");
+  //   if (!win)
+  //     return;
+  //   await win.hide();
+  // });
+
   return () => {
     stop();
     channel.removeEventListener("message", handleChannelMsg);

@@ -123,7 +123,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="list w-full flex flex-col text-sm">
+  <div
+    class="list w-full flex flex-col text-sm"
+    @click="openItemId = undefined"
+  >
     <!-- 骨架屏 -->
     <template v-if="isReload">
       <div v-for="p in 10" :key="p" class="item">
@@ -161,14 +164,14 @@ onBeforeUnmount(() => {
         </div>
         <div class="ml-a flex-row-c-c flex-shrink-0">
           <template v-if="p.status === ChatApplyStatusType.Load">
-            <el-button-group>
+            <el-button-group class="shadow bg-color">
               <BtnElButton size="small" @click="onArgeeFriend(p.applyId)">
                 同意
               </BtnElButton>
               <BtnElButton
                 size="small"
                 style="padding: 0 0.3em;"
-                @click="openItemId = openItemId === p.applyId ? undefined : p.applyId"
+                @click.stop="openItemId = openItemId === p.applyId ? undefined : p.applyId"
               >
                 <el-popover
                   :visible="openItemId === p.applyId"
@@ -176,10 +179,9 @@ onBeforeUnmount(() => {
                   width="fit-content"
                   transition="popper-fade"
                   :teleported="true"
-                  :trigger-keys="['Enter']"
                   append-to-body
                   placement="bottom"
-                  trigger="click"
+                  trigger="focus"
                 >
                   <template #reference>
                     <i
@@ -189,10 +191,11 @@ onBeforeUnmount(() => {
                   </template>
                   <template #default>
                     <div
-                      class="w-fit px-3 py-1 text-sm tracking-0.1em btn-primary-bg"
+                      class="w-fit px-2.6 py-1 text-0.8rem btn-primary-bg"
                       @click="onRejectFriend(p.applyId)"
                     >
-                      拒绝
+                      <i class="i-solar:user-block-outline mr-1 p-2" />
+                      拒&nbsp;绝
                     </div>
                   </template>
                 </el-popover>
@@ -213,9 +216,9 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .avatar-icon {
-  --at-apply: "h-2.4rem bg-color-2 overflow-hidden rounded-full w-2.4rem flex-row-c-c  shadow-sm";
+  --at-apply: "h-2.4rem bg-color-2 overflow-hidden rounded-full w-2.4rem flex-row-c-c shadow-sm";
 }
 .item {
-  --at-apply: "card-default flex items-center gap-4 p-4 cursor-pointer rounded-6px hover:(!bg-color-3 shadow) transition-200 mb-4";
+  --at-apply: "card-default flex items-center gap-4 p-4 cursor-pointer rounded-6px hover:!bg-op-60 transition-200 mb-4";
 }
 </style>

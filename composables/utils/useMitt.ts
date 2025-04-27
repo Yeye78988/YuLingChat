@@ -35,6 +35,8 @@ export enum MittEventType {
   GROUP_CONTRONLLER = "chat-group-controller", // 群聊控制
   // 消息队列事件
   MESSAGE_QUEUE = "chat-message-queue", // 消息队列事件
+  // WebSocket同步事件
+  WS_SYNC = "chat-ws-sync", // WebSocket断开重连后的同步事件
 
 }
 
@@ -124,6 +126,8 @@ type EventPayloadMap = {
   [MittEventType.GROUP_CONTRONLLER]: { type: "delete" | "add", payload: { roomId: number } };
   // 消息队列
   [MittEventType.MESSAGE_QUEUE]: MessageQueuePayload;
+  // WebSocket同步事件
+  [MittEventType.WS_SYNC]: { lastDisconnectTime: number, reconnectTime: number };
 };
 
 export type MittEvents = {

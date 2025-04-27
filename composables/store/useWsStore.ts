@@ -3,6 +3,7 @@ import type BackWebSocket from "@tauri-apps/plugin-websocket";
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { WsStatusEnum } from "../../types/chat/WsType";
 
+const WS_SYNC_DELAY = 200;
 
 // @unocss-include
 // https://pinia.web3doc.top/ssr/nuxt.html#%E5%AE%89%E8%A3%85
@@ -10,6 +11,10 @@ export const useWsStore = defineStore(
   WS_STORE_KEY,
   () => {
     const isWindBlur = ref<boolean>(false);
+    // 记录最后一次断开时刻
+    const lastDisconnectTime = ref<number>(0);
+    // 记录连接时刻
+    const connectTime = ref<number>(0);
 
     // WebSocket核心hooks
     const {
@@ -54,6 +59,21 @@ export const useWsStore = defineStore(
       // 如果已经连接且状态为OPEN，直接返回
       if (webSocketHandler.value && status.value === WsStatusEnum.OPEN) {
         return webSocketHandler.value;
+      }
+
+      // 记录连接时刻
+      connectTime.value = Date.now();
+
+      // 检查是否需要触发同步事件（断开后快速重连）
+      if (lastDisconnectTime.value > 0) {
+        const reconnectDelay = connectTime.value - lastDisconnectTime.value;
+        if (reconnectDelay >= WS_SYNC_DELAY) {
+          // 延迟小于200ms，触发同步事件
+          mitter.emit(MittEventType.WS_SYNC, {
+            lastDisconnectTime: lastDisconnectTime.value,
+            reconnectTime: connectTime.value,
+          });
+        }
       }
 
       // 根据设置选择WebSocket实现
@@ -135,6 +155,8 @@ export const useWsStore = defineStore(
           await closeConnection();
         }
         finally {
+          // 记录断开时刻
+          lastDisconnectTime.value = Date.now();
           webSocketHandler.value = null;
           status.value = WsStatusEnum.SAFE_CLOSE;
         }
@@ -160,6 +182,8 @@ export const useWsStore = defineStore(
               // 忽略错误
             }
 
+            // 记录断开时刻
+            lastDisconnectTime.value = Date.now();
             status.value = WsStatusEnum.SAFE_CLOSE;
             ElNotification.success("断开成功！");
           }
@@ -185,6 +209,9 @@ export const useWsStore = defineStore(
         fullWsUrl.value = "";
         isWindBlur.value = false;
         webSocketHandler.value = null;
+        // 记录断开时刻
+        lastDisconnectTime.value = Date.now();
+        connectTime.value = 0;
       }
     }
 
@@ -195,6 +222,8 @@ export const useWsStore = defineStore(
       status,
       isWindBlur,
       wsMsgList,
+      lastDisconnectTime,
+      connectTime,
       // 方法
       resetStore,
       reload,

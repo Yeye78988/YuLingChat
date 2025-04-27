@@ -18,8 +18,8 @@ defineProps<{
       <!-- <div class="i-solar:sort-by-time-bold ml-2 p-3 btn-info" title="申请记录"/> -->
       <slot name="control" />
     </div>
-    <el-scrollbar view-class="p-2rem md:w-2/3 mx-a" wrap-class="w-full flex-1 h-full">
-      <ChatFriendApplyList />
+    <el-scrollbar wrap-class="w-full flex-1 h-full">
+      <ChatFriendApplyList class="mx-a p-2rem lg:px-1/5" />
     </el-scrollbar>
   </div>
 </template>

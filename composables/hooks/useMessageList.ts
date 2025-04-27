@@ -9,7 +9,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
   const chat = useChatStore();
   const user = useUserStore();
   const setting = useSettingStore();
-
   // 消息
   const pageInfo = computed({
     get: () => chat?.theContact?.pageInfo || {},
@@ -98,7 +97,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
   /**
    * 重新加载
    */
-  function reload(roomId?: number) {
+  async function reload(roomId?: number) {
     roomId = roomId || chat.theRoomId;
     if (!chat.theContact || !roomId)
       return;
@@ -113,7 +112,9 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     chat.theContact.msgList?.splice?.(0);
     isReload.value = true;
     isLoading.value = true;
-    getChatMessagePage(roomId, 20, null, user.getToken).then(({ data }) => {
+    try {
+      const { data } = await getChatMessagePage(roomId, 20, null, user.getToken);
+
       if (roomId !== chat.theRoomId)
         return;
       // 追加数据
@@ -123,27 +124,32 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       pageInfo.value.isLast = data.isLast;
       pageInfo.value.cursor = data.cursor || undefined;
       isLoading.value = false;
-      nextTick(() => scrollBottom(false));
-      setTimeout(() => {
-        isReload.value = false;
-        scrollBottom(false);
-        chat.saveScrollTop && chat.saveScrollTop();
-      }, 100);
-    }).catch(() => {
+
+      await nextTick();
+      scrollBottom(false);
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+      isReload.value = false;
+      scrollBottom(false);
+      chat.saveScrollTop && chat.saveScrollTop();
+    }
+    catch (error) {
       isLoading.value = false;
       isReload.value = false;
-      nextTick(() => scrollBottom(false));
-    });
+      await nextTick();
+      scrollBottom(false);
+    }
   }
   /**
    * 同步消息
    * 根据lastMsg比对进行同步
    */
-  function syncMessages(roomId?: number) {
+  async function syncMessages(roomId?: number) {
     roomId = roomId || chat.theRoomId;
-    if (!roomId || !chat.contactMap[roomId])
+    if (!roomId || !chat.contactMap[roomId] || !chat.contactMap[roomId]?.isSyncing)
       return;
 
+    chat.contactMap[roomId] && (chat.contactMap[roomId]!.isSyncing = true);
     const contact = chat.contactMap[roomId];
     const lastMsgId = contact?.msgList?.[0]?.message.id;
     if (!contact || !contact.msgList || !lastMsgId) {
@@ -151,7 +157,8 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     }
     // 检查是否需要同步
     if (!contact.msgList.length || contact.lastMsgId !== lastMsgId) {
-      reload(roomId);
+      await reload(roomId);
+      chat.contactMap[roomId] && (chat.contactMap[roomId]!.isSyncing = false);
     }
   }
 

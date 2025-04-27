@@ -238,7 +238,7 @@ function handleProgressUpdate(
   contact: ChatContactDetailVO,
   oldMsg?: ChatMessageVO<AiChatReplyBodyMsgVO>,
   count = 3,
-  delay = 30,
+  delay = 50,
 ) {
   // 初始化缓冲区
   if (oldMsg && !bufferMap.has(oldMsg)) {

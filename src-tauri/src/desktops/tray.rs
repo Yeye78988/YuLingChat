@@ -106,6 +106,17 @@ pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
                     msgbox.set_focus().unwrap();
                 }
             }
+            TrayIconEvent::Move {
+                id: _,
+                position: _,
+                rect: _,
+            } => {
+                let app: &AppHandle = tray.app_handle();
+                if let Some(msgbox) = app.get_webview_window("msgbox") {
+                    msgbox.show().unwrap();
+                    msgbox.set_focus().unwrap();
+                }
+            }
             TrayIconEvent::Leave {
                 id: _,
                 position,
