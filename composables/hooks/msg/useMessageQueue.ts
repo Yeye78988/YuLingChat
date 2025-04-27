@@ -104,14 +104,14 @@ class MessageQueueManager {
 export function useMessageQueue() {
   const queueManager = new MessageQueueManager();
   const isProcessingQueue = ref(false);
-  const processingDelay = 80; // 处理间隔(ms)
+  // const processingDelay = 80; // 处理间隔(ms)
+  const user = useUserStore();
 
   // 消息队列的响应式引用 - 不再需要computed，因为队列本身已经是响应式的
   const messageQueue = computed(() => queueManager.getAll());
 
   // 消息构建器 - 预先构建消息对象 - 已经是箭头函数
-  const msgBuilder = (formData: ChatMessageDTO, id: any, time: number): ChatMessageVO => {
-    const user = useUserStore();
+  const msgBuilder = (formData: ChatMessageDTO, tempId: any, time: number): ChatMessageVO => {
     // 构建临时消息对象
     return {
       fromUser: {
@@ -121,7 +121,7 @@ export function useMessageQueue() {
         nickName: user.userInfo.nickname,
       },
       message: {
-        id,
+        id: tempId,
         roomId: formData.roomId,
         sendTime: time,
         content: formData.content,
@@ -219,11 +219,9 @@ export function useMessageQueue() {
     finally {
       isProcessingQueue.value = false;
       // 延迟一段时间后继续处理队列
-      setTimeout(() => {
-        if (queueManager.length > 0) {
-          processMessageQueue();
-        }
-      }, processingDelay);
+      if (queueManager.length > 0) {
+        processMessageQueue();
+      }
     }
   };
 

@@ -62,18 +62,16 @@ export const useWsStore = defineStore(
 
 
       const callFn = () => {
+        call();
         // 记录连接时刻
         connectTime.value = Date.now();
         // 检查是否需要触发同步事件（断开后快速重连）
-        if (lastDisconnectTime.value > 0) {
-          const reconnectDelay = connectTime.value - lastDisconnectTime.value;
-          if (reconnectDelay >= WS_SYNC_DELAY) {
+        if (lastDisconnectTime.value > 0 && (connectTime.value - lastDisconnectTime.value) >= WS_SYNC_DELAY) {
           // 延迟小于200ms，触发同步事件
-            mitter.emit(MittEventType.WS_SYNC, {
-              lastDisconnectTime: lastDisconnectTime.value,
-              reconnectTime: connectTime.value,
-            });
-          }
+          mitter.emit(MittEventType.WS_SYNC, {
+            lastDisconnectTime: lastDisconnectTime.value,
+            reconnectTime: connectTime.value,
+          });
         }
       };
       // 根据设置选择WebSocket实现
@@ -85,7 +83,7 @@ export const useWsStore = defineStore(
     /**
      * 接收消息
      */
-    function onMessage(call: (data: WsMsgBodyVO) => void) {
+    function onMessage() {
       if (!webSocketHandler.value)
         return;
 
@@ -100,7 +98,7 @@ export const useWsStore = defineStore(
             const data = JSON.parse(event.data) as Result<WsMsgBodyVO>;
             checkResponse(data); // 处理错误
             if (data) {
-              processWsMessage(data, call);
+              processWsMessage(data);
             }
           }
           catch (err) {
@@ -127,7 +125,7 @@ export const useWsStore = defineStore(
             try {
               const data = JSON.parse(String(msg.data)) as Result<WsMsgBodyVO>;
               if (data) {
-                processWsMessage(data, call);
+                processWsMessage(data);
               }
             }
             catch (err) {

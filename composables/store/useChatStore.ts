@@ -144,22 +144,10 @@ export const useChatStore = defineStore(
       msgBuilder,
     } = useMessageQueue();
 
-    // 添加消息到聊天记录并处理临时消息
-    const appendMsgWithTemp = (msg: ChatMessageVO, tempId?: number | string) => {
-      // 如果有临时ID，查找并替换临时消息
-      const roomId = msg.message.roomId;
-      if (tempId && roomId) {
-        const msgList = contactMap.value[roomId]?.msgList || [];
-        const tempIndex = msgList.findIndex(m => m.message.id && m.message.id === tempId);
-        if (tempIndex !== -1) {
-          // 替换临时消息
-          msgList[tempIndex] = msg as ChatMessageVO;
-          return;
-        }
-      }
-      appendMsg(msg);
-    };
+    // roomId_msgId
+    const findMsgCache = new Map<string, ChatMessageVO>();
     // 监听消息队列事件
+    mitter.off(MittEventType.MESSAGE_QUEUE);
     mitter.on(MittEventType.MESSAGE_QUEUE, ({ type, payload }) => {
       const { msg, queueItem } = payload || {};
       if (type === "add" && msg) {
@@ -169,8 +157,19 @@ export const useChatStore = defineStore(
         }
       }
       else if (type === "success" && msg) { // 更新临时消息为服务器返回的消息
+        findMsgCache.set(`${msg.message.roomId}_${msg.message.id}`, msg); // 需要缓存
         if (queueItem && queueItem.id) {
-          appendMsgWithTemp(msg, queueItem.id);
+          // 如果有临时ID，查找并替换临时消息
+          const roomId = msg.message.roomId;
+          if (queueItem.id && roomId) {
+            const msgList = contactMap.value[roomId]?.msgList || [];
+            const tempIndex = msgList.findIndex(m => m.message.id === queueItem.id);
+            if (tempIndex !== -1) {
+              // 替换临时消息
+              msgList[tempIndex] = msg as ChatMessageVO;
+              return;
+            }
+          }
         }
         // 消息阅读上报（延迟）
         if (msg.message.roomId) {
@@ -576,7 +575,7 @@ export const useChatStore = defineStore(
 
     /* ------------------------------------------- 消息操作 ------------------------------------------- */
     // 添加消息到列表
-    function appendMsg(data: ChatMessageVO, successSend: boolean = false) {
+    function appendMsg(data: ChatMessageVO) {
       const roomId = data.message.roomId;
       const existsMsg = findMsg(roomId, data.message.id);
       if (existsMsg) {
@@ -584,22 +583,22 @@ export const useChatStore = defineStore(
         existsMsg.message = data?.message;
         return;
       }
-      if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
-        // 需要排序
-        const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
-        if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
-          const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
-          if (insertIndex !== -1)
-            contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
-          else
-            contactMap.value[roomId].msgList.push(data);
-        }
-        else { // 直接追加到末尾
-          contactMap.value[roomId].msgList.push(data);
-        }
-      }
+      contactMap.value?.[roomId]?.msgList && contactMap.value[roomId].msgList.push(data);
+      // if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
+      //   // 需要排序
+      //   const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
+      //   if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
+      //     const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
+      //     if (insertIndex !== -1)
+      //       contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
+      //     else
+      //       contactMap.value[roomId].msgList.push(data);
+      //   }
+      //   else { // 直接追加到末尾
+      //     contactMap.value[roomId].msgList.push(data);
+      //   }
+      // }
     }
-    const findMsgCache = new Map<string, ChatMessageVO>();
     // 查找消息
     function findMsg(roomId: number, msgId: number) {
       if (!msgId || !roomId)
@@ -1036,7 +1035,6 @@ export const useChatStore = defineStore(
       retryMessage,
       clearMessageQueue,
       msgBuilder,
-      appendMsgWithTemp,
 
       // 群成员
       memberPageInfo,

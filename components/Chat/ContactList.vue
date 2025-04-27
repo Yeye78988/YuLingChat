@@ -285,7 +285,7 @@ onMounted(() => {
   // 监听
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {
     // 重连
-    console.log(`会话同步中上次${lastDisconnectTime}ms 重连${reconnectTime}ms...`);
+    console.log(`会话同步，时延：${reconnectTime - lastDisconnectTime}ms`);
     fetchContacts();
   });
 });

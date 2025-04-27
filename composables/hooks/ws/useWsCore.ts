@@ -62,10 +62,11 @@ export function useWsMessage() {
   // 是否有新消息
   const isNewMsg = computed(() => wsMsgList.value.newMsg.length > 0);
 
+  const { handleNotification } = useWsNotification();
   /**
    * 处理接收到的WebSocket消息
    */
-  function processWsMessage(msgData: Result<WsMsgBodyVO>, callback: (data: WsMsgBodyVO) => void) {
+  function processWsMessage(msgData: Result<WsMsgBodyVO>) {
     if (!msgData)
       return;
 
@@ -77,8 +78,7 @@ export function useWsMessage() {
       wsMsgList.value[wsMsgMap[wsMsg.type]].push(body as any);
       mitter.emit(resolteChatPath(wsMsg.type), body);
     }
-
-    callback(wsMsg);
+    handleNotification(wsMsg);
   }
 
   /**
@@ -188,8 +188,7 @@ export function useWsWorker() {
    * 设置消息处理器
    */
   function setupMessageHandlers() {
-    const { handleNotification } = useWsNotification();
-    ws.onMessage(handleNotification);
+    ws.onMessage();
   }
 
   /**
