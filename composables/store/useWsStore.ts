@@ -1,12 +1,12 @@
 import type { Message as BackMessage } from "@tauri-apps/plugin-websocket";
 import type BackWebSocket from "@tauri-apps/plugin-websocket";
 import { acceptHMRUpdate, defineStore } from "pinia";
-import { WsStatusEnum } from "../../types/chat/WsType";
+import { useWsMessage } from "~/composables/hooks/ws/useWsCore";
+import { WsStatusEnum } from "~/types/chat/WsType";
 
 const WS_SYNC_DELAY = 200;
 
 // @unocss-include
-// https://pinia.web3doc.top/ssr/nuxt.html#%E5%AE%89%E8%A3%85
 export const useWsStore = defineStore(
   WS_STORE_KEY,
   () => {
@@ -54,35 +54,34 @@ export const useWsStore = defineStore(
         status.value = WsStatusEnum.SAFE_CLOSE;
         return false;
       }
-      // 构建WebSocket URL
-      fullWsUrl.value = `${BaseWSUrl}?Authorization=${user.getToken}`;
+
       // 如果已经连接且状态为OPEN，直接返回
       if (webSocketHandler.value && status.value === WsStatusEnum.OPEN) {
         return webSocketHandler.value;
       }
 
-      // 记录连接时刻
-      connectTime.value = Date.now();
+      const callFn = () => {
+        console.log(1);
 
-      // 检查是否需要触发同步事件（断开后快速重连）
-      if (lastDisconnectTime.value > 0) {
-        const reconnectDelay = connectTime.value - lastDisconnectTime.value;
-        if (reconnectDelay >= WS_SYNC_DELAY) {
-          // 延迟小于200ms，触发同步事件
-          mitter.emit(MittEventType.WS_SYNC, {
-            lastDisconnectTime: lastDisconnectTime.value,
-            reconnectTime: connectTime.value,
-          });
+        call();
+        // 记录连接时刻
+        connectTime.value = Date.now();
+        // 检查是否需要触发同步事件（断开后快速重连）
+        if (lastDisconnectTime.value > 0) {
+          const reconnectDelay = connectTime.value - lastDisconnectTime.value;
+          if (reconnectDelay >= WS_SYNC_DELAY) {
+            mitter.emit(MittEventType.WS_SYNC, {
+              lastDisconnectTime: lastDisconnectTime.value,
+              reconnectTime: connectTime.value,
+            });
+          }
         }
-      }
+      };
 
       // 根据设置选择WebSocket实现
-      if (setting.isUseWebsocket) {
-        return initBrowserWebSocket(fullWsUrl.value, call);
-      }
-      else {
-        return initTauriWebSocket(fullWsUrl.value, call);
-      }
+      return setting.isUseWebsocket
+        ? initBrowserWebSocket(fullWsUrl.value, callFn)
+        : initTauriWebSocket(fullWsUrl.value, callFn);
     }
 
     /**
@@ -206,7 +205,6 @@ export const useWsStore = defineStore(
       finally {
         resetMsgList();
         status.value = WsStatusEnum.SAFE_CLOSE;
-        fullWsUrl.value = "";
         isWindBlur.value = false;
         webSocketHandler.value = null;
         // 记录断开时刻
@@ -235,7 +233,6 @@ export const useWsStore = defineStore(
     };
   },
   {
-    // https://prazdevs.github.io/pinia-plugin-persistedstate/frameworks/nuxt-3.html
     persist: false,
   },
 );

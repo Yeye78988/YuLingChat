@@ -9,7 +9,8 @@ import { WsMsgType, WsStatusEnum } from "~/types/chat/WsType";
  */
 export function useWebSocket() {
   const webSocketHandler = ref<WebSocket | BackWebSocket | null>(null);
-  const fullWsUrl = ref<string>("");
+  const user = useUserStore();
+  const fullWsUrl = computed(() => `${BaseWSUrl}?Authorization=${user.getToken}`);
   const status = ref<WsStatusEnum>(WsStatusEnum.CLOSE);
 
   /**

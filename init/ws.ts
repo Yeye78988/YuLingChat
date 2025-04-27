@@ -6,13 +6,13 @@ export async function useWsInit() {
   const user = useUserStore();
 
   // 使用Worker管理hooks
-  const { reload, cleanupWorker } = useWsWorker();
+  const { reload: reloadWorker, cleanupWorker } = useWsWorker();
 
   // 自动重连
   const validStatus = [WsStatusEnum.OPEN, WsStatusEnum.CONNECTION];
   watchDebounced(() => !validStatus.includes(ws.status) && user.isLogin, (bool) => {
     if (bool) {
-      reload();
+      reloadWorker();
     }
     else if (!user.isLogin) {
       cleanupWorker();
@@ -25,15 +25,15 @@ export async function useWsInit() {
 
   // 初始状态检查
   if (!validStatus.includes(ws.status) && user.isLogin) {
-    reload();
+    reloadWorker();
   }
 
   // 暴露给外部调用，用于刷新Web Worker状态
   mitter.off(MittEventType.CHAT_WS_RELOAD);
-  mitter.on(MittEventType.CHAT_WS_RELOAD, reload);
+  mitter.on(MittEventType.CHAT_WS_RELOAD, reloadWorker);
   return {
     ws,
-    reload,
+    reloadWorker,
   };
 }
 

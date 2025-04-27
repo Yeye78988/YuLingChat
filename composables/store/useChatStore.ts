@@ -151,7 +151,6 @@ export const useChatStore = defineStore(
       if (tempId && roomId) {
         const msgList = contactMap.value[roomId]?.msgList || [];
         const tempIndex = msgList.findIndex(m => m.message.id && m.message.id === tempId);
-
         if (tempIndex !== -1) {
           // 替换临时消息
           msgList[tempIndex] = msg as ChatMessageVO;

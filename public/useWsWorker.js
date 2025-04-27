@@ -49,10 +49,8 @@ function startHeartbeatMonitor() {
   heartbeatTimer = setInterval(() => {
     const now = new Date();
     const elapsedTime = now.getTime() - lastHeartbeatTime.getTime();
-
     // 发送心跳消息
     sendHeartbeat(elapsedTime);
-
     // 更新上次心跳时间
     lastHeartbeatTime = now;
   }, HEARTBEAT_INTERVAL);

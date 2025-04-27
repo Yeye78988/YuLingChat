@@ -22,7 +22,7 @@ const isSyncing = ref(false);
 onMounted(() => {
   // 监听WebSocket重连事件
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {
-    console.log(`消息同步中，上次断开时间：${lastDisconnectTime}ms，重连时间：${reconnectTime}ms...`);
+    console.log(`消息同步中，时间：${reconnectTime - lastDisconnectTime}ms`);
     syncMessages();
   });
 });
