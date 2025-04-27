@@ -47,7 +47,7 @@ export function getDBMsgPage(roomId: number, pageSize = 10, cursor: string | num
  * @param token tokn
  * @returns 发送的组合消息
  */
-export function addChatMessage(dto: ChatMessageDTO, token: string) {
+export function sendChatMessage(dto: ChatMessageDTO, token: string) {
   return useHttp.post<Result<ChatMessageVO>>(
     "/chat/message",
     { ...dto },
@@ -282,6 +282,11 @@ export interface ChatMessageVO<T = any> {
    * 消息详情
    */
   message: Message<T>;
+
+  /**
+   * 用于标记消息
+   */
+  clientId?: string
 }
 
 /**
@@ -556,6 +561,10 @@ export interface ChatMessageDTO {
    * 文本消息（可选）
    */
   content?: string;
+  /**
+   * 客户端辨识id
+   */
+  clientId?: string;
   /**
    * 消息内容，类型不同传值不同
    */

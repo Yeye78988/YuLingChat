@@ -162,12 +162,17 @@ export function useMessageQueue() {
     try {
       // 发送消息
       const roomId = currentItem.formData.roomId;
+      const clientId = currentItem.id;
       const user = useUserStore();
-      const res = await addChatMessage({
+      const res = await sendChatMessage({
         ...currentItem.formData,
         roomId,
+        clientId, // 用于辨识同一条消息
       }, user.getToken);
       if (res.code === StatusCode.SUCCESS) { // 发送成功
+        if (!queueManager.get(currentItem.id)) {
+          return;
+        }
         queueManager.updateStatus(currentItem.id, MessageSendStatus.SUCCESS);
         mitter.emit(MittEventType.MESSAGE_QUEUE, {
           type: "success",
@@ -188,7 +193,6 @@ export function useMessageQueue() {
         queueManager.removePending(currentItem.id);
       }
       else { // 其他错误
-        console.log(res);
         queueManager.updateStatus(currentItem.id, MessageSendStatus.ERROR);
         mitter.emit(MittEventType.MESSAGE_QUEUE, {
           type: "error",
@@ -228,7 +232,7 @@ export function useMessageQueue() {
   // 添加消息到队列 - 已经是箭头函数
   const addToMessageQueue = (formData: ChatMessageDTO, callback?: (msg: ChatMessageVO) => void) => {
     const time = Date.now();
-    const id = `temp_${time}`;
+    const id = `temp_${time}_${Math.floor(Math.random() * 100)}`;
     const tempMsg = msgBuilder(formData, id, time);
     // 生成唯一ID
     const queueItem: MessageQueueItem = {
@@ -305,12 +309,30 @@ export function useMessageQueue() {
     });
   };
 
+  // 处理
+  const resolveQueueItem = (clientId: string, msg: ChatMessageVO) => {
+    queueManager.updateStatus(clientId, MessageSendStatus.SUCCESS);
+    const currentItem = queueManager.get(clientId);
+    if (!currentItem)
+      return;
+    mitter.emit(MittEventType.MESSAGE_QUEUE, {
+      type: "success",
+      payload: { queueItem: currentItem, msg },
+    });
+    if (typeof currentItem.callback === "function") {
+      currentItem.callback(msg);
+    }
+    // 从队列中移除
+    queueManager.remove(clientId);
+  };
+
   return {
     messageQueue,
     isProcessingQueue,
     isExsist: (id: any) => !!queueManager.get(id),
     get: queueManager.get,
     addToMessageQueue,
+    resolveQueueItem,
     processMessageQueue,
     retryMessage,
     clearMessageQueue,

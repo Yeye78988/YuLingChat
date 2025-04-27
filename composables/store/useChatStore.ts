@@ -138,6 +138,7 @@ export const useChatStore = defineStore(
       isExsist: isExsistQueue,
       get: getMsgQueue,
       addToMessageQueue,
+      resolveQueueItem,
       processMessageQueue,
       retryMessage,
       clearMessageQueue,
@@ -170,6 +171,7 @@ export const useChatStore = defineStore(
               return;
             }
           }
+          appendMsg(msg); // 保证顺序
         }
         // 消息阅读上报（延迟）
         if (msg.message.roomId) {
@@ -584,20 +586,20 @@ export const useChatStore = defineStore(
         return;
       }
       contactMap.value?.[roomId]?.msgList && contactMap.value[roomId].msgList.push(data);
-      // if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
-      //   // 需要排序
-      //   const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
-      //   if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
-      //     const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
-      //     if (insertIndex !== -1)
-      //       contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
-      //     else
-      //       contactMap.value[roomId].msgList.push(data);
-      //   }
-      //   else { // 直接追加到末尾
-      //     contactMap.value[roomId].msgList.push(data);
-      //   }
-      // }
+      if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
+        // 需要排序
+        const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
+        if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
+          const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
+          if (insertIndex !== -1)
+            contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
+          else
+            contactMap.value[roomId].msgList.push(data);
+        }
+        else { // 直接追加到末尾
+          contactMap.value[roomId].msgList.push(data);
+        }
+      }
     }
     // 查找消息
     function findMsg(roomId: number, msgId: number) {
@@ -1029,6 +1031,7 @@ export const useChatStore = defineStore(
       messageQueue,
       isProcessingQueue,
       isExsistQueue,
+      resolveQueueItem,
       getMsgQueue,
       addToMessageQueue,
       processMessageQueue,

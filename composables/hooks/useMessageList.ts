@@ -313,12 +313,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
           break;
       }
     });
-
-    mitter.on(MittEventType.MESSAGE_QUEUE, (payload: MessageQueuePayload) => {
-      if (payload.type === "success" || payload.type === "error") {
-        // 消息发送成功或失败
-      }
-    });
   }
 
   /**
