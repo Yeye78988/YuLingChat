@@ -97,7 +97,7 @@ onMounted(async () => {
         target="_blank"
         rel="noopener noreferrer"
         v-bind="$attrs"
-        class="1.8rem flex-row-c-c rounded-4rem pl-4 pr-6 text-xs btn-info-bg border-default card-default"
+        class="h-1.8rem flex-row-c-c rounded-4rem pl-4 pr-6 text-xs btn-info-bg border-default card-default"
       >
         <i class="i-solar-download-minimalistic-broken mr-2 p-2" />
         APP
