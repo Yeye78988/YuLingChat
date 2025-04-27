@@ -477,7 +477,8 @@ function toLoginForm() {
     </div>
     <DialogPopup
       v-model="agreeDetail.showDetail"
-      :duration="360"
+      :duration="200"
+      :min-scale="0.98"
       :show-close="false"
       destroy-on-close
       content-class="z-1200"

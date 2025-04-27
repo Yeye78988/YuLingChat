@@ -336,9 +336,11 @@ defineExpose({
         class="menu w-full flex items-center rounded-t-2 p-4"
         :class="{ 'bg-linear': callType === CallTypeEnum.VIDEO && isConnected }"
       >
-        <span v-if="!isConnected" mx-a>
+        <div v-if="!isConnected" relative w-full flex-row-bt-c>
+          <span />
           {{ callType === CallTypeEnum.AUDIO ? '语音通话' : '视频通话' }}
-        </span>
+          <i i-carbon:close p-3 btn-danger title="关闭" @click.capture="closeDialog" />
+        </div>
         <template v-else>
           <!-- 视频比例控制 -->
           <el-dropdown v-if="callType === CallTypeEnum.VIDEO && maxWindStream?.getVideoTracks()?.[0]?.enabled" trigger="hover">

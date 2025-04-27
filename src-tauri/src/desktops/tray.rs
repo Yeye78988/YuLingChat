@@ -113,8 +113,10 @@ pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
             } => {
                 let app: &AppHandle = tray.app_handle();
                 if let Some(msgbox) = app.get_webview_window("msgbox") {
-                    msgbox.show().unwrap();
-                    msgbox.set_focus().unwrap();
+                    // 是否可见
+                    if msgbox.is_visible().unwrap() {
+                        msgbox.set_focus().unwrap();
+                    }
                 }
             }
             TrayIconEvent::Leave {
