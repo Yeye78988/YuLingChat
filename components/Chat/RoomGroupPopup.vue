@@ -37,9 +37,7 @@ const {
   theContactClone,
   searchUserWord,
   imgList,
-  isShowApply,
   isLord,
-  theUser,
   vMemberList,
   inputOssFileUploadRef,
   containerProps,
@@ -97,6 +95,7 @@ async function changShieldStatus() {
     v-if="setting.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
     class="group scroll relative"
+    wrap-class="pb-20"
   >
     <div flex-row-bt-c flex-shrink-0 flex-row truncate>
       <i
@@ -239,7 +238,7 @@ async function changShieldStatus() {
           autofocus
           :rows="8"
           :maxlength="200"
-          class="scroll-bar mt-2 card-rounded-df bg-transparent p-3 border-default-2"
+          class="scroll-bar mt-2 card-rounded-df p-3 border-default-2 bg-color"
           type="textarea"
           style="resize:none;width: 100%;"
           placeholder="未填写"
@@ -250,39 +249,43 @@ async function changShieldStatus() {
       </div>
       <div class="label-item mt-3">
         会话设置
-        <div class="mt-3 card-rounded-df px-3 py-2 border-default-2">
-          <div mb-2 flex-row-bt-c pb-2 text-xs border-default-b>
+        <div class="mt-2 card-rounded-df px-3 py-2 text-xs border-default-2 bg-color">
+          <div mb-2 flex-row-bt-c pb-2 border-default-b>
             设为置顶
             <el-switch
               :model-value="isPin"
+              size="small"
               :loading="isPinLoading"
               :before-change="changIsPin"
             />
           </div>
-          <div flex-row-bt-c text-xs>
+          <div flex-row-bt-c>
             消息免打扰
             <el-switch
               :model-value="shieldStatus"
               :loading="shieldStatusLoading"
+              size="small"
               :before-change="changShieldStatus"
             />
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 退出 -->
     <btn-el-button
       v-show="!chat.contactMap[chat.theRoomId!]?.hotFlag" v-memo="[isNotExistOrNorFriend, isTheGroupOwner]" icon-class="i-solar:logout-3-broken mr-2"
       type="danger"
       plain
-      class="mt-3 w-full"
+      class="mt-6 w-full"
       @click="onExitOrClearGroup"
     >
       <span>
         {{ isNotExistOrNorFriend ? '不显示聊天' : isTheGroupOwner ? '解散群聊' : '退出群聊' }}
       </span>
     </btn-el-button>
-    <!-- 好友申请 -->
-    <LazyChatFriendApplyDialog v-model:show="isShowApply" :user-id="theUser?.userId" />
+    <!-- 渐变色 -->
+    <div class="shadow-linear absolute bottom-0 left-0 z-1 block h-20 w-full w-full cursor-pointer text-center" />
   </el-scrollbar>
 </template>
 

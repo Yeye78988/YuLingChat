@@ -1,3 +1,4 @@
+
 <script lang="ts" setup>
 // 会话store
 const user = useUserStore();
@@ -118,7 +119,7 @@ onDeactivated(() => {
         <p truncate text-sm>
           {{ p?.nickname || "未填写" }}
         </p>
-        <p class="text-overflow-3 mt-1 max-h-4em text-mini" :title="p.description || ''">
+        <p class="text-overflow-2 mt-1 max-h-4em text-mini" :title="p.description || ''">
           {{ p.description || "" }}
         </p>
       </div>
@@ -139,11 +140,6 @@ onDeactivated(() => {
 @media (min-width: 640px) {
   .list {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-}
-@media (max-width: 768px) {
-  .text-overflow-3 {
-    -webkit-line-clamp: 2;
   }
 }
 .item {

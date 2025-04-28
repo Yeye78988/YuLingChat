@@ -2,6 +2,7 @@
 import type { ChatRoomAdminAddDTO } from "~/composables/api/chat/room";
 import ContextMenu from "@imengyu/vue3-context-menu";
 import { useAsyncCopyText } from "~/composables/utils";
+import { mitter, MittEventType } from "~/composables/utils/useMitt";
 
 const { data } = defineProps<{ data: ChatRoomGroupVO }>();
 const ws = useWsStore();
@@ -63,7 +64,6 @@ async function reload() {
 
 // 添加好友
 const theUser = ref<ChatMemberVO | undefined>(undefined);
-const isShowApply = ref(false);
 
 // 权限相关
 const getTheRoleType = computed(() => data?.role);
@@ -104,7 +104,11 @@ function onContextMenu(e: MouseEvent, item: ChatMemberVO) {
               return ElMessage.warning("申请失败，和对方已是好友！");
             }
             theUser.value = item;
-            isShowApply.value = true;
+            // 触发全局事件
+            mitter.emit(MittEventType.FRIEND_APPLY_DIALOG, {
+              show: true,
+              userId: item.userId,
+            });
           }).catch(() => {
             ElMessage.error("操作失败，请稍后再试！");
           });
@@ -281,8 +285,6 @@ function onInviteMember() {
         <i class="i-carbon:add p-3" />
       </div>
     </div>
-    <!-- 好友申请 -->
-    <LazyChatFriendApplyDialog v-model:show="isShowApply" :user-id="theUser?.userId" />
   </div>
 </template>
 

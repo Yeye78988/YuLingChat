@@ -1,4 +1,5 @@
 import ContextMenu from "@imengyu/vue3-context-menu";
+import { mitter, MittEventType } from "~/composables/utils/useMitt";
 
 
 export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
@@ -371,17 +372,22 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
           icon: "group-hover:scale-110 transition-transform i-solar:user-plus-broken btn-info",
           hidden: isSelf,
           onClick: () => {
-          // 确认是否为好友
             isChatFriend({ uidList: [item.userId] }, user.getToken).then((res) => {
-              if (res.code !== StatusCode.SUCCESS)
+              if (res.code !== StatusCode.SUCCESS) {
                 return ElMessage.error(res.msg || "申请失败，请稍后再试！");
-              const user = res.data.checkedList.find((p: FriendCheck) => p.uid === item.userId);
-              if (user && user.isFriend)
+              }
+              const userFriend = res.data.checkedList.find((p: FriendCheck) => p.uid === item.userId);
+              if (userFriend && userFriend.isFriend) {
                 return ElMessage.warning("申请失败，和对方已是好友！");
-              // 开启申请
+              }
               theUser.value = item;
-              isShowApply.value = true;
+              // 使用mitt触发事件
+              mitter.emit(MittEventType.FRIEND_APPLY_DIALOG, {
+                show: true,
+                userId: item.userId,
+              });
             }).catch(() => {
+              ElMessage.error("操作失败，请稍后再试！");
             });
           },
         },
@@ -477,40 +483,24 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   }
 
   return {
-    // 群聊相关
-    isTheGroupPermission,
-    isTheGroupOwner,
-    isLord,
-    vMemberList,
-    onMemberContextMenu,
-    onExitOrClearGroup,
-    submitUpdateRoom,
-
-    // 搜索与用户相关
     showSearch,
-    searchUserWord,
+    isTheGroupOwner,
     isNotExistOrNorFriend,
     theContactClone,
-    isShowApply,
-    theUser,
-
-    // 图片与上传相关
+    searchUserWord,
     imgList,
+    isLord,
+    theUser,
+    vMemberList,
     inputOssFileUploadRef,
-    onSubmitImages,
-    toggleImage,
-
-    // 表单与编辑相关
-    editFormField,
-
-    // 容器与布局相关
     containerProps,
     wrapperProps,
-
-    // 数据加载与滚动相关
-    loadData,
-    scrollTo,
+    onSubmitImages,
+    toggleImage,
+    submitUpdateRoom,
     onScroll,
-    reload,
+    scrollTo,
+    onMemberContextMenu,
+    onExitOrClearGroup,
   };
 }

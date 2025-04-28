@@ -31,6 +31,7 @@ export enum MittEventType {
   RELOAD_MEMBER_LIST = "chat-reload-member-list", // 重新加载成员列表
   // 好友
   FRIEND_CONTROLLER = "chat-delete-friend", // 好友控制
+  FRIEND_APPLY_DIALOG = "chat-friend-apply-dialog", // 好友申请弹窗
   // 群聊
   GROUP_CONTRONLLER = "chat-group-controller", // 群聊控制
   // 消息队列事件
@@ -91,6 +92,12 @@ export interface MessageQueuePayload {
   payload?: MessageQueueData
 }
 
+// 好友申请弹窗事件载荷
+export interface FriendApplyDialogPayload {
+  show: boolean;
+  userId?: string;
+}
+
 // eslint-disable-next-line ts/consistent-type-definitions
 type EventPayloadMap = {
   // ws重新连接事件
@@ -122,6 +129,7 @@ type EventPayloadMap = {
   [MittEventType.RELOAD_MEMBER_LIST]: { type: "reload", payload: { userId: string, roomId: number } };
   // 好友
   [MittEventType.FRIEND_CONTROLLER]: { type: "delete" | "add", payload: { userId: string } };
+  [MittEventType.FRIEND_APPLY_DIALOG]: FriendApplyDialogPayload;
   // 群聊
   [MittEventType.GROUP_CONTRONLLER]: { type: "delete" | "add", payload: { roomId: number } };
   // 消息队列

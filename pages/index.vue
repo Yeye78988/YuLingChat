@@ -1,5 +1,5 @@
-
 <script lang="ts" setup>
+import { mitter, MittEventType } from "~/composables/utils/useMitt";
 import { appName } from "~/constants";
 import { WsStatusEnum } from "~/types/chat/WsType";
 
@@ -25,6 +25,24 @@ const showGroupDialog = computed({
         };
   },
 });
+
+// 好友申请弹窗状态
+const isShowApply = ref(false);
+const applyUserId = ref<string | undefined>();
+
+// 监听好友申请弹窗事件
+onMounted(() => {
+  mitter.on(MittEventType.FRIEND_APPLY_DIALOG, (payload) => {
+    isShowApply.value = payload.show;
+    applyUserId.value = payload.userId;
+  });
+});
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  mitter.off(MittEventType.FRIEND_APPLY_DIALOG);
+});
+
 // 监听消息
 useMsgLinear();
 // 初始化设置
@@ -96,6 +114,12 @@ watch(() => user.isLogin, (val) => {
       v-if="setting.isMobileSize && user.isLogin && chat.isOpenContact"
       hydrate-on-media-query="(max-width: 768px)"
       class="grid sm:hidden"
+    />
+    <!-- 好友申请弹窗 -->
+    <LazyChatFriendApplyDialog
+      v-model:show="isShowApply"
+      :user-id="applyUserId"
+      hydrate-on-idle
     />
   </main>
 </template>
