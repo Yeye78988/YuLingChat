@@ -80,9 +80,10 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     chat.setReadList(targetCtx.roomId);
   }
   // 3）本房间追加消息
-  if (targetCtx.pageInfo.size && targetCtx.msgIdList.length) { // 存在消息列表 才追加 （避免再次加载导致消息显示重复）
-    if (msg.clientId) {
+  if (targetCtx.pageInfo.size && targetCtx.msgList.length) { // 存在消息列表 才追加 （避免再次加载导致消息显示重复）
+    if (msg.clientId && chat.isExsistQueue(msg.clientId)) {
       chat.resolveQueueItem(msg.clientId, msg);
+      return;
     }
     chat.appendMsg(msg); // 追加消息
   }

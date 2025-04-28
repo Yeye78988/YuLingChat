@@ -166,16 +166,15 @@ export const useChatStore = defineStore(
             const msgList = contactMap.value[roomId]?.msgList || [];
             const tempIndex = msgList.findIndex(m => m.message.id === queueItem.id);
             if (tempIndex !== -1) {
-              // 替换临时消息
+              // 移除
               msgList[tempIndex] = msg as ChatMessageVO;
-              return;
             }
           }
-          appendMsg(msg); // 保证顺序
-        }
-        // 消息阅读上报（延迟）
-        if (msg.message.roomId) {
-          setReadList(msg.message.roomId, true);
+          // 消息阅读上报（延迟）
+          if (msg.message.roomId) {
+            setReadList(msg.message.roomId, true);
+          }
+          // appendMsg(msg); // 保证顺序
         }
       }
       else if (type === "error") { // 消息发送失败
@@ -583,10 +582,8 @@ export const useChatStore = defineStore(
       if (existsMsg) {
         existsMsg.fromUser = data?.fromUser;
         existsMsg.message = data?.message;
-        return;
       }
-      contactMap.value?.[roomId]?.msgList && contactMap.value[roomId].msgList.push(data);
-      if (!existsMsg && contactMap.value?.[roomId]?.msgList) {
+      else if (contactMap.value?.[roomId]?.msgList) {
         // 需要排序
         const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
         if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {

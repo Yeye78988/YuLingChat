@@ -47,16 +47,14 @@ class MessageQueueManager {
 
   // 更新消息状态
   updateStatus = (id: any, status: MessageSendStatus): void => {
-    if (this.queue[id]) {
+    if (this.queue[id])
       this.queue[id].status = status;
-    }
   };
 
   // 增加重试次数
   incrementRetryCount = (id: any): void => {
-    if (this.queue[id]) {
+    if (this.queue[id])
       this.queue[id].retryCount++;
-    }
   };
 
   // 移除消息
@@ -149,15 +147,6 @@ export function useMessageQueue() {
 
     // 更新状态为发送中
     queueManager.updateStatus(currentItem.id, MessageSendStatus.SENDING);
-
-    // 触发事件通知
-    mitter.emit(MittEventType.MESSAGE_QUEUE, {
-      type: "process",
-      payload: {
-        queueItem: currentItem,
-        msg: currentItem.tempMsg,
-      },
-    });
 
     try {
       // 发送消息
