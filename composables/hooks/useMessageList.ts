@@ -101,7 +101,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     roomId = roomId || chat.theRoomId;
     if (!chat.theContact || !roomId)
       return;
-    //  TODO:判断缓存是否超过 10 分钟
     // 重置滚动位置
     chat.scrollTopSize = 0;
     pageInfo.value = {

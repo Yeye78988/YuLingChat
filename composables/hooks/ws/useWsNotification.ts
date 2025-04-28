@@ -19,63 +19,54 @@ export function useWsNotification() {
   /**
    * 处理消息通知
    */
-  function handleNotification(msg: WsMsgBodyVO) {
-    if (!noticeType[msg.type])
+  function handleNotification(wsMsg: WsMsgBodyVO) {
+    if (!noticeType[wsMsg.type])
       return;
 
-    const body = msg.data as ChatMessageVO;
+    const msg = wsMsg.data as ChatMessageVO;
     // 非当前用户消息通知
-    if (body.fromUser?.userId && body.fromUser?.userId === user?.userId) {
+    if (msg.fromUser?.userId && msg.fromUser?.userId === user?.userId) {
       return;
     }
 
     // 系统通知
     if (setting.settingPage.notificationType !== NotificationEnums.SYSTEM)
       return;
-
     // 非托盘通知且聊天显示
     if (!setting.isWeb || (setting.isWeb && !chat.isVisible)) {
-      sendMessageNotification(body);
+      if (!checkShieldNotice(msg)) // 免打扰
+        return;
+      // web 通知
+      if (setting.isWeb) {
+        sendWebNotification(msg.fromUser.nickName, `${msg.message.content || "消息通知"}`, {
+          icon: msg.fromUser.avatar ? BaseUrlImg + msg.fromUser.avatar : "/logo.png",
+          onClick: () => {
+            chat.setContact(chat.contactMap[msg.message.roomId]);
+          },
+        });
+      }
+      else { // tauri 通知
+        sendNotification({
+          icon: ["android", "ios"].includes(setting.appPlatform) ? "/logo.png" : BaseUrlImg + msg.fromUser.avatar,
+          title: msg.fromUser.nickName,
+          body: `${msg.message.content || "消息通知"}`,
+          largeBody: `${msg.message.content || "消息通知"}`,
+          number: 1,
+        });
+      }
     }
   }
 
-  /**
-   * 发送系统通知
-   */
-  function sendMessageNotification(msg: ChatMessageVO) {
-    if (!checkNotice(msg))
-      return;
-    // web 通知
-    if (setting.isWeb) {
-      sendWebNotification(msg.fromUser.nickName, `${msg.message.content || "消息通知"}`, {
-        icon: msg.fromUser.avatar ? BaseUrlImg + msg.fromUser.avatar : "/logo.png",
-        onClick: () => {
-          chat.setContact(chat.contactMap[msg.message.roomId]);
-        },
-      });
-      return;
-    }
-
-    // tauri 通知
-    sendNotification({
-      icon: ["android", "ios"].includes(setting.appPlatform) ? "/logo.png" : BaseUrlImg + msg.fromUser.avatar,
-      title: msg.fromUser.nickName,
-      body: `${msg.message.content || "消息通知"}`,
-      largeBody: `${msg.message.content || "消息通知"}`,
-      number: 1,
-    });
+  function checkShieldNotice(msg: ChatMessageVO) {
+    const chat = useChatStore();
+    if (chat?.contactMap?.[msg?.message?.roomId as any]?.shieldStatus === isTrue.TRUE)
+      return false;
+    return true;
   }
+
 
   return {
     noticeType,
     handleNotification,
-    sendMessageNotification,
   };
-}
-
-function checkNotice(msg: ChatMessageVO) {
-  const chat = useChatStore();
-  if (chat?.contactMap?.[msg?.message?.roomId as any]?.shieldStatus === isTrue.TRUE)
-    return false;
-  return true;
 }

@@ -71,7 +71,7 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     ws.wsMsgList.newMsg.splice(0);
     return;
   }
-  const isCurrentRoom = targetCtx.roomId === msg.message.roomId;
+  const isCurrentRoom = chat.theRoomId === msg.message.roomId; // 是否是当前房间
   // 2）更新消息列表
   if (msg.message.roomId !== targetCtx.roomId || (setting.isMobileSize && !chat.isOpenContact)) {
     ws.wsMsgList.newMsg.splice(0);
