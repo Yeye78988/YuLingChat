@@ -58,7 +58,7 @@ JiwuChat 是一款基于 Tauri2 和 Nuxt3 构建的轻量`(~10MB)`多平台聊�
 
 - 账号：ikun233
 - 密码：123456
-- 体验：[Web端地址](https://chat.jiwu.kiwi233.top/)
+- 体验：[Web端地址](https://jiwuchat.top/)
 
 > ⚠ 注：~~该账号上传文件、修改个人信息、修改密码等部分没有权限，只作为测试账号使用。~~
 

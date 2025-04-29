@@ -398,8 +398,8 @@ export const useChatStore = defineStore(
       };
       // 补充会话详情 (5分钟更新一次)
       const lastSaveTime = contactMap.value?.[vo.roomId]?.saveTime;
+      theRoomId.value = vo.roomId;
       if (lastSaveTime && ((Date.now() - lastSaveTime) < CONTACT_CACHE_TIME)) {
-        theRoomId.value = vo.roomId;
         return;
       }
       const res = await getChatContactInfo(vo.roomId, user.getToken, vo.type)?.catch(() => {});
@@ -414,7 +414,6 @@ export const useChatStore = defineStore(
           saveTime: Date.now(),
         };
       }
-      theRoomId.value = vo.roomId;
     }
     // 重新拉取会话
     async function reloadContact(roomId: number, callBack?: (contact: ChatContactDetailVO) => void) {

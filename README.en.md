@@ -58,7 +58,7 @@ JiwuChat is a lightweight `(~10MB)` multi-platform chat application built with T
 
 - Username: ikun233  
 - Password: 123456  
-- Demo: [Web Version](https://chat.jiwu.kiwi233.top/)  
+- Demo: [Web Version](https://jiwuchat.top/)  
 
 > ⚠ Note: ~~This test account has limited permissions (e.g., no file uploads, profile edits, or password changes).~~  
 

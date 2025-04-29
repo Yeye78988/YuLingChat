@@ -17,29 +17,29 @@ definePageMeta({
 const setting = useSettingStore();
 onMounted(async () => {
   user.showLoginAndRegister = "login";
-});
 
-if (setting.isDesktop) {
-  watch(() => user.showLoginAndRegister, async (val) => {
-    if (val !== "") {
+  if (setting.isDesktop) {
+    watch(() => user.showLoginAndRegister, async (val) => {
+      if (val !== "") {
       // 关闭窗口动画
-      if (setting.settingPage.isCloseAllTransition) {
-        getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : 480));
-        return;
+        if (setting.settingPage.isCloseAllTransition) {
+          getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : 480));
+          return;
+        }
+        // 窗口动画
+        invoke("animate_window_resize", {
+          windowLabel: LOGIN_WINDOW_LABEL,
+          toWidth: 360,
+          toHeight: val === LOGIN_WINDOW_LABEL ? 450 : 480,
+          duration: 160,
+          steps: 12,
+        }).catch((err: any) => console.error("窗口动画失败:", err));
       }
-      // 窗口动画
-      invoke("animate_window_resize", {
-        windowLabel: LOGIN_WINDOW_LABEL,
-        toWidth: 360,
-        toHeight: val === LOGIN_WINDOW_LABEL ? 450 : 480,
-        duration: 160,
-        steps: 12,
-      }).catch((err: any) => console.error("窗口动画失败:", err));
-    }
-  }, {
-    immediate: true,
-  });
-}
+    }, {
+      immediate: true,
+    });
+  }
+});
 </script>
 
 <template>

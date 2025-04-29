@@ -493,7 +493,7 @@ defineExpose({
         <!-- 快捷键提示卡片 -->
         <div
           v-if="showShortcutTips"
-          class="btn-bg pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df text-sm shadow-md transition-200 sm:(left-4 top-4)"
+          class="pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df text-sm shadow-md transition-200 sm:(left-4 top-4) bg-color-br"
           :class="[isShortcutCardCollapsed ? 'transform -translate-x-full !left-0' : '']"
         >
           <div class="mb-2 flex-row-bt-c px-3 py-2 border-default-2-b">
@@ -522,7 +522,7 @@ defineExpose({
           <div
             v-show="isShortcutCardCollapsed && showShortcutTips"
             title="快捷键提示"
-            class="absolute right-0 top-1/2 translate-x-full rounded-r-md px-1 py-2 shadow -translate-y-1/2 btn-primary-bg !rounded-l-0 bg-color"
+            class="absolute right-0 top-1/2 translate-x-full rounded-r-md px-1 py-2 shadow -translate-y-1/2 btn-primary-bg !rounded-l-0 bg-color text-color"
             @click="toggleShortcutCard"
           >
             <i :class="[isShortcutCardCollapsed ? 'i-carbon:chevron-right' : 'i-carbon:chevron-left']" class="p-2.6" />
