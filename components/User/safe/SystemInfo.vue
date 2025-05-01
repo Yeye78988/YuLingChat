@@ -7,7 +7,7 @@
       <i class="i-solar:accumulator-outline mr-2 p-2.5" />设备信息
     </div>
     <div
-      rounde-4 h-62vh overflow-y-auto
+      rounde-4 flex-1 overflow-y-auto
     >
       <!-- 列表 -->
       <div

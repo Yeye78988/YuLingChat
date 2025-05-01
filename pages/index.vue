@@ -30,12 +30,57 @@ const showGroupDialog = computed({
 const isShowApply = ref(false);
 const applyUserId = ref<string | undefined>();
 
+// 检查用户是否绑定了邮箱或手机号
+function checkUserBindingStatus() {
+  // 如果用户已登录
+  if (user.isLogin) {
+    // 检查是否已绑定邮箱和手机号
+    const isEmailBound = user.userInfo.isEmailVerified === isTrue.TRUE;
+    const isPhoneBound = user.userInfo.isPhoneVerified === isTrue.TRUE;
+
+    // 如果邮箱和手机号都未绑定
+    if (!isEmailBound && !isPhoneBound) {
+      // 获取上次提醒时间
+      const lastRemindTime = localStorage.getItem("lastBindingRemindTime");
+      const now = new Date().toDateString();
+
+      // 如果没有提醒过或者上次提醒不是今天
+      if (true) {
+        // 显示提醒对话框
+        ElMessageBox.confirm(
+          "请绑定邮箱或手机号以提高账号安全性，是否前往绑定？",
+          "账号安全",
+          {
+            confirmButtonText: "前往绑定",
+            cancelButtonText: "稍后再说",
+            type: "warning",
+            center: true,
+            customClass: "text-center",
+          },
+        ).then(() => {
+          // 用户点击确认，跳转到安全设置页面
+          navigateTo("/user/safe");
+        }).catch(() => {
+          // 用户点击取消，不做任何操作
+        });
+
+        // 更新提醒时间
+        localStorage.setItem("lastBindingRemindTime", now);
+      }
+    }
+  }
+}
+
 // 监听好友申请弹窗事件
 onMounted(() => {
+  // 监听好友申请弹窗事件
   mitter.on(MittEventType.FRIEND_APPLY_DIALOG, (payload) => {
     isShowApply.value = payload.show;
     applyUserId.value = payload.userId;
   });
+
+  // 登录后检查绑定状态
+  checkUserBindingStatus();
 });
 
 // 组件卸载时移除事件监听
@@ -47,8 +92,9 @@ onUnmounted(() => {
 useMsgLinear();
 // 初始化设置
 watch(() => user.isLogin, (val) => {
-  if (val)
+  if (val) {
     setting.loadSettingPreData();
+  }
 }, {
   immediate: true,
 });

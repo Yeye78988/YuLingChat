@@ -25,9 +25,9 @@ function close() {
         class="absolute h-full w-full card-rounded-df backdrop-blur-2px"
         @click="close"
       />
-      <UserSafePwdForm v-if="modelValue.showUpdatePwd" key="UserSafePwdForm" @close="close()" />
-      <UserSafePhoneForm v-if="modelValue.showUpdatePhone" key="UserSafePhoneForm" @close="close()" />
-      <UserSafeEmailForm v-if="modelValue.showUpdateEmail" key="UserSafeEmailForm" @close="close()" />
+      <UserSafePwdForm v-if="modelValue.showUpdatePwd" key="UserSafePwdForm" class="shadow-lg" @close="close()" />
+      <UserSafePhoneForm v-if="modelValue.showUpdatePhone" key="UserSafePhoneForm" class="shadow-lg" @close="close()" />
+      <UserSafeEmailForm v-if="modelValue.showUpdateEmail" key="UserSafeEmailForm" class="shadow-lg" @close="close()" />
     </div>
   </transition>
 </template>

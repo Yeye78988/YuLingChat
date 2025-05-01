@@ -7,95 +7,80 @@ const [formAnimateRef, enter] = useAutoAnimate({
 });
 
 const setting = useSettingStore();
-onMounted(() => {
-  enter(!setting.settingPage.isCloseAllTransition);
-});
+const user = useUserStore();
+
 enum CheckTypeEnum {
   PHONE = DeviceType.PHONE,
   EMAIL = DeviceType.EMAIL,
   OLD_PASSWORD = 2,
 }
 
-const user = useUserStore();
+// 状态变量
 const isLoading = ref<boolean>(false);
 const codeStorage = ref<number>(0);
-const chooseType = ref<CheckTypeEnum | undefined>(user.userInfo.isEmailVerified ? CheckTypeEnum.EMAIL : user.userInfo.isPhoneVerified ? CheckTypeEnum.PHONE : undefined);
-const checkTypeValue = computed(() => chooseType.value === CheckTypeEnum.PHONE ? user.userInfo.phone : user.userInfo.email);
+const userFormRefs = ref();
 
-// 表单
+// 根据用户验证状态选择默认验证方式
+const chooseType = ref<CheckTypeEnum | undefined>(
+  user.userInfo.isEmailVerified
+    ? CheckTypeEnum.EMAIL
+    : user.userInfo.isPhoneVerified
+      ? CheckTypeEnum.PHONE
+      : CheckTypeEnum.OLD_PASSWORD,
+);
+
+// 显示当前选择的验证方式对应的值
+const checkTypeValue = computed(() =>
+  chooseType.value === CheckTypeEnum.PHONE ? user.userInfo.phone : user.userInfo.email,
+);
+
+// 表单数据
 const userForm = reactive({
-  code: "", // 旧密码
-  password: "",
-  newPassword: "", // 密码
+  code: "", // 验证码
+  password: "", // 旧密码
+  newPassword: "", // 新密码
 });
-const isSecondCheck = computed(() => chooseType.value === CheckTypeEnum.EMAIL || chooseType.value === CheckTypeEnum.PHONE);
-const rules = reactive(isSecondCheck.value
+
+// 是否使用二步验证（邮箱或手机号）
+const isSecondCheck = computed(() =>
+  chooseType.value === CheckTypeEnum.EMAIL || chooseType.value === CheckTypeEnum.PHONE,
+);
+
+// 密码验证规则
+const passwordRules = [
+  { required: true, message: "密码不能为空！", trigger: "blur" },
+  {
+    pattern: /^\w{6,20}$/,
+    message: "密码字母数字下划线组成",
+    trigger: "change",
+  },
+  { min: 6, max: 20, message: "密码长度6-20字符！", trigger: "blur" },
+  {
+    validator: () => userForm.password !== userForm.newPassword,
+    message: "新旧密码相同！",
+    trigger: "change",
+  },
+  {
+    validator: () => userForm.password !== userForm.newPassword,
+    message: "新旧密码相同！",
+    trigger: "blur",
+  },
+];
+
+// 表单验证规则
+const rules = computed(() => isSecondCheck.value
   ? {
       code: [
         { required: true, message: "请输入验证码", trigger: "blur" },
         { min: 6, max: 6, message: "验证码长度错误", trigger: "blur" },
       ],
-      newPassword: [
-        { required: true, message: "新密码不能为空！", trigger: "blur" },
-        {
-          pattern: /^\w{6,20}$/,
-          message: "密码字母数字下划线组成",
-          trigger: "change",
-        },
-        { min: 6, max: 20, message: "新密码长度6-20字符！", trigger: "blur" },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "change",
-        },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "blur",
-        },
-      ],
+      newPassword: passwordRules,
     }
   : {
-      password: [
-        { required: true, message: "新密码不能为空！", trigger: "blur" },
-        {
-          pattern: /^\w{6,20}$/,
-          message: "密码字母数字下划线组成",
-          trigger: "change",
-        },
-        { min: 6, max: 20, message: "新密码长度6-20字符！", trigger: "blur" },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "change",
-        },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "blur",
-        },
-      ],
-      newPassword: [
-        { required: true, message: "新密码不能为空！", trigger: "blur" },
-        {
-          pattern: /^\w{6,20}$/,
-          message: "密码字母数字下划线组成",
-          trigger: "change",
-        },
-        { min: 6, max: 20, message: "新密码长度6-20字符！", trigger: "blur" },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "change",
-        },
-        {
-          validator: () => userForm.password !== userForm.newPassword,
-          message: "新旧密码相同！",
-          trigger: "blur",
-        },
-      ],
-    });
-const userFormRefs = ref();
+      password: passwordRules,
+      newPassword: passwordRules,
+    },
+);
 
 /**
  * 修改密码
@@ -103,6 +88,7 @@ const userFormRefs = ref();
 async function onUpdatePwd(formEl: FormInstance | undefined) {
   if (!formEl || isLoading.value)
     return;
+
   await formEl.validate(async (valid) => {
     if (valid) {
       isLoading.value = true;
@@ -112,6 +98,7 @@ async function onUpdatePwd(formEl: FormInstance | undefined) {
           cancelButtonText: "取消",
           lockScroll: false,
         });
+
         if (action === "confirm")
           await toUpdate();
       }
@@ -124,9 +111,13 @@ async function onUpdatePwd(formEl: FormInstance | undefined) {
   });
 }
 
+/**
+ * 执行密码更新
+ */
 async function toUpdate() {
   if (chooseType.value === undefined)
     return;
+
   let res;
   if (chooseType.value === CheckTypeEnum.OLD_PASSWORD) {
     res = await updatePwdByToken(
@@ -141,45 +132,49 @@ async function toUpdate() {
       user.getToken,
     );
   }
+
   if (res && res.code === StatusCode.SUCCESS) {
-    // 修改成功
     ElMessage.success({
       message: "修改成功，下次登录请用新密码！",
       duration: 2000,
     });
     emits("close");
+    return true;
   }
-  return true;
+
+  return false;
 }
 
-// 二步验证
+/**
+ * 获取验证码
+ */
 async function getCheckCodeReq(type?: CheckTypeEnum) {
-  if (type === undefined)
+  if (type === undefined || codeStorage.value > 0)
     return;
 
   const key = type === CheckTypeEnum.EMAIL ? user.userInfo.email : user.userInfo.phone;
-  if (codeStorage.value > 0)
+  if (!key || (type !== CheckTypeEnum.PHONE && type !== CheckTypeEnum.EMAIL))
     return;
 
-  if (key && (type === CheckTypeEnum.PHONE || type === CheckTypeEnum.EMAIL)) {
-    const res = await getCheckCode(key, type as any, user.getToken);
-    if (res.code === StatusCode.SUCCESS) {
-      ElMessage({
-        message: "发送成功，请查收！",
-        type: "success",
-        duration: 2000,
-      });
-      codeStorage.value = 60;
-      const timer = setInterval(() => {
-        codeStorage.value--;
-        if (codeStorage.value === 0)
-          clearInterval(timer);
-      }, 1000);
-    }
+  const res = await getCheckCode(key, type as any, user.getToken);
+  if (res.code === StatusCode.SUCCESS) {
+    ElMessage({
+      message: "发送成功，请查收！",
+      type: "success",
+      duration: 2000,
+    });
+
+    codeStorage.value = 60;
+    const timer = setInterval(() => {
+      codeStorage.value--;
+      if (codeStorage.value === 0)
+        clearInterval(timer);
+    }, 1000);
   }
 }
+
 onMounted(() => {
-  chooseType.value = user.userInfo.isEmailVerified ? CheckTypeEnum.EMAIL : user.userInfo.isPhoneVerified ? CheckTypeEnum.PHONE : CheckTypeEnum.OLD_PASSWORD;
+  enter(!setting.settingPage.isCloseAllTransition);
 });
 </script>
 
@@ -295,7 +290,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .form {
-  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default py-2em";
+  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default rounded-2 py-2em";
 
   :deep(.el-input-group__append) {
     .el-button {

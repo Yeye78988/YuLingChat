@@ -154,7 +154,7 @@ async function getEmailCode() {
 
 <style scoped lang="scss">
 .form {
-  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default p-1.2em";
+  --at-apply: "sm:w-360px w-95vw block overflow-hidden border-default-2 backdrop-blur-5px card-default rounded-2 p-1.2em";
 	:deep(.el-input__wrapper) {
 		padding: 0.3em 1em;
 	}

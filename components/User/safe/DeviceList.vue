@@ -69,8 +69,8 @@ function exitLogin(ua?: string) {
 </script>
 
 <template>
-  <div class="group flex flex-col">
-    <div my-4 text-sm>
+  <div class="group h-full flex flex-col">
+    <div my-4 shrink-0 text-sm>
       <i class="i-solar:devices-outline mr-2 p-2.5" />
       登录设备
       <i
@@ -79,15 +79,17 @@ function exitLogin(ua?: string) {
         @click="reload"
       />
     </div>
-    <div
+    <el-scrollbar
       v-loading="isLoading"
-      rounde-4 h-62vh overflow-y-auto
+      class="rounde-4"
+      height="74vh"
       :element-loading-spinner="defaultLoadingIcon"
     >
       <!-- 列表 -->
       <div
         ref="autoAnimateRef"
-        class="relative grid grid-cols-1 items-start gap-2 pb-4rem lg:grid-cols-3 sm:grid-cols-2"
+        height="50%"
+        class="relative grid grid-cols-1 h-full items-start gap-2 pb-4rem lg:grid-cols-3 sm:grid-cols-2"
       >
         <UserSafeDeviceCard
           v-for="p in deviceList"
@@ -109,7 +111,7 @@ function exitLogin(ua?: string) {
           </el-button>
         </UserSafeDeviceCard>
       </div>
-    </div>
+    </el-scrollbar>
   </div>
 </template>
 
