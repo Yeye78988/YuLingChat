@@ -143,7 +143,7 @@ async function getRegCode(type: RegisterType) {
     // 获取邮箱验证码
     if (type === RegisterType.EMAIL) {
       // 简单校验
-      if (formUser.email.trim() === "")
+      if (formUser.email.trim() === "" || emailCodeStorage.value > 0)
         return;
       if (!checkEmail(formUser.email))
         return ElMessage.error("邮箱格式不正确！");
@@ -163,7 +163,7 @@ async function getRegCode(type: RegisterType) {
     }
     // 获取手机号验证码
     else if (type === RegisterType.PHONE) {
-      if (formUser.phone.trim() === "")
+      if (formUser.email.trim() === "" || phoneCodeStorage.value > 0)
         return;
       if (!checkPhone(formUser.phone))
         return ElMessage.error("手机号格式不正确！");
@@ -413,9 +413,11 @@ function toLoginForm() {
         placeholder="请输入邮箱"
       >
         <template #append>
-          <el-button type="primary" :disabled="emailCodeStorage > 0" @click="getRegCode(registerType)">
+          <!-- <el-button style="border:none; width" type="primary"  @click="getRegCode(registerType)">
+          </el-button> -->
+          <span>
             {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
-          </el-button>
+          </span>
         </template>
       </el-input>
     </el-form-item>
@@ -423,9 +425,9 @@ function toLoginForm() {
     <el-form-item v-if="registerType === RegisterType.PHONE" type="tel" prop="phone" class="animated">
       <el-input v-model.trim="formUser.phone" :prefix-icon="ElIconIphone" autocomplete="off" :size="size" placeholder="请输入手机号">
         <template #append>
-          <el-button type="primary" :disabled="phoneCodeStorage > 0" @click="getRegCode(registerType)">
+          <span @click="getRegCode(registerType)">
             {{ phoneCodeStorage > 0 ? `${phoneCodeStorage}s后重新发送` : "获取验证码" }}
-          </el-button>
+          </span>
         </template>
       </el-input>
     </el-form-item>
@@ -538,6 +540,10 @@ function toLoginForm() {
   // 报错信息
   :deep(.el-form-item) {
     padding: 0.3em 0.1em;
+
+    .el-input-group__append {
+      --at-apply: "card-rounded-df rounded-l-0  transition-100 text-light dark:text-theme-info bg-theme-info dark:bg-dark border-l-0 hover:(!text-light !bg-theme-info) px-4 tracking-0.1em";
+    }
 
     .el-form-item__error {
       padding-top: 0;

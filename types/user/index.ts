@@ -3,7 +3,7 @@ export enum LoginType {
   PWD,
   PHONE,
   EMAIL,
-  ADMIN,
+  // ADMIN,
 }
 
 export enum RegisterType {

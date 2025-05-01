@@ -77,7 +77,7 @@ async function getLoginCode(type: LoginType) {
     // 获取邮箱验证码
     if (type === LoginType.EMAIL) {
     // 简单校验
-      if (userForm.value.email.trim() === "")
+      if (!userForm.value.email.trim() || emailCodeStorage.value > 0)
         return;
       if (!checkEmail(userForm.value.email)) {
         isLoading.value = false;
@@ -98,7 +98,7 @@ async function getLoginCode(type: LoginType) {
     }
     // 获取手机号验证码
     else if (type === LoginType.PHONE) {
-      if (userForm.value.phone.trim() === "")
+      if (!userForm.value.phone.trim() || phoneCodeStorage.value > 0)
         return;
       if (!checkPhone(userForm.value.phone)) {
         isLoading.value = false;
@@ -204,9 +204,6 @@ async function onLogin(formEl: any | undefined) {
         case LoginType.EMAIL:
           res = await toLoginByEmail(userForm.value.email, userForm.value.code);
           break;
-        case LoginType.ADMIN:
-          res = await toLoginByPwd(userForm.value.username, userForm.value.password, true);
-          break;
       }
     }
     catch (error) {
@@ -310,7 +307,6 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
       </div>
       <!-- 切换登录 -->
       <el-segmented
-        v-show="loginType !== LoginType.ADMIN"
         v-model="loginType"
         class="toggle-login grid grid-cols-3 mb-4 w-full gap-2 card-bg-color-2"
         :options="options"
@@ -332,13 +328,8 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           @keyup.enter="getLoginCode(loginType)"
         >
           <template #append>
-            <el-button
-              type="primary"
-              :disabled="emailCodeStorage > 0 || isLoading"
-              @click="getLoginCode(loginType)"
-            >
-              {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
-            </el-button>
+            <span class="" @click="getLoginCode(loginType)"> {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
+            </span>
           </template>
         </el-input>
       </el-form-item>
@@ -359,13 +350,9 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
           @keyup.enter="getLoginCode(loginType)"
         >
           <template #append>
-            <el-button
-              type="primary"
-              :disabled="phoneCodeStorage > 0 || isLoading"
-              @click="getLoginCode(loginType)"
-            >
+            <span @click="getLoginCode(loginType)">
               {{ phoneCodeStorage > 0 ? `${phoneCodeStorage}s后重新发送` : "获取验证码" }}
-            </el-button>
+            </span>
           </template>
         </el-input>
       </el-form-item>
@@ -385,7 +372,7 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
       </el-form-item>
       <!-- 密码登录 -->
       <el-form-item
-        v-if="loginType === LoginType.PWD || loginType === LoginType.ADMIN "
+        v-if="loginType === LoginType.PWD"
         label=""
         prop="username"
         class="animated"
@@ -416,13 +403,13 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
                 class="i-carbon:close ml-a h-0 w-0 flex-shrink-0 overflow-hidden transition-all group-hover:(h-1.5em w-1.5em) btn-danger"
                 @click.stop.capture="removeHistoryAccount(item.account)"
               />
-              <span v-if="item.type === LoginType.ADMIN" class="ml-2 flex-shrink-0 rounded-4px bg-theme-primary px-1 py-1px text-xs text-white">管理员</span>
+              <span v-if="item.userInfo && item.userInfo.isAdmin" class="ml-2 flex-shrink-0 rounded-4px bg-theme-primary px-1 py-1px text-xs text-white">管理员</span>
             </div>
           </template>
         </el-autocomplete>
       </el-form-item>
       <el-form-item
-        v-if="loginType === LoginType.PWD || loginType === LoginType.ADMIN"
+        v-if="loginType === LoginType.PWD"
         type="password"
         show-password
         label=""
@@ -459,12 +446,12 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-checkbox v-model="autoLogin" class="mt-1" style="padding: 0;font-size: inherit;float: left; height: fit-content;">
           记住我
         </el-checkbox>
-        <span
+        <!-- <span
           class="mr-2 cursor-pointer border-r-(1px [var(--el-border-color-base)] solid) pr-2 transition-300"
-          @click="loginType = loginType === LoginType.ADMIN ? LoginType.PHONE : LoginType.ADMIN"
+          @click="forgetPassword"
         >
-          {{ loginType !== LoginType.ADMIN ? "管理员" : "用户登录" }}
-        </span>
+        忘记密码？
+        </span> -->
         <span
           cursor-pointer class="text-color-primary" transition-300
           @click="toRegister"
@@ -523,7 +510,9 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
   // 报错信息
   :deep(.el-form-item) {
     padding: 0.3em 0.1em;
-
+    .el-input-group__append {
+      --at-apply: "card-rounded-df rounded-l-0  transition-100 text-light dark:text-theme-primary bg-theme-primary dark:bg-dark border-l-0 hover:(!text-light !bg-theme-primary) px-4 tracking-0.1em";
+    }
 
     .el-form-item__error {
       padding-top: 0;

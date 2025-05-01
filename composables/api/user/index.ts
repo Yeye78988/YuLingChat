@@ -6,16 +6,16 @@ import type { Result } from "@/types/result";
  * @param password 密码
  * @returns promise
  */
-export function toLoginByPwd(username: string, password: string, isAdmin: boolean = false) {
+export function toLoginByPwd(username: string, password: string) {
   // 管理员
-  if (isAdmin) {
-    return useHttp.post<Result<string>>("/admin/login/pwd", {
-      username,
-      password,
-    });
-  }
+  // if (isAdmin) {
+  //   return useHttp.post<Result<string>>("/admin/login/pwd", {
+  //     username,
+  //     password,
+  //   });
+  // }
   // 用户
-  return useHttp.post<Result<string>>("/user/login/pwd", { username, password });
+  return useHttp.post<Result<string>>("/user/login/pwd/all", { username, password });
 }
 /**
  * 邮箱登录

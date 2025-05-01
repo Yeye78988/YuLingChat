@@ -25,12 +25,8 @@ const form = ref({
 
 <template>
   <div class="flex flex-col">
-    <div
-      my-4 block text-sm
-    >
-      <i
-        i-solar:shield-check-broken mr-2 p-2.5
-      />
+    <div my-4 block text-sm>
+      <i i-solar:shield-check-broken mr-2 p-2.5 />
       修改信息
     </div>
     <!-- 用户信息 -->
@@ -51,9 +47,7 @@ const form = ref({
         />
       </div>
       <!-- 密码 -->
-      <div
-        ml-1 mt-6 flex-row-bt-c
-      >
+      <div ml-1 mt-6 flex-row-bt-c>
         <small>
           密&emsp;码：
           <small opacity-80>************</small>
@@ -66,9 +60,7 @@ const form = ref({
         </small>
       </div>
       <!-- 手机号 -->
-      <div
-        ml-1 mt-6 flex-row-bt-c
-      >
+      <div ml-1 mt-6 flex-row-bt-c>
         <small>
           手机号：
           <small
@@ -112,8 +104,6 @@ const form = ref({
         <!-- 退出 -->
         <ElDivider class="dark:opacity-20" />
         <div
-
-
           mb-1 flex-row-bt-c justify-end
         >
           <el-text
