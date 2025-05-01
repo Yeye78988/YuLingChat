@@ -60,6 +60,7 @@ definePageMeta({
         <el-scrollbar
           v-if="unReadContactList.length"
           height="70vh"
+          wrap-class="pb-4"
         >
           <!-- 消息 -->
           <div

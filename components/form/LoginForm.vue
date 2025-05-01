@@ -286,6 +286,10 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
   const results = queryString ? historyAccounts.value.filter(p => p.account.toLowerCase().indexOf(queryString.toLowerCase()) === 0) : historyAccounts.value;
   cb(results);
 }
+
+function forgetPassword() {
+  ElMessage.warning("请手机或者邮箱验证登录后，找回密码！");
+}
 </script>
 
 <template>
@@ -446,12 +450,12 @@ function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
         <el-checkbox v-model="autoLogin" class="mt-1" style="padding: 0;font-size: inherit;float: left; height: fit-content;">
           记住我
         </el-checkbox>
-        <!-- <span
+        <span
           class="mr-2 cursor-pointer border-r-(1px [var(--el-border-color-base)] solid) pr-2 transition-300"
           @click="forgetPassword"
         >
-        忘记密码？
-        </span> -->
+          忘记密码？
+        </span>
         <span
           cursor-pointer class="text-color-primary" transition-300
           @click="toRegister"

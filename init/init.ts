@@ -1,4 +1,5 @@
-import { LogicalPosition } from "@tauri-apps/api/dpi";
+import type { LogicalPosition } from "@tauri-apps/api/dpi";
+import { PhysicalPosition } from "@tauri-apps/api/dpi";
 import { listen } from "@tauri-apps/api/event";
 import { appDataDir } from "@tauri-apps/api/path";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -6,7 +7,8 @@ import { isPermissionGranted, requestPermission } from "@tauri-apps/plugin-notif
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { type as osType, platform } from "@tauri-apps/plugin-os";
 import { restoreStateCurrent, StateFlags } from "@tauri-apps/plugin-window-state";
-import { useFlashTray } from "~/composables/tauri/window";
+import { MSG_WEBVIEW_WIDTH, useFlashTray } from "~/composables/tauri/window";
+
 
 /**
  * Tauri事件
@@ -107,7 +109,6 @@ export function useAuthInit() {
     user.onCheckLogin();
   }
 }
-
 /**
  * 初始化消息通知窗口 (仅限桌面端)
  */
@@ -198,37 +199,56 @@ export async function useMsgBoxWebViewInit() {
     if (!win)
       return;
     const position = event.payload as LogicalPosition;
-    // const winPosition = await win.position();
-    // console.log("winPosition", winPosition);
 
     const setting = useSettingStore();
     const screenSize = window.screen;
-    const taskWidth = screenSize.width - screenSize.availWidth;
-    const taskHeight = screenSize.height - screenSize.availHeight;
+
+    // 获取屏幕缩放比例
+    const scaleFactor = await win.scaleFactor() || window.devicePixelRatio || 1;
+
+    // 计算任务栏尺寸（考虑缩放）
+    const taskWidth = (screenSize.width - screenSize.availWidth) * scaleFactor;
+    const taskHeight = (screenSize.height - screenSize.availHeight) * scaleFactor;
+
+    // 计算可用屏幕尺寸（考虑缩放）
+    const availWidth = screenSize.availWidth * scaleFactor;
+    const availHeight = screenSize.availHeight * scaleFactor;
+
+    // 消息窗口尺寸（考虑缩放）
+    const msgWidth = MSG_WEBVIEW_WIDTH;
+    const msgHeight = MSG_WEBVIEW_HEIGHT.value;
+
     if (setting.osType === "windows") {
       // 任务栏 上下左右四个位置
-      let x = position.x - MSG_WEBVIEW_WIDTH / 2;
-      let y = position.y - MSG_WEBVIEW_HEIGHT.value;
+      let x = position.x - msgWidth / 2;
+      let y = position.y - msgHeight;
+
+      // 调整位置，确保窗口完全在屏幕内
       if (x < 0) {
         x = taskWidth;
-        y = position.y - MSG_WEBVIEW_HEIGHT.value / 2;
+        y = position.y - msgHeight / 2;
       }
       if (y < 0) {
-        x = position.x - MSG_WEBVIEW_WIDTH / 2;
+        x = position.x - msgWidth / 2;
         y = taskHeight;
       }
-      if (x + MSG_WEBVIEW_WIDTH > screenSize.availWidth) {
-        x = screenSize.availWidth - MSG_WEBVIEW_WIDTH;
-        y = position.y - MSG_WEBVIEW_HEIGHT.value / 2;
+      if (x + msgWidth > availWidth) {
+        x = availWidth - msgWidth;
+        y = position.y - msgHeight / 2;
       }
-      if (y + MSG_WEBVIEW_HEIGHT.value > screenSize.availHeight) {
-        y = screenSize.availHeight - MSG_WEBVIEW_HEIGHT.value;
+      if (y + msgHeight > availHeight) {
+        y = availHeight - msgHeight;
       }
-      await win.setPosition(new LogicalPosition(x, y));
+      // 使用 LogicalPosition 设置位置
+      await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
     }
     else if (setting.osType === "macos") {
-      await win.setPosition(new LogicalPosition(position.x - MSG_WEBVIEW_WIDTH / 2, position.y));
+      // macOS 托盘位置通常在顶部，调整窗口位置
+      const x = position.x - msgWidth / 2;
+      const y = position.y;
+      await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
     }
+
     await win.show();
     await win.setFocus();
   });
