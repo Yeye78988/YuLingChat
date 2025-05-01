@@ -109,6 +109,37 @@ export function useAuthInit() {
     user.onCheckLogin();
   }
 }
+
+
+// resolveUnReadContact
+async function resolveUnReadContact(contact: ChatContactExtra | undefined) {
+  if (!contact)
+    return;
+  const chat = useChatStore();
+  const mainWin = WebviewWindow.getCurrent();
+  await navigateTo("/");
+  await mainWin.show();
+  await mainWin.isMinimized() && await mainWin.unminimize();
+  chat.setContact(contact);
+  if (contact && chat.theRoomId === contact?.roomId)
+    chat.setReadList(contact?.roomId);
+  await nextTick();
+  chat.scrollBottom(false);
+}
+
+async function resolveUserApply() {
+  const chat = useChatStore();
+  if (chat.applyUnReadCount > 0) {
+    const mainWin = WebviewWindow.getCurrent();
+    await navigateTo("/friend");
+    await mainWin?.show();
+    await mainWin?.isMinimized() && await mainWin?.unminimize();
+    await mainWin?.setFocus();
+    // 切换到好友申请页面
+    chat.setTheFriendOpt(FriendOptType.NewFriend);
+  }
+}
+
 /**
  * 初始化消息通知窗口 (仅限桌面端)
  */
@@ -165,6 +196,8 @@ export async function useMsgBoxWebViewInit() {
       MSG_WEBVIEW_HEIGHT.value = size.height;
     });
   }
+
+
   // 监听点击事件消息通知事件
   const trayClickUnlisten = await listen("tray_click", async (event) => {
     const win = await WebviewWindow.getByLabel(MAIN_WINDOW_LABEL);
@@ -173,15 +206,12 @@ export async function useMsgBoxWebViewInit() {
 
     if (chat.isNewMsg) {
       // 消费第一个未读消息
-      await navigateTo("/");
-      await win.show();
-      await win.isMinimized() && await win.unminimize();
       const contact = chat.unReadContactList[0];
-      chat.setContact(contact);
-      if (contact && chat.theRoomId === contact?.roomId)
-        chat.setReadList(contact?.roomId);
-      await nextTick();
-      chat.scrollBottom(false);
+      if (chat.applyUnReadCount > 0) {
+        resolveUserApply(); // 处理好友申请
+        return;
+      }
+      resolveUnReadContact(contact);
     }
     else {
       stop();
@@ -279,16 +309,20 @@ async function handleChannelMsg(event: MessageEvent) {
   const ws = useWsStore();
   const user = useUserStore();
   const chat = useChatStore();
+  const mainWin = await WebviewWindow?.getByLabel(MAIN_WINDOW_LABEL);
+
   if (!payload)
     return;
+
   // 是否托盘通知
   const setting = useSettingStore();
   if (setting.settingPage.notificationType !== NotificationEnums.TRAY) {
     return;
   }
   const { type, data } = payload;
-  const mainWin = await WebviewWindow?.getByLabel(MAIN_WINDOW_LABEL);
   if (type === "readContact") { // 读取单个
+    if (!data.roomId)
+      return;
     chat.setContact(chat.contactMap[data.roomId]);
     if (chat.theRoomId === data.roomId)
       chat.setReadList(data.roomId);
@@ -302,6 +336,7 @@ async function handleChannelMsg(event: MessageEvent) {
   }
   else if (type === "readAllContact") { // 读取全部
     await navigateTo("/");
+    resolveUserApply(); // 处理好友申请
     chat.unReadContactList.forEach((p) => {
       setMsgReadByRoomId(p.roomId, user.getToken).then((res) => {
         if (res.code !== StatusCode.SUCCESS)
@@ -317,5 +352,10 @@ async function handleChannelMsg(event: MessageEvent) {
       });
       return p;
     });
+  }
+  else if (type === "openFriendApply") { // 打开好友申请页面
+    if (mainWin) {
+      resolveUserApply();
+    }
   }
 }

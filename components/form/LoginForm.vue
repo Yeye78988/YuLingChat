@@ -515,7 +515,7 @@ function forgetPassword() {
   :deep(.el-form-item) {
     padding: 0.3em 0.1em;
     .el-input-group__append {
-      --at-apply: "card-rounded-df rounded-l-0  transition-100 text-light dark:text-theme-primary bg-theme-primary dark:bg-dark border-l-0 hover:(!text-light !bg-theme-primary) px-4 tracking-0.1em";
+      --at-apply: "card-rounded-df cursor-pointer rounded-l-0  transition-200 text-light dark:text-theme-primary bg-theme-primary dark:bg-dark border-l-0 hover:(!text-light !bg-theme-primary border-none) px-4 tracking-0.1em";
     }
 
     .el-form-item__error {

@@ -3,8 +3,10 @@ import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 const unReadContactList = ref<ChatContactDetailVO[]>([]);
 const channel = new BroadcastChannel("main_channel");
-const unreadCount = computed(() => unReadContactList.value?.reduce((acc, cur) => acc + cur.unreadCount, 0) || 0);
-
+const applyUnReadCount = ref(0);
+const unreadCount = computed(() => unReadContactList.value?.reduce((acc, cur) => acc + cur.unreadCount, 0) || 0 + applyUnReadCount.value);
+const showScrollbar = computed(() => unReadContactList.value.length > 0 || applyUnReadCount.value > 0);
+const appWindow = WebviewWindow.getCurrent();
 // 监听消息
 async function handleReadMessage(p: ChatContactDetailVO) {
   // 标记已读
@@ -18,15 +20,30 @@ async function readAllContact() {
   unReadContactList.value = [];
 }
 
-onMounted(async () => {
+// 处理好友申请点击事件
+async function handleFriendApply() {
+  // 发送消息到主窗口，打开好友申请页面
+  channel.postMessage({ type: "openFriendApply" });
+  // 隐藏当前窗口
+  appWindow.hide();
+}
+
+const user = useUserStore();
+const ws = useWsStore();
+const applyUnReadCountKey = computed(() => `applyUnReadCount_${user.userId}`);
+onMounted(() => {
   // 监听locakStorage
   window.addEventListener("storage", (e) => {
     if (e.key === "unReadContactList")
       unReadContactList.value = JSON.parse(e.newValue || "[]");
+    if (e.key === applyUnReadCountKey.value)
+      applyUnReadCount.value = Number.parseInt(e.newValue || "0");
   });
   // 主动获取
   try {
     unReadContactList.value = JSON.parse(localStorage.getItem("unReadContactList") || "[]");
+    // 获取好友申请未读数
+    applyUnReadCount.value = Number.parseInt(localStorage.getItem(applyUnReadCountKey.value) || "0") || ws.wsMsgList.applyMsg.length;
   }
   catch (error) {
     console.warn(error);
@@ -35,7 +52,6 @@ onMounted(async () => {
 
 
 // 隐藏窗口
-const appWindow = WebviewWindow.getCurrent();
 function handleMouseLeave() {
   appWindow.hide();
 }
@@ -58,10 +74,32 @@ definePageMeta({
           新消息 ({{ unreadCount }})
         </div>
         <el-scrollbar
-          v-if="unReadContactList.length"
+          v-if="showScrollbar"
           height="70vh"
           wrap-class="pb-4"
         >
+          <!-- 好友申请 -->
+          <div
+            v-if="applyUnReadCount > 0"
+            title="查看好友申请"
+            class="group w-full flex cursor-pointer gap-2 rounded bg-white p-2 shadow-sm transition-all !items-center dark:bg-dark-7 hover:(bg-[var(--el-color-primary)] text-light shadow-lg)"
+            @click="handleFriendApply"
+          >
+            <div class="h-8 w-8 flex-row-c-c rounded-1 bg-theme-warning">
+              <i i-solar:user-plus-bold bg-light p-2 />
+            </div>
+            <div class="flex flex-1 flex-col justify-between gap-1 truncate px-1">
+              <p class="truncate">
+                新的好友申请
+              </p>
+              <p flex-row-bt-c gap-2 truncate op-60>
+                <small truncate>
+                  您有新的好友申请待处理
+                </small>
+              </p>
+            </div>
+            <el-badge :value="applyUnReadCount" class="ml-1" />
+          </div>
           <!-- 消息 -->
           <div
             v-for="p in unReadContactList"
@@ -85,12 +123,12 @@ definePageMeta({
           </div>
         </el-scrollbar>
 
-        <small v-if="unReadContactList.length" class="border-0 border-t-1px pt-2 text-right btn-info border-default" @click="readAllContact()">
+        <small v-if="unReadContactList.length || applyUnReadCount > 0" class="border-0 border-t-1px pt-2 text-right btn-info border-default" @click="readAllContact()">
           忽略全部
         </small>
         <!-- 没有消息 -->
         <div v-else class="flex-row-c-c flex-1 flex-col text-center op-70">
-          <i i-solar-chat-dots-line-duotone class="mb-2 h-6 w-6" />
+          <i i-solar:chat-dots-line-duotone class="mb-2 h-6 w-6" />
           <small class="text-sm">
             暂无新消息
           </small>

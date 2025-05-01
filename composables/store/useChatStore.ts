@@ -55,7 +55,7 @@ export const useChatStore = defineStore(
     const recallMsgMap = ref<Record<number, ChatMessageVO>>({});
 
     /** ---------------------------- 好友 ---------------------------- */
-    const applyUnReadCount = ref(0); // 申请未读数
+    const applyUnReadCount = useLocalStorage(computed(() => `applyUnReadCount_${useUserStore().userId}`), 0); // 申请未读数
 
     /** ---------------------------- 会话 ---------------------------- */
     const searchKeyWords = ref("");
@@ -102,7 +102,7 @@ export const useChatStore = defineStore(
       localStorage.setItem("unReadContactList", JSON.stringify(list));
       return list;
     });
-    const isNewMsg = computed(() => unReadContactList.value.length > 0);
+    const isNewMsg = computed(() => unReadContactList.value.length > 0 || applyUnReadCount.value > 0);
     const isVisible = ref(false); // 是否可见
     const isMsgListScroll = ref(false); // 消息列表是否滚动
     const shouldAutoScroll = ref(false); // 是否自动滚动

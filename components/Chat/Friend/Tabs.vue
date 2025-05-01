@@ -34,7 +34,7 @@ const activeNames = useLocalStorage(`${route.fullPath}_activeNames`, {
           :class="{ focus: chat.theFriendOpt.type === FriendOptType.NewFriend }"
           @click="toggleView(FriendOptType.NewFriend)"
         >
-          <el-badge :value="chat.applyUnReadCount" :hidden="!ws.wsMsgList.applyMsg.length" :max="99">
+          <el-badge :value="chat.applyUnReadCount" :hidden="!chat.applyUnReadCount" :max="99">
             <div class="avatar-icon bg-theme-warning">
               <i i-solar:user-plus-bold bg-light p-3 />
             </div>
