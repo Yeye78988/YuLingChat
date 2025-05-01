@@ -41,11 +41,12 @@ function checkUserBindingStatus() {
     // 如果邮箱和手机号都未绑定
     if (!isEmailBound && !isPhoneBound) {
       // 获取上次提醒时间
-      const lastRemindTime = localStorage.getItem("lastBindingRemindTime");
+      const lastRemindTime = localStorage.getItem(`${user.userId}_lastBindingRemindTime`);
       const now = new Date().toDateString();
 
       // 如果没有提醒过或者上次提醒不是今天
-      if (true) {
+      console.log("提醒时间", lastRemindTime, now);
+      if (!lastRemindTime || lastRemindTime !== now) {
         // 显示提醒对话框
         ElMessageBox.confirm(
           "请绑定邮箱或手机号以提高账号安全性，是否前往绑定？",
@@ -65,7 +66,7 @@ function checkUserBindingStatus() {
         });
 
         // 更新提醒时间
-        localStorage.setItem("lastBindingRemindTime", now);
+        localStorage.setItem(`${user.userId}_lastBindingRemindTime`, now);
       }
     }
   }
