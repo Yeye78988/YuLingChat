@@ -158,7 +158,6 @@ export const useChatStore = defineStore(
         }
       }
       else if (type === "success" && msg) { // 更新临时消息为服务器返回的消息
-        findMsgCache.set(`${msg.message.roomId}_${msg.message.id}`, msg); // 需要缓存
         if (queueItem && queueItem.id) {
           // 如果有临时ID，查找并替换临时消息
           const roomId = msg.message.roomId;
@@ -174,7 +173,7 @@ export const useChatStore = defineStore(
           if (msg.message.roomId) {
             setReadList(msg.message.roomId, true);
           }
-          // appendMsg(msg); // 保证顺序
+          appendMsg(msg); // 保证顺序
         }
       }
       else if (type === "error") { // 消息发送失败

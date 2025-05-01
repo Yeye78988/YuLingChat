@@ -150,16 +150,16 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
     translation: [
       {
         label: "复制",
-        hidden: !txt || !data.message.body._textTranslation,
+        hidden: !txt || !translation,
         customClass: "group",
         icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
         onClick: () => {
-          useCopyText(data.message.body._textTranslation?.result as string);
+          useCopyText(translation?.result as string);
         },
       },
       {
         label: "重新",
-        hidden: !txt || !data.message.body._textTranslation,
+        hidden: !txt || !translation,
         customClass: "group",
         icon: "i-solar:refresh-outline group-hover:(rotate-180 i-solar:refresh-bold) group-btn-info",
         onClick: async () => {
@@ -175,14 +175,13 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       {
         label: "关闭",
-        hidden: !txt || !data.message.body._textTranslation,
+        hidden: !txt || !translation,
         customClass: "group",
         icon: "i-solar:text-field-focus-line-duotone group-hover:(scale-110 i-solar:text-field-focus-bold) group-btn-danger",
         onClick: async () => {
           if (!txt || !data.message.id || !translation)
             return;
           if (closeTranslation(data.message.id, translation.targetLang)) {
-            //
             data.message.body._textTranslation = null;
           }
         },
@@ -467,7 +466,6 @@ async function refundMsg(data: ChatMessageVO<any>, msgId: number) {
         // 存储撤回的消息以便潜在的恢复
         chat.setRecallMsg(oldData);
       }
-
       data.message.type = MessageType.RECALL;
       data.message.content = `${data.fromUser.userId === user.userInfo.id ? "我" : `"${data.fromUser.nickName}"`}撤回了一条消息`;
       data.message.body = undefined;

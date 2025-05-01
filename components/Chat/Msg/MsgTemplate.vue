@@ -18,13 +18,13 @@ const user = useUserStore();
 interface TextBodyVO extends TextBodyMsgVO {
   _textTranslation?: Partial<TranslationVO>;
 }
-const msgId = data.message?.id;
+const msgId = computed(() => data.message?.id as number | undefined);
 const body = computed(() => data.message?.body as Partial<TextBodyVO> | undefined);
 const isSelf = user?.userInfo?.id && data?.fromUser?.userId === user?.userInfo?.id;
 // 关闭翻译
 function clearTranslation() {
   if (body?.value?._textTranslation) {
-    closeTranslation(msgId, body.value._textTranslation.targetLang!);
+    closeTranslation(msgId.value as number, body.value._textTranslation.targetLang!);
     body.value._textTranslation = undefined;
   }
 }
