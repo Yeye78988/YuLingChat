@@ -62,25 +62,7 @@ export const useChatStore = defineStore(
     const isOpenContact = ref(true); // 用于移动尺寸
     const theRoomId = ref<number | undefined>(undefined); // 当前会话id
     const contactMap = ref<Record<number, ChatContactExtra>>({});
-    const theContact = computed<Partial<ChatContactExtra>>({
-      get: () => (theRoomId.value
-        ? contactMap.value[theRoomId.value]
-        : {
-            msgList: [],
-            unreadMsgList: [],
-            pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-          }) as Partial<ChatContactExtra>,
-      set: (val: Partial<ChatContactExtra>) => {
-        const roomId = val?.roomId;
-        if (roomId) {
-          theRoomId.value = roomId;
-          contactMap.value[roomId] = val as ChatContactExtra;
-        }
-        else {
-          theRoomId.value = undefined;
-        }
-      },
-    });
+    const theContact = computed<Partial<ChatContactExtra>>(() => theRoomId.value ? (contactMap.value?.[theRoomId.value] || {}) : {});
     const sortedContacts = computed(() => Object.values(contactMap.value).sort((a, b) => {
       const pinDiff = (b.pinTime || 0) - (a.pinTime || 0);
       if (pinDiff !== 0)
@@ -750,29 +732,16 @@ export const useChatStore = defineStore(
     };
 
     // 向下/向上切换房间
-    const onDownUpChangeRoomLoading = ref(false);
-    const onDownUpChangeRoom = async (type: "down" | "up") => {
-      if (onDownUpChangeRoomLoading.value)
-        return;
-      const index = getContactList.value.findIndex(p => p.roomId === theRoomId.value);
-      onDownUpChangeRoomLoading.value = true;
-      if (index === -1 && getContactList?.value?.[0]?.roomId) {
-        await onChangeRoom(getContactList?.value?.[0]?.roomId as number);
-        onDownUpChangeRoomLoading.value = false;
-        return;
+    const onDownUpChangeRoom = useThrottleFn(async (type: "down" | "up") => {
+      const currentIndex = getContactList.value.findIndex(p => p.roomId === theRoomId.value);
+      // 根据方向切换房间
+      const targetIndex = type === "down" ? currentIndex + 1 : currentIndex - 1;
+      const targetRoom = getContactList.value[targetIndex];
+
+      if (targetRoom?.roomId) {
+        await onChangeRoom(targetRoom.roomId);
       }
-      if (type === "down") {
-        // 向下
-        if (index < getContactList.value.length - 1 && getContactList?.value?.[index + 1]?.roomId)
-          await onChangeRoom(getContactList.value[index + 1]?.roomId as number);
-      }
-      else {
-        // 向上
-        if (index > 0 && getContactList?.value?.[index - 1]?.roomId)
-          await onChangeRoom(getContactList.value[index - 1]?.roomId as number);
-      }
-      onDownUpChangeRoomLoading.value = false;
-    };
+    }, 100);
 
     /** --------------------------- 艾特AT人 --------------------------- */
     const atUserList = ref<Partial<AtChatMemberOption>[]>([]);
@@ -927,11 +896,6 @@ export const useChatStore = defineStore(
     /** ------------------------------------------- 重置 ------------------------------------------- */
     function resetStore() {
       contactMap.value = {};
-      theContact.value = {
-        msgList: [],
-        unreadMsgList: [],
-        pageInfo: { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-      } as Partial<ChatContactExtra>;
       showExtension.value = false;
       isOpenContact.value = true;
       roomGroupPageInfo.value = {

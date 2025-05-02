@@ -229,7 +229,7 @@ function onClickContact(room: ChatContactVO) {
 }
 
 // 监听当前选中的房间ID变化
-watchDebounced(() => chat.theRoomId, (newRoomId) => {
+watch(() => chat.theRoomId, (newRoomId) => {
   if (newRoomId) {
     requestAnimationFrame(() => {
       // 查找当前选中的联系人元素
@@ -251,7 +251,7 @@ watchDebounced(() => chat.theRoomId, (newRoomId) => {
       }
     });
   }
-}, { immediate: false, debounce: 300 });
+}, { immediate: false });
 
 const RoomTypeTagType: Record<number, "" | "primary" | "info" | any> = {
   [RoomType.AICHAT]: "warning",

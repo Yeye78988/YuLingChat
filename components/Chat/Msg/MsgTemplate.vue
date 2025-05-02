@@ -56,6 +56,7 @@ const showTranslation = computed(() => !!body.value?._textTranslation);
     <CardElImage
       ctx-name="avatar"
       error-class="i-solar:user-bold-duotone"
+      load-class=" "
       :src="BaseUrlImg + data.fromUser.avatar"
       fit="cover"
       class="avatar h-2.4rem w-2.4rem flex-shrink-0 cursor-pointer rounded-1/2 object-cover border-default"
@@ -85,7 +86,7 @@ const showTranslation = computed(() => !!body.value?._textTranslation);
         class="reply"
         @click="chat.scrollReplyMsg(body?.reply?.id || 0, body?.reply?.gapCount, false)"
       >
-        <i class="i-solar:forward-2-bold-duotone mr-1 p-2" />
+        <i class="reply-icon i-solar:forward-2-bold-duotone mr-1 p-2" />
         {{ `${body?.reply?.nickName} : ${body?.reply?.body?.substring(0, 50) || ''}` }}
       </small>
 

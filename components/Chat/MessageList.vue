@@ -6,6 +6,7 @@ const {
   pageInfo,
   isLoading,
   isReload,
+  msgList,
   scrollbarRef,
   syncMessages,
   loadData,
@@ -63,7 +64,7 @@ defineExpose({
         :delay="800"
         :threshold-height="200"
         :immediate="false"
-        :no-more="pageInfo.isLast && !isReload"
+        :no-more="pageInfo?.isLast && !isReload"
         :loading="isLoading && !isReload"
         @load="loadData"
       >
@@ -75,12 +76,12 @@ defineExpose({
         </template>
         <!-- 消息适配器 -->
         <ChatMsgMain
-          v-for="(msg, i) in chat.theContact.msgList"
+          v-for="(msg, i) in msgList"
           :id="`chat-msg-${msg.message.id}`"
           :key="msg.message.id"
           :index="i"
           :data="msg"
-          :prev-msg="i > 0 ? chat.theContact?.msgList?.[i - 1] || {} : {}"
+          :prev-msg="msgList?.[i - 1] || {}"
         />
       </ListDisAutoIncre>
     </div>
