@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus";
 import type { Result } from "~/types/result";
+import { CardLoading } from "#components";
 import { MdPreview } from "md-editor-v3";
 import { DeviceType, getRegisterCode, toLoginByPwd } from "~/composables/api/user";
 import { checkUsernameExists } from "~/composables/api/user/info";
@@ -24,7 +25,7 @@ const options = [
 ];
 // 请求加载
 const isLoading = ref<boolean>(false);
-const loadingText = ref<string>("自动登录中...");
+const loadingText = ref<string>("");
 const formRef = ref();
 // 表单
 const formUser = reactive({
@@ -143,7 +144,9 @@ async function getRegCode(type: RegisterType) {
     // 获取邮箱验证码
     if (type === RegisterType.EMAIL) {
       // 简单校验
-      if (formUser.email.trim() === "" || emailCodeStorage.value > 0)
+      if (formUser.email.trim() === "")
+        return ElMessage.error("邮箱不能为空！");
+      if (emailCodeStorage.value > 0)
         return;
       if (!checkEmail(formUser.email))
         return ElMessage.error("邮箱格式不正确！");
@@ -163,7 +166,9 @@ async function getRegCode(type: RegisterType) {
     }
     // 获取手机号验证码
     else if (type === RegisterType.PHONE) {
-      if (formUser.email.trim() === "" || phoneCodeStorage.value > 0)
+      if (formUser.phone.trim() === "")
+        return ElMessage.error("手机号不能为空！");
+      if (phoneCodeStorage.value > 0)
         return;
       if (!checkPhone(formUser.phone))
         return ElMessage.error("手机号格式不正确！");
@@ -179,6 +184,9 @@ async function getRegCode(type: RegisterType) {
           duration: 5000,
         });
       }
+    }
+    else {
+      ElMessage.warning("非法操作，注册类型有误！");
     }
   }
   catch (err) { }
@@ -362,13 +370,9 @@ function toLoginForm() {
   <!-- 注册 -->
   <el-form
     ref="formRef"
-    v-loading="isLoading"
     :disabled="isLoading"
     label-position="top"
     style="border: none;"
-    :element-loading-text="loadingText"
-    element-loading-background="transparent"
-    :element-loading-spinner="defaultLoadingIcon"
     autocomplete="off"
     hide-required-asterisk
     :rules="rules"
@@ -413,9 +417,7 @@ function toLoginForm() {
         placeholder="请输入邮箱"
       >
         <template #append>
-          <!-- <el-button style="border:none; width" type="primary"  @click="getRegCode(registerType)">
-          </el-button> -->
-          <span>
+          <span class="code-btn" @click="getRegCode(registerType)">
             {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
           </span>
         </template>
@@ -425,7 +427,7 @@ function toLoginForm() {
     <el-form-item v-if="registerType === RegisterType.PHONE" type="tel" prop="phone" class="animated">
       <el-input v-model.trim="formUser.phone" :prefix-icon="ElIconIphone" autocomplete="off" :size="size" placeholder="请输入手机号">
         <template #append>
-          <span @click="getRegCode(registerType)">
+          <span class="code-btn" @click="getRegCode(registerType)">
             {{ phoneCodeStorage > 0 ? `${phoneCodeStorage}s后重新发送` : "获取验证码" }}
           </span>
         </template>
@@ -464,11 +466,17 @@ function toLoginForm() {
       />
     </el-form-item>
     <el-form-item style="margin: 0;">
-      <BtnElButton type="info" class="submit w-full tracking-0.2em shadow" style="padding: 1.1em;font-size: 1rem;" @click="onRegister(formRef)">
+      <BtnElButton
+        :loading="isLoading"
+        :loading-icon="CardLoading"
+        type="info"
+        class="submit"
+        @click="onRegister(formRef)"
+      >
         立即注册
       </BtnElButton>
     </el-form-item>
-    <div mt-3 flex items-center text-right text-0.8em sm:text-sm>
+    <div class="mt-3 text-right text-0.8em sm:text-sm">
       <el-checkbox v-model="isAgreeTerm" style="--el-color-primary: var(--el-color-info);padding: 0;font-size: inherit;opacity: 0.8;float: left; height: fit-content;">
         同意并遵守
         <span text-color-info>《用户协议》</span>
@@ -532,17 +540,20 @@ function toLoginForm() {
   display: block;
   overflow: hidden;
   animation-delay: 0.1s;
-
   :deep(.el-input__wrapper) {
-    padding: 0.3em 1em;
+    // padding: 0.3em 1em;
+    --at-apply: "p-[0.5em_1em] sm:p-[0.3em_1em]";
   }
 
   // 报错信息
   :deep(.el-form-item) {
-    padding: 0.3em 0.1em;
+    padding: 0.3em 0;
 
     .el-input-group__append {
-      --at-apply: "card-rounded-df cursor-pointer rounded-l-0  transition-200 text-light dark:text-theme-info bg-theme-info dark:bg-dark border-l-0 hover:(!text-light !bg-theme-info border-none) px-4 tracking-0.1em";
+      --at-apply: "text-theme-info card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-info op-100)";
+    }
+    .code-btn {
+      --at-apply: "h-full flex-row-c-c px-4 transition-200 ";
     }
 
     .el-form-item__error {
@@ -552,7 +563,7 @@ function toLoginForm() {
 }
 
 :deep(.el-button) {
-  padding: 0.3em 1em;
+  padding: 0.5em 1em;
 }
 
 // label总体
@@ -562,6 +573,7 @@ function toLoginForm() {
 
 // 切换注册
 :deep(.toggle-btns.el-segmented) {
+  --el-segmented-item-selected-disabled-bg-color: var(--el-color-info-light-5);
   --el-segmented-item-selected-bg-color: var(--el-color-info);
   --el-border-radius-base: 6px;
   height: 2.6rem;
@@ -578,14 +590,14 @@ function toLoginForm() {
 }
 
 .dark .active {
-  background-color: var(--el-color-primary);
+  background-color: var(--el-color-info);
 }
 
 .submit {
-  font-size: 1.2em;
-  font-weight: 600;
-  transition: 0.3s;
-  cursor: pointer;
+  --at-apply: "h-2.6rem transition-200 w-full tracking-0.2em text-4 shadow font-500";
+  :deep(.el-icon) {
+    --at-apply: "text-5";
+  }
 }
 :deep(.el-input__wrapper.is-focus) {
   --el-input-focus-border-color: var(--el-color-info);

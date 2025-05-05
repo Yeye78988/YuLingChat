@@ -36,7 +36,7 @@ const form = ref({
       flex flex-1 flex-col
     >
       <div class="flex items-center">
-        <CardElImage class="h-12 w-12 card-default" :src="BaseUrlImg + user.userInfo.avatar" />
+        <CardAvatar class="h-12 w-12 rounded-1/2 border-default-2 card-default" :src="BaseUrlImg + user.userInfo.avatar" />
         <strong class="ml-3 block">{{ user.userInfo.username }}</strong>
         <i
           opacity-0
@@ -109,9 +109,9 @@ const form = ref({
           <el-text
             style="margin-left: 1rem"
             class="cursor-pointer transition-300 hover:text-[var(--el-color-primar)y]"
-            @click="ElMessage.warning('功能还未开放!')"
+            @click.stop="navigateTo('/user')"
           >
-            注销
+            编辑资料
           </el-text>
           <el-text
             style="margin-left: 1rem"

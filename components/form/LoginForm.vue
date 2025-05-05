@@ -9,6 +9,7 @@ import {
 import { LoginType } from "~/types/user/index.js";
 
 const user = useUserStore();
+const setting = useSettingStore();
 const loginType = useLocalStorage<LoginType>("loginType", LoginType.EMAIL);
 const {
   historyAccounts,
@@ -306,8 +307,8 @@ function forgetPassword() {
     autocomplete="off"
   >
     <template v-if="!user.isLogin">
-      <div mb-4 text-sm tracking-0.2em op-80>
-        聊你所想，聊天随心✨
+      <div mb-6 text-sm tracking-0.2em op-80>
+        {{ setting.isWeb && !setting.isMobileSize ? '聊你所想，聊天随心✨' : '' }}
       </div>
       <!-- 切换登录 -->
       <el-segmented
@@ -315,7 +316,6 @@ function forgetPassword() {
         class="toggle-login grid grid-cols-3 mb-4 w-full gap-2 card-bg-color-2"
         :options="options"
       />
-      <!-- 验证码登录(客户端 ) -->
       <!-- 邮箱登录 -->
       <el-form-item
         v-if="loginType === LoginType.EMAIL"
@@ -332,7 +332,7 @@ function forgetPassword() {
           @keyup.enter="getLoginCode(loginType)"
         >
           <template #append>
-            <span class="" @click="getLoginCode(loginType)"> {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
+            <span class="code-btn" @click="getLoginCode(loginType)"> {{ emailCodeStorage > 0 ? `${emailCodeStorage}s后重新发送` : "获取验证码" }}
             </span>
           </template>
         </el-input>
@@ -354,7 +354,7 @@ function forgetPassword() {
           @keyup.enter="getLoginCode(loginType)"
         >
           <template #append>
-            <span @click="getLoginCode(loginType)">
+            <span class="code-btn" @click="getLoginCode(loginType)">
               {{ phoneCodeStorage > 0 ? `${phoneCodeStorage}s后重新发送` : "获取验证码" }}
             </span>
           </template>
@@ -436,7 +436,7 @@ function forgetPassword() {
           type="primary"
           class="submit w-full tracking-0.2em shadow"
           style="padding: 20px"
-          :loading="user.isOnLogining"
+          :loading="isLoading || user.isOnLogining"
           @keyup.enter="onLogin(formRef)"
           @click="onLogin(formRef)"
         >
@@ -445,7 +445,7 @@ function forgetPassword() {
       </el-form-item>
       <!-- 底部 -->
       <div
-        class="mt-2 text-right text-0.8em sm:mt-4 sm:text-sm"
+        class="mt-3 text-right text-0.8em sm:text-sm"
       >
         <el-checkbox v-model="autoLogin" class="mt-1" style="padding: 0;font-size: inherit;float: left; height: fit-content;">
           记住我
@@ -511,15 +511,18 @@ function forgetPassword() {
     padding: 0.3em 1em;
   }
 
-  // 报错信息
   :deep(.el-form-item) {
-    padding: 0.3em 0.1em;
+    padding: 0;
+
     .el-input-group__append {
-      --at-apply: "card-rounded-df cursor-pointer rounded-l-0  transition-200 text-light dark:text-theme-primary bg-theme-primary dark:bg-dark border-l-0 hover:(!text-light !bg-theme-primary border-none) px-4 tracking-0.1em";
+      --at-apply: "text-theme-primary card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-primary op-100)";
+    }
+    .code-btn {
+      --at-apply: " h-full flex-row-c-c px-4 transition-200 ";
     }
 
     .el-form-item__error {
-      padding-top: 0;
+      margin-top: 0.2rem;
     }
   }
 }
@@ -557,10 +560,9 @@ function forgetPassword() {
 }
 
 .submit {
-  font-size: 1.2em;
-  font-weight: 600;
-  transition: 0.3s;
-  cursor: pointer;
-
+  --at-apply: "h-2.6rem transition-200 w-full tracking-0.2em text-4 shadow font-500";
+  :deep(.el-icon) {
+    --at-apply: "text-5";
+  }
 }
 </style>
