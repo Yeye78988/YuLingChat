@@ -16,7 +16,8 @@ export interface PlaySounder {
 export interface PageInfo { cursor?: string, isLast: boolean, size: number }
 export interface RoomChacheData { pageInfo: PageInfo; userList: ChatMemberVO[], isReload: boolean, cacheTime: number, isLoading: boolean }
 export interface ChatContactExtra extends ChatContactDetailVO {
-  msgList: ChatMessageVO[],
+  msgMap: Record<number, ChatMessageVO>, // 消息对象，key为消息ID
+  msgIds: number[], // 消息ID数组，用于保持顺序
   unreadMsgList?: ChatMessageVO[]
   pageInfo: Partial<PageInfo>,
   isReload: boolean
@@ -126,13 +127,11 @@ export const useChatStore = defineStore(
       msgBuilder,
     } = useMessageQueue();
 
-    // roomId_msgId
-    const findMsgCache = new Map<string, ChatMessageVO>();
     // 监听消息队列事件
     mitter.off(MittEventType.MESSAGE_QUEUE);
     mitter.on(MittEventType.MESSAGE_QUEUE, ({ type, payload }) => {
       const { msg, queueItem } = payload || {};
-      if (type === "add" && msg) {
+      if (type === "add" && msg) { // 添加消息
         if (theRoomId.value && theRoomId.value === msg.message.roomId) {
           appendMsg(msg);
           nextTick(() => scrollBottom?.(false));
@@ -143,11 +142,10 @@ export const useChatStore = defineStore(
           // 如果有临时ID，查找并替换临时消息
           const roomId = msg.message.roomId;
           if (queueItem.id && roomId) {
-            const msgList = contactMap.value[roomId]?.msgList || [];
-            const tempIndex = msgList.findIndex(m => m.message.id === queueItem.id);
-            if (tempIndex !== -1) {
-              // 移除
-              msgList[tempIndex] = msg as ChatMessageVO;
+            const contact = contactMap.value[roomId];
+            if (contact && contact.msgMap[queueItem.id]) {
+              // 更新消息
+              contact.msgMap[queueItem.id] = msg as ChatMessageVO;
             }
           }
           // 消息阅读上报（延迟）
@@ -351,7 +349,8 @@ export const useChatStore = defineStore(
       contactMap.value[vo.roomId] = {
         ...(oldVo // 详情
           || {
-            msgList: [],
+            msgMap: {},
+            msgIds: [],
             unreadMsgList: [],
             isReload: false,
             isLoading: false,
@@ -370,7 +369,8 @@ export const useChatStore = defineStore(
       contactMap.value[vo.roomId] = {
         ...(vo || {}),
         // 消息列表
-        msgList: contactMap.value?.[vo.roomId]?.msgList || [],
+        msgMap: contactMap.value?.[vo.roomId]?.msgMap || {},
+        msgIds: contactMap.value?.[vo.roomId]?.msgIds || [],
         unreadMsgList: contactMap.value?.[vo.roomId]?.unreadMsgList || [],
         isReload: contactMap.value?.[vo.roomId]?.isReload || false,
         isLoading: contactMap.value?.[vo.roomId]?.isLoading || false,
@@ -384,9 +384,13 @@ export const useChatStore = defineStore(
       }
       const res = await getChatContactInfo(vo.roomId, user.getToken, vo.type)?.catch(() => {});
       if (res && res.code === StatusCode.SUCCESS) {
+        // 保存现有消息数据
+        const { msgMap = {}, msgIds = [] } = contactMap.value[vo.roomId] || {};
+
         contactMap.value[vo.roomId] = {
           ...(res?.data || {}),
-          msgList: contactMap.value?.[vo.roomId]?.msgList || [],
+          msgMap,
+          msgIds,
           unreadMsgList: contactMap.value?.[vo.roomId]?.unreadMsgList || [],
           isReload: contactMap.value?.[vo.roomId]?.isReload || false,
           isLoading: contactMap.value?.[vo.roomId]?.isLoading || false,
@@ -557,46 +561,40 @@ export const useChatStore = defineStore(
     // 添加消息到列表
     function appendMsg(data: ChatMessageVO) {
       const roomId = data.message.roomId;
-      const existsMsg = findMsg(roomId, data.message.id);
-      if (existsMsg) {
-        existsMsg.fromUser = data?.fromUser;
-        existsMsg.message = data?.message;
+      const msgId = data.message.id;
+
+      // 确保消息存在且有效
+      if (!roomId || !msgId) {
+        return;
       }
-      else if (contactMap.value?.[roomId]?.msgList) {
-        // 需要排序
-        const lastMsg = contactMap.value[roomId].msgList[contactMap.value[roomId].msgList.length - 1];
-        if (lastMsg && lastMsg.message.sendTime >= data.message.sendTime && lastMsg?.message.id > data.message.id) {
-          const insertIndex = contactMap.value[roomId].msgList.findIndex(msg => msg.message.id > data.message.id);
-          if (insertIndex !== -1)
-            contactMap.value[roomId].msgList.splice(insertIndex, 0, data);
-          else
-            contactMap.value[roomId].msgList.push(data);
-        }
-        else { // 直接追加到末尾
-          contactMap.value[roomId].msgList.push(data);
-        }
+      const contact = contactMap.value[roomId];
+      if (!contact) {
+        return;
       }
+      const clientId = data?.clientId as any;
+      const sendMsg = findMsg(roomId, clientId as any);
+      if (sendMsg) {
+        const sendIndex = contact.msgIds.findIndex(id => id === clientId);
+        contact.msgIds.splice(sendIndex, 1, msgId);
+        delete contact.msgMap[clientId];
+        contact.msgMap[msgId] = data;
+        return;
+      }
+      const index = contact.msgIds.findIndex(id => id === msgId);
+      if (index === -1) {
+        contact.msgIds.push(msgId);
+      }
+      // 添加|更新消息
+      contact.msgMap[msgId] = data;
     }
+
     // 查找消息
     function findMsg(roomId: number, msgId: number) {
       if (!msgId || !roomId)
         return undefined;
-      if (findMsgCache.has(`${roomId}_${msgId}`)) {
-        console.log("命中缓存");
-        return findMsgCache.get(`${roomId}_${msgId}`) as ChatMessageVO;
-      }
-      const msg = contactMap.value?.[roomId]?.msgList.find((k: ChatMessageVO) => k?.message?.id === msgId);
-      if (msg) {
-        findMsgCache.set(`${roomId}_${msgId}`, msg);
-      }
-      return msg;
+      return contactMap.value[roomId]?.msgMap?.[msgId];
     }
-    // 删除缓存
-    function removeMsgCache(roomId: number, msgId: number) {
-      if (!msgId || !roomId)
-        return;
-      findMsgCache.delete(`${roomId}_${msgId}`);
-    }
+
     // 添加撤回消息
     function setRecallMsg(msg: ChatMessageVO) {
       if (!msg?.message?.id)
@@ -620,11 +618,12 @@ export const useChatStore = defineStore(
       }
       // 标记已读
       if (roomId === contact?.roomId) {
-        const msg = contact?.msgList[contact?.msgList.length - 1];
+        const lastMsgId = contact.msgIds[contact.msgIds.length - 1];
+        const lastMsg = lastMsgId ? contact.msgMap[lastMsgId] : undefined;
         // contact.unreadCount = 0;
         // contact.text = msg ? resolveMsgContactText(msg) : contact?.text;
         contact.unreadMsgList = [];
-        contact.lastMsgId = msg?.message?.id || contact?.lastMsgId;
+        contact.lastMsgId = lastMsg?.message?.id || contact?.lastMsgId;
       }
       if (readDebounceTimers[roomId])
         clearTimeout(readDebounceTimers[roomId]);
@@ -941,7 +940,6 @@ export const useChatStore = defineStore(
       currentMemberList.value = [];
       isMemberLoading.value = false;
       isMemberReload.value = false;
-      findMsgCache.clear();
       contactMap.value = {};
       currentMemberList.value = [];
       updateContactList.value = {};
@@ -950,6 +948,20 @@ export const useChatStore = defineStore(
       isMemberReload.value = false;
     }
 
+    /* ------------------------------------------- 新的消息存储结构迁移 ------------------------------------------- */
+    /**
+     * 获取消息列表
+     * 兼容旧的msgList结构
+     */
+    function getMessageList(roomId?: number | undefined): ChatMessageVO[] {
+      if (!roomId || !contactMap.value[roomId]) {
+        return [];
+      }
+      const contact = contactMap.value[roomId];
+      // 按msgIds顺序获取消息
+      // const sortIds = contact.msgIds.sort((a, b) => a - b);
+      return contact.msgIds.map(id => contact.msgMap[id]).filter(Boolean) as ChatMessageVO[];
+    }
 
     return {
       // state
@@ -1031,8 +1043,8 @@ export const useChatStore = defineStore(
       setPinContact,
       setShieldContact,
       appendMsg,
-      removeMsgCache,
       confirmRtcFn,
+      getMessageList,
       // dom
       scrollReplyMsg,
       saveScrollTop,

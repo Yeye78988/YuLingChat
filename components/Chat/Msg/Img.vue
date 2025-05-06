@@ -27,7 +27,11 @@ function handleImagePreview() {
     return;
 
   // 获取当前房间的所有图片
-  const imgs = chat.theContact?.msgList?.filter(msg => msg.message?.type === MessageType.IMG) as ChatMessageVO<ImgBodyMsgVO>[];
+  const imgs = chat.theContact?.msgIds
+    ?.map(id => chat.theContact?.msgMap?.[id])
+    .filter((msg): msg is ChatMessageVO<ImgBodyMsgVO> =>
+      !!msg && msg.message?.type === MessageType.IMG,
+    );
   if (!imgs?.length)
     return;
   const currentImgUrl = BaseUrlImg + body?.url;

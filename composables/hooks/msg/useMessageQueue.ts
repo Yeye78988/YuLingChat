@@ -192,7 +192,7 @@ export function useMessageQueue() {
       }
     }
     catch (error) { // 发送失败
-      // queueManager.updateStatus(currentItem.id, MessageSendStatus.ERROR);
+      queueManager.updateStatus(currentItem.id, MessageSendStatus.ERROR);
       // // 触发事件通知
       // mitter.emit(MittEventType.MESSAGE_QUEUE, {
       //   type: "error",
@@ -256,34 +256,33 @@ export function useMessageQueue() {
 
   // 重试发送消息
   const retryMessage = (messageId: any) => {
-    const message = queueManager.get(messageId);
-    if (!message?.tempMsg || message.status !== MessageSendStatus.ERROR) {
+    const item = queueManager.get(messageId);
+    if (!item?.tempMsg || item.status !== MessageSendStatus.ERROR) {
       return;
     }
     // 从消息列表中删除错误消息
     const chat = useChatStore();
-    const roomId = message.tempMsg.message.roomId;
+    const roomId = item.tempMsg.message.roomId;
     if (!roomId) {
       return;
     }
 
     // 查找并删除消息列表中的错误消息
     if (roomId && chat.contactMap[roomId]) {
-      const msgIndex = chat.contactMap[roomId].msgList.findIndex(
-        msg => msg.message.id === messageId,
-      );
+      const contact = chat.contactMap[roomId];
+      const msgIndex = contact.msgIds.indexOf(messageId);
       if (msgIndex !== -1) {
-        // 从消息列表中移除错误消息
-        chat.contactMap[roomId].msgList.splice(msgIndex, 1);
+        contact.msgIds.splice(msgIndex, 1);
       }
+      delete contact.msgMap[messageId];
     }
-    addToMessageQueue(message.formData, message.callback);
+    addToMessageQueue(item.formData, item.callback);
     // 触发重试事件
     mitter.emit(MittEventType.MESSAGE_QUEUE, {
       type: "retry",
       payload: {
-        queueItem: message,
-        msg: message.tempMsg,
+        queueItem: item,
+        msg: item.tempMsg,
       },
     });
   };

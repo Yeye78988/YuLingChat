@@ -21,7 +21,9 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
   const isLoading = computed(() => !!chat?.theContact?.isLoading);
   const isReload = computed(() => !!chat?.theContact?.isReload);
   const offset = computed(() => setting.isMobileSize ? -730 : -678);
-  const msgList = computed(() => chat?.theContact?.msgList || []);
+
+  // 将msgMap和msgIds转换为有序的消息数组，供组件使用
+  const msgList = computed(() => chat.getMessageList(chat.theRoomId));
 
   // 滚动相关
   type ScrollbarRefType = InstanceType<typeof ElScrollbar>;
@@ -111,9 +113,16 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       if (roomId !== chat.theRoomId || !theContact)
         return;
 
-      // 追加数据
-      if (data?.list?.length && theContact.msgList) {
-        theContact.msgList.unshift(...data.list);
+      // 处理新消息
+      if (data?.list?.length) {
+        // 将新消息添加到msgMap中
+        data.list.forEach((msg) => {
+          const msgId = msg.message.id;
+          if (msgId) {
+            theContact.msgMap[msgId] = msg;
+          }
+        });
+        theContact.msgIds.unshift(...data.list.map(msg => msg.message.id));
       }
 
       const oldSize = theContact.scrollTopSize || 0;
@@ -125,10 +134,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
         chat.saveScrollTop && chat.saveScrollTop();
 
-        if (thePageInfo.cursor === null && !theContact.msgList?.length) {
+        if (thePageInfo.cursor === null && !theContact.msgIds?.length) {
           // 第一次加载默认没有动画
           scrollBottom(false);
-          call && call(theContact.msgList || []);
+          call && call(msgList.value);
         }
         else {
           // 计算并更新滚动位置
@@ -180,16 +189,26 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     };
 
     const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
-    chat.contactMap[roomId]!.msgList = [];
+
+    // 清空现有消息
+    chat.contactMap[roomId]!.msgMap = {};
+    chat.contactMap[roomId]!.msgIds = [];
     chat.contactMap[roomId]!.isReload = true;
     chat.contactMap[roomId]!.isLoading = true;
 
     try {
       const { data } = await getChatMessagePage(roomId, PAGINATION_SIZE, null, user.getToken);
 
-      // 追加数据
+      // 添加新消息
       if (data?.list?.length) {
-        chat.contactMap[roomId]!.msgList.push(...data.list);
+        data.list.forEach((msg) => {
+          const msgId = msg.message.id;
+          if (msgId) {
+            chat.contactMap[roomId]!.msgMap[msgId] = msg;
+            chat.contactMap[roomId]!.msgIds.push(msgId);
+          }
+        });
+
         if (thePageInfo) {
           thePageInfo.isLast = data.isLast;
           thePageInfo.cursor = data.cursor || undefined;
@@ -226,13 +245,16 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
     try {
       chat.contactMap[roomId]!.isSyncing = true;
-      const lastMsgId = chat.contactMap[roomId]!.msgList?.[0]?.message.id;
+      // 获取第一条消息ID（如果存在）
+      const firstMsgId = chat.contactMap[roomId]!.msgIds?.[0];
+      const firstMsg = firstMsgId ? chat.contactMap[roomId]!.msgMap[firstMsgId] : undefined;
+      const firstMsgIdValue = firstMsg?.message.id;
 
-      if (!chat.contactMap[roomId]!.msgList || !lastMsgId)
+      if (!chat.contactMap[roomId]!.msgIds?.length || !firstMsgIdValue)
         return;
 
       // 检查是否需要同步
-      if (!chat.contactMap[roomId]!.msgList.length || chat.contactMap[roomId]!.lastMsgId !== lastMsgId) {
+      if (!chat.contactMap[roomId]!.msgIds.length || chat.contactMap[roomId]!.lastMsgId !== firstMsgIdValue) {
         await reload(roomId);
       }
     }
@@ -260,7 +282,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
         // 检查是否需要同步消息
         const contact = getContact(val);
-        if (contact && (!contact.msgList.length || contact.lastMsgId !== contact?.lastMsgId))
+        if (contact && (!contact.msgIds.length || contact.lastMsgId !== contact?.lastMsgId))
           reload(val);
       }
 
@@ -378,7 +400,8 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
     if (isAtBottom) {
       // 更新状态并触发已读上报
-      const isLastMessageFromAI = chat.theContact?.msgList?.[(chat.theContact.msgList?.length || 0) - 1]?.message?.type === MessageType.AI_CHAT_REPLY;
+      const lastMsg = msgList.value[msgList.value.length - 1];
+      const isLastMessageFromAI = lastMsg?.message?.type === MessageType.AI_CHAT_REPLY;
       chat.shouldAutoScroll = isLastMessageFromAI;
       chat.isScrollBottom = true;
       debounceReadList(chat.theRoomId);
