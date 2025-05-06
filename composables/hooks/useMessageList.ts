@@ -116,7 +116,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         theContact.msgList.unshift(...data.list);
       }
 
-      const oldSize = chat.scrollTopSize;
+      const oldSize = theContact.scrollTopSize || 0;
 
       // 更新滚动位置
       nextTick(() => {
@@ -132,10 +132,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         }
         else {
           // 计算并更新滚动位置
-          const newSize = chat.scrollTopSize;
+          const newSize = theContact.scrollTopSize || 0;
           const msgRangeSize = newSize - oldSize;
           if (msgRangeSize > 0) {
-            chat.scrollTop(msgRangeSize);
+            scrollTop(msgRangeSize);
           }
         }
 
@@ -172,7 +172,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       return;
 
     // 重置滚动位置和页面信息
-    chat.scrollTopSize = 0;
+    contactData.scrollTopSize = 0;
     contactData.pageInfo = {
       cursor: undefined as undefined | string,
       isLast: false,
@@ -210,6 +210,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       }
     }
   }
+
 
   /**
    * 同步消息
@@ -331,7 +332,9 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
    * 保存上一个位置
    */
   function saveScrollTop() {
-    chat.scrollTopSize = scrollbarRef?.value?.wrapRef?.scrollHeight || 0;
+    if (chat.theRoomId && chat.theContact) {
+      chat.theContact.scrollTopSize = scrollbarRef?.value?.wrapRef?.scrollHeight || 0;
+    }
   }
 
   /**
