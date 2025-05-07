@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+const setting = useSettingStore();
 const chat = useChatStore();
-const user = useUserStore();
 
 const {
   pageInfo,
@@ -20,6 +20,16 @@ init();
 
 // 消息同步状态
 const isSyncing = ref(false);
+
+// 监听
+watch(() => setting.isMobileSize, (val, oldVal) => {
+  if (val !== oldVal) {
+    chat.scrollBottom(false);
+  }
+}, {
+  immediate: true,
+});
+
 onMounted(() => {
   // 监听WebSocket重连事件
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {

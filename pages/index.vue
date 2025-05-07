@@ -1,13 +1,11 @@
 <script lang="ts" setup>
 import { mitter, MittEventType } from "~/composables/utils/useMitt";
 import { appName } from "~/constants";
-import { WsStatusEnum } from "~/types/chat/WsType";
 
 const user = useUserStore();
 const ws = useWsStore();
 const setting = useSettingStore();
 const chat = useChatStore();
-const showWsStatusBtns = computed(() => !setting.isMobileSize && (ws.status !== WsStatusEnum.OPEN || !user.isLogin));
 const showGroupDialog = computed({
   get() {
     return chat.inviteMemberForm.show;
@@ -26,10 +24,15 @@ const showGroupDialog = computed({
   },
 });
 
+// 监听消息
+useMsgLinear();
+
+// 页面过渡
+const pageTransition = computed(() => setting.isMobileSize && !setting.settingPage.isCloseAllTransition ? chat.pageTransition : false);
+
 // 好友申请弹窗状态
 const isShowApply = ref(false);
 const applyUserId = ref<string | undefined>();
-
 // 检查用户是否绑定了邮箱或手机号
 function checkUserBindingStatus() {
   // 如果用户已登录
@@ -45,7 +48,7 @@ function checkUserBindingStatus() {
       const now = new Date().toDateString();
 
       // 如果没有提醒过或者上次提醒不是今天
-      console.log("提醒时间", lastRemindTime, now);
+      // console.log("提醒时间", lastRemindTime, now);
       if (!lastRemindTime || lastRemindTime !== now) {
         // 显示提醒对话框
         ElMessageBox.confirm(
@@ -72,6 +75,15 @@ function checkUserBindingStatus() {
   }
 }
 
+// 初始化设置
+watch(() => user.isLogin, (val) => {
+  if (val) {
+    setting.loadSettingPreData();
+  }
+}, {
+  immediate: true,
+});
+
 // 监听好友申请弹窗事件
 onMounted(() => {
   // 监听好友申请弹窗事件
@@ -87,17 +99,6 @@ onMounted(() => {
 // 组件卸载时移除事件监听
 onUnmounted(() => {
   mitter.off(MittEventType.FRIEND_APPLY_DIALOG);
-});
-
-// 监听消息
-useMsgLinear();
-// 初始化设置
-watch(() => user.isLogin, (val) => {
-  if (val) {
-    setting.loadSettingPreData();
-  }
-}, {
-  immediate: true,
 });
 </script>
 
@@ -120,7 +121,7 @@ watch(() => user.isLogin, (val) => {
             {{ appTitle || appName }}
           </div>
           <!-- 连接状态 -->
-          <BtnWsStatusBtns v-if="showWsStatusBtns" class="offline" />
+          <!-- <BtnWsStatusBtns v-if="showWsStatusBtns" class="offline" /> -->
         </template>
       </MenuHeaderMenuBar>
       <div
@@ -130,7 +131,7 @@ watch(() => user.isLogin, (val) => {
         <!-- 缓存 页面内容 -->
         <NuxtPage
           keepalive
-          :transition="setting.isMobileSize && !setting.settingPage.isCloseAllTransition ? chat.pageTransition : false"
+          :transition="pageTransition"
         />
       </div>
     </div>

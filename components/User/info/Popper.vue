@@ -68,7 +68,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
   <MenuPopper
     placement="right-start"
     transition="popper-fade"
-    trigger="click"
+    trigger="hover"
     :offset="4"
     :show-arrow="false"
     popper-class="!border-default !card-default-br-2"

@@ -658,11 +658,11 @@ defineExpose({
       @clear-reply="chat.setReplyMsg({})"
       @scroll-bottom="setReadAndScrollBottom"
     />
-    <div class="form-tools">
+    <div class="form-contain">
       <!-- 工具栏 TODO: AI机器人暂不支持 -->
       <template v-if="!isAiRoom">
         <div
-          class="relative my-2 flex items-center gap-3 px-2 sm:mb-0 sm:gap-4"
+          class="relative h-10 flex flex-shrink-0 items-center gap-3 px-2 sm:gap-4"
         >
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
@@ -787,10 +787,8 @@ defineExpose({
               v-if="aiOptions.length > 0"
               v-model="chat.askAiRobotList"
               placeholder="AI助手"
-
               size="small"
-
-              style="width: 10rem;"
+              style="width: 9rem;"
               :multiple-limit="6"
               no-match-text="没有找到机器人"
               :fallback-placements="['top']"
@@ -799,23 +797,22 @@ defineExpose({
               tag-type="primary"
               tag-effect="dark"
               :show-arrow="false"
-              class="ai-select group text-1rem text-color"
-              popper-class="w-10rem global-custom-select"
+              class="group ai-select text-1rem text-color"
+              :class="{ 'selected-items': chat.askAiRobotList.length > 0 }"
+              popper-class="w-9rem global-custom-select"
               :offset="8"
-
               :value-on-clear="undefined"
               clearable teleported collapse-tags multiple
               :max-collapse-tags="2"
             >
               <template #prefix>
                 <i
-                  class="i-ri:robot-2-line p-2.6 text-small"
-                  :class="{ 'bg-theme-primary i-ri:robot-2-fill p-2.6': chat.askAiRobotList.length > 0 }"
+                  class="robot-select-icon"
                 />
               </template>
               <template #label="{ value }">
                 <CardAvatar
-                  class="h-6 w-6 shrink-0 rounded-1/2"
+                  class="h-5 w-5 shrink-0 rounded-1/2 bg-color"
                   :src="BaseUrlImg + value.avatar"
                   :title="value.label"
                 />
@@ -827,7 +824,7 @@ defineExpose({
                 :value="item"
               >
                 <div class="h-full w-8em flex items-center pr-1" :title="item.label">
-                  <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default" :src="BaseUrlImg + item.avatar" />
+                  <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default bg-color" :src="BaseUrlImg + item.avatar" />
                   <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
                 </div>
               </el-option>
@@ -874,7 +871,7 @@ defineExpose({
       <el-form-item
         v-if="!isSoundRecordMsg"
         prop="content"
-        class="input relative h-fit w-full !m-(b-2 t-2) sm:mt-0"
+        class="input relative h-fit w-full"
         style="padding: 0;margin:  0;"
         :rules="[
           { min: 1, max: maxContentLen, message: `长度在 1 到 ${maxContentLen} 个字符`, trigger: `change` },
@@ -913,7 +910,7 @@ defineExpose({
           @keydown.exact.arrow-down.stop.prevent="onInputExactKey('ArrowDown')"
         >
           <template #label="{ item }">
-            <div class="h-full w-10em flex items-center pr-1" :title="item.label">
+            <div class="h-full w-9rem flex items-center pr-1" :title="item.label">
               <CardElImage class="h-6 w-6 rounded-full border-default" :src="BaseUrlImg + item.avatar" />
               <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
             </div>
@@ -993,7 +990,7 @@ defineExpose({
 </template>
 
 <style lang="scss" scoped>
-.form-tools {
+.form-contain {
     --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-hidden px-2 pb-2 border-default-t";
     box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 16px;
     .tip {
@@ -1093,17 +1090,17 @@ defineExpose({
 
 .ai-select {
   :deep(.el-select__wrapper) {
-    --at-apply: "rounded-4 flex-row-c-c text-light pr-3 pl-2 h-8 min-w-10rem w-fit border-default-hover !bg-transparent !shadow-none";
-    // &:hover,
-    // &.is-hoving,
-    // &.is-focused {
-    //   --at-apply: "!w-10em";
-    // }
+    --at-apply: "rounded-4 flex-row-c-c text-light pr-3 pl-2 h-7 min-w-9rem w-fit !border-default !sm:border-(1px solid transparent) sm:!bg-transparent !shadow-none";
+    &:hover,
+    &.is-hoving,
+    &.is-focused {
+      --at-apply: "!border-default";
+    }
     .el-select__placeholder {
       --at-apply: "text-color tracking-0.1em op-80";
     }
     .el-tag {
-      --at-apply: "text-light rounded-4 !h-fit min-h-6 w-6 p-0 bg-none border-none cursor-pointer";
+      --at-apply: "text-light rounded-4 !h-fit min-h-5 w-5 p-0 bg-none border-none cursor-pointer";
       .el-tag__close {
         --at-apply: "hidden";
       }
@@ -1115,11 +1112,18 @@ defineExpose({
       --at-apply: "flex-row-c-c";
     }
   }
-//  &.is-selected {
-//     :deep(.el-select__wrapper) {
-//       --at-apply: "!w-14rem";
-//     }
-//   }
+  .robot-select-icon {
+    --at-apply: "p-2.4 i-ri:robot-2-line";
+  }
+
+  &.selected-items {
+    :deep(.el-select__wrapper) {
+      --at-apply: "!border-default";
+      .robot-select-icon {
+        --at-apply: "bg-theme-primary i-ri:robot-2-fill";
+      }
+    }
+  }
 }
 
 // 语音
