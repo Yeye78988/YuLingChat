@@ -205,6 +205,9 @@ body .el-message {
     .el-scrollbar__bar {
       opacity: 0.2;
     }
+    .el-select-dropdown__list {
+      padding: 0;
+    }
   }
   .el-select-dropdown__item,
   .el-mention-dropdown__item {

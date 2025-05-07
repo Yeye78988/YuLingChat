@@ -215,17 +215,22 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         }
       }
 
-      await nextTick(() => scrollBottom(false));
+      await nextTick();
+      scrollBottom(false);
       chat.saveScrollTop && chat.saveScrollTop();
     }
     catch (error) {
       console.error("重新加载消息出错:", error);
-      await nextTick(() => scrollBottom(false));
+      await nextTick();
+      scrollBottom(false);
+      chat.saveScrollTop && chat.saveScrollTop();
     }
     finally {
       if (chat.contactMap[roomId]) {
-        chat.contactMap[roomId]!.isLoading = false;
-        chat.contactMap[roomId]!.isReload = false;
+        nextTick(() => {
+          chat.contactMap[roomId]!.isLoading = false;
+          chat.contactMap[roomId]!.isReload = false;
+        });
       }
     }
   }

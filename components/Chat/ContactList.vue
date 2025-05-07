@@ -132,12 +132,13 @@ async function refreshItem(roomId: number) {
 
 // 状态错误
 const online = useOnline();
+const isAnimateDelay = ref(true);
 const showWsStatusTxt = computed(() => {
   if (!online.value) {
     return setting.isMobileSize ? "网络已断开" : "当前网络不可用";
   }
   if (ws.status !== WsStatusEnum.OPEN) {
-    return ws.status === WsStatusEnum.CONNECTION ? "正在重新连接..." : "连接已断开";
+    return ws.status === WsStatusEnum.CONNECTION ? (isAnimateDelay.value ? "" : "正在重新连接...") : "连接已断开";
   }
   if (!user.isLogin) {
     return "登录失效";
@@ -317,6 +318,9 @@ onMounted(() => {
       }, 300);
     }
   });
+  setTimeout(() => {
+    isAnimateDelay.value = false;
+  }, 1500);
 });
 </script>
 

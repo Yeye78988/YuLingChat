@@ -1111,6 +1111,12 @@ defineExpose({
     .el-select__tags-text {
       --at-apply: "flex-row-c-c";
     }
+    .el-select__selected-item {
+      animation: latter-slice-left 0.3s both;
+      &.el-select__placeholder {
+        animation: none;
+      }
+    }
   }
   .robot-select-icon {
     --at-apply: "text-color p-2.4 i-ri:robot-2-line";
@@ -1121,8 +1127,13 @@ defineExpose({
       --at-apply: "!border-default";
       .robot-select-icon {
         --at-apply: "bg-theme-primary";
-        // filter-shadow动画
-        filter: drop-shadow(0 0 0.5rem var(--el-color-primary));
+      }
+      .el-select__prefix {
+        --at-apply: "relative";
+        &::after {
+          content: "";
+          --at-apply: "absolute -z-1 inset-0 rounded-full bg-theme-primary animate-ping";
+        }
       }
     }
   }
