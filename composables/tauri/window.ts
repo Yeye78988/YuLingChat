@@ -187,15 +187,6 @@ export async function showWindow(label: "login" | "main" | "msgbox") {
   }
 }
 
-/**
- * 窗口隐藏
- * @param label 窗口标签
- * @returns 是否关闭成功
- */
-export async function hiddenWindow(label: "login" | "main" | "msgbox") {
-  return await invoke;
-}
-
 export const TrayIconId = "tray_icon";
 
 /**

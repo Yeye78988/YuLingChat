@@ -137,7 +137,7 @@ const showWsStatusTxt = computed(() => {
     return setting.isMobileSize ? "网络已断开" : "当前网络不可用";
   }
   if (ws.status !== WsStatusEnum.OPEN) {
-    return "连接已断开";
+    return ws.status === WsStatusEnum.CONNECTION ? "正在重新连接..." : "连接已断开";
   }
   if (!user.isLogin) {
     return "登录失效";
@@ -307,7 +307,15 @@ onMounted(() => {
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {
     // 重连
     console.log(`会话同步，时延：${reconnectTime - lastDisconnectTime}ms`);
-    fetchContacts();
+    try {
+      fetchContacts();
+    }
+    catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        fetchContacts();
+      }, 300);
+    }
   });
 });
 </script>

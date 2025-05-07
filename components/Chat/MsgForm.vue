@@ -1090,14 +1090,14 @@ defineExpose({
 
 .ai-select {
   :deep(.el-select__wrapper) {
-    --at-apply: "rounded-4 flex-row-c-c text-light pr-3 pl-2 h-7 min-w-9rem w-fit !border-default !sm:border-(1px solid transparent) sm:!bg-transparent !shadow-none";
+    --at-apply: "rounded-4 flex-row-c-c pr-3 pl-2 h-7 min-w-9rem w-fit !border-default !sm:border-(1px solid transparent) sm:!bg-transparent !shadow-none";
     &:hover,
     &.is-hoving,
     &.is-focused {
       --at-apply: "!border-default";
     }
     .el-select__placeholder {
-      --at-apply: "text-color tracking-0.1em op-80";
+      --at-apply: "!text-color tracking-0.1em op-80";
     }
     .el-tag {
       --at-apply: "text-light rounded-4 !h-fit min-h-5 w-5 p-0 bg-none border-none cursor-pointer";
@@ -1113,14 +1113,16 @@ defineExpose({
     }
   }
   .robot-select-icon {
-    --at-apply: "p-2.4 i-ri:robot-2-line";
+    --at-apply: "text-color p-2.4 i-ri:robot-2-line";
   }
 
   &.selected-items {
     :deep(.el-select__wrapper) {
       --at-apply: "!border-default";
       .robot-select-icon {
-        --at-apply: "bg-theme-primary i-ri:robot-2-fill";
+        --at-apply: "bg-theme-primary";
+        // filter-shadow动画
+        filter: drop-shadow(0 0 0.5rem var(--el-color-primary));
       }
     }
   }

@@ -3,6 +3,7 @@ import type { WsSendMsgDTO } from "~/types/chat/WsType";
 import BackWebSocket from "@tauri-apps/plugin-websocket";
 import { WsMsgType, WsStatusEnum } from "~/types/chat/WsType";
 
+const WS_SYNC_DELAY = 200;
 /**
  * WebSocket核心Hook
  * 提供WebSocket基础功能
@@ -12,6 +13,25 @@ export function useWebSocket() {
   const user = useUserStore();
   const fullWsUrl = computed(() => `${BaseWSUrl}?Authorization=${user.getToken}`);
   const status = ref<WsStatusEnum>(WsStatusEnum.CLOSE);
+  // 记录最后一次断开时刻
+  const lastDisconnectTime = ref<number>(0);
+  // 记录连接时刻
+  const connectTime = ref<number>(0);
+
+
+  function fetchWsChat() {
+    // 记录连接时刻
+    connectTime.value = Date.now();
+    console.log(`ws connectTime:${connectTime.value}   lastDisconnectTime:${lastDisconnectTime.value} delay:${connectTime.value - lastDisconnectTime.value}`);
+    // 检查是否需要触发同步事件（断开后快速重连）
+    if (lastDisconnectTime.value > 0 && (connectTime.value - lastDisconnectTime.value) >= WS_SYNC_DELAY) {
+    // 延迟小于200ms，触发同步事件
+      mitter.emit(MittEventType.WS_SYNC, {
+        lastDisconnectTime: lastDisconnectTime.value,
+        reconnectTime: connectTime.value,
+      });
+    }
+  }
 
   /**
    * 处理WebSocket错误和关闭事件
@@ -20,6 +40,7 @@ export function useWebSocket() {
     return (e: Event) => {
       status.value = wsStatus;
       webSocketHandler.value = null;
+      lastDisconnectTime.value = Date.now();
     };
   };
 
@@ -34,9 +55,13 @@ export function useWebSocket() {
       return null;
     }
 
+
     // 设置事件处理器
-    status.value = WsStatusEnum.OPEN;
-    webSocketHandler.value.onopen = call;
+    webSocketHandler.value.onopen = () => {
+      status.value = WsStatusEnum.OPEN;
+      fetchWsChat();
+      call();
+    };
     webSocketHandler.value.addEventListener("error", handleSocketEvent("error", WsStatusEnum.CLOSE));
     webSocketHandler.value.addEventListener("close", handleSocketEvent("close", WsStatusEnum.SAFE_CLOSE));
 
@@ -50,7 +75,8 @@ export function useWebSocket() {
     try {
       const ws = await BackWebSocket.connect(url);
       webSocketHandler.value = ws;
-
+      status.value = WsStatusEnum.OPEN;
+      fetchWsChat();
       // 设置状态
       status.value = ws.id ? WsStatusEnum.OPEN : WsStatusEnum.CLOSE;
 
@@ -74,11 +100,13 @@ export function useWebSocket() {
     if ("WebSocket protocol error: Connection reset without closing handshake".includes(msg?.data?.toString() || "")) {
       status.value = WsStatusEnum.SAFE_CLOSE;
       webSocketHandler.value = null;
+      lastDisconnectTime.value = Date.now();
       return true;
     }
     else if (msg?.data?.toString().includes("WebSocket protocol error")) {
       status.value = WsStatusEnum.CLOSE;
       webSocketHandler.value = null;
+      lastDisconnectTime.value = Date.now();
       return true;
     }
     return false;
@@ -109,6 +137,14 @@ export function useWebSocket() {
     }
   }
 
+  function resetWs() {
+    status.value = WsStatusEnum.CLOSE;
+    (webSocketHandler.value as WebSocket)?.close?.();
+    webSocketHandler.value = null;
+    lastDisconnectTime.value = Date.now();
+    mitter.emit(MittEventType.CHAT_WS_RELOAD); // 触发WebSocket重连事件
+  }
+
   /**
    * 发送消息
    */
@@ -132,6 +168,8 @@ export function useWebSocket() {
     webSocketHandler,
     status,
     fullWsUrl,
+    lastDisconnectTime,
+    connectTime,
     initBrowserWebSocket,
     initTauriWebSocket,
     handleTauriWsError,

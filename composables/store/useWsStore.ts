@@ -4,23 +4,20 @@ import { acceptHMRUpdate, defineStore } from "pinia";
 import { useWsMessage } from "~/composables/hooks/ws/useWsCore";
 import { WsStatusEnum } from "~/types/chat/WsType";
 
-const WS_SYNC_DELAY = 200;
 
 // @unocss-include
 export const useWsStore = defineStore(
   WS_STORE_KEY,
   () => {
     const isWindBlur = ref<boolean>(false);
-    // 记录最后一次断开时刻
-    const lastDisconnectTime = ref<number>(0);
-    // 记录连接时刻
-    const connectTime = ref<number>(0);
 
     // WebSocket核心hooks
     const {
       webSocketHandler,
       status,
       fullWsUrl,
+      lastDisconnectTime,
+      connectTime,
       initBrowserWebSocket,
       initTauriWebSocket,
       handleTauriWsError,
@@ -55,29 +52,14 @@ export const useWsStore = defineStore(
         return false;
       }
 
-      // 如果已经连接且状态为OPEN，直接返回
-      if (webSocketHandler.value && status.value === WsStatusEnum.OPEN) {
+      // 如果已经连接且状态为OPEN或CONNECTION，直接返回
+      if (webSocketHandler.value && (status.value === WsStatusEnum.OPEN || status.value === WsStatusEnum.CONNECTION)) {
         return webSocketHandler.value;
       }
-
-
-      const callFn = () => {
-        call();
-        // 记录连接时刻
-        connectTime.value = Date.now();
-        // 检查是否需要触发同步事件（断开后快速重连）
-        if (lastDisconnectTime.value > 0 && (connectTime.value - lastDisconnectTime.value) >= WS_SYNC_DELAY) {
-          // 延迟小于200ms，触发同步事件
-          mitter.emit(MittEventType.WS_SYNC, {
-            lastDisconnectTime: lastDisconnectTime.value,
-            reconnectTime: connectTime.value,
-          });
-        }
-      };
       // 根据设置选择WebSocket实现
       return setting.isUseWebsocket
-        ? initBrowserWebSocket(fullWsUrl.value, callFn)
-        : initTauriWebSocket(fullWsUrl.value, callFn);
+        ? initBrowserWebSocket(fullWsUrl.value, call)
+        : initTauriWebSocket(fullWsUrl.value, call);
     }
 
     /**
@@ -216,8 +198,6 @@ export const useWsStore = defineStore(
       status,
       isWindBlur,
       wsMsgList,
-      lastDisconnectTime,
-      connectTime,
       // 方法
       resetStore,
       reload,

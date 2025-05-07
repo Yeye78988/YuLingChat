@@ -150,7 +150,13 @@ export function useWsWorker() {
       if (e.data.type === "heart") {
         if (ws.status !== WsStatusEnum.OPEN || !ws.webSocketHandler)
           return reload();
-        ws.sendHeart();
+        try {
+          ws.sendHeart();
+        }
+        catch (error) {
+          console.error(error);
+          reload();
+        }
       }
       if (e.data.type === "log")
         console.log(e.data.data);
