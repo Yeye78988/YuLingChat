@@ -14,7 +14,7 @@ const setting = useSettingStore();
       class="inputs !w-10rem !sm:w-12rem"
       v-bind="$attrs"
       fit-input-width
-      filterable
+      :filterable="!setting.isMobileSize"
       default-first-option
       placeholder="请选择翻译工具"
     >
@@ -39,7 +39,7 @@ const setting = useSettingStore();
       :show-arrow="false"
       class="inputs !w-10rem !sm:w-12rem"
       fit-input-width
-      filterable
+      :filterable="!setting.isMobileSize"
       default-first-option
       placeholder="请选择翻译目标语言"
     >

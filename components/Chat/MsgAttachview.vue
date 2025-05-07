@@ -110,7 +110,7 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
           load-class="sky-loading block absolute top-0"
           class="shadow-sm transition-shadow card-default hover:shadow"
           :style="getImgSize(img.width, img.height)"
-          :class="imgList.length > 1 ? '!w-4rem h-4rem !sm:(w-8rem h-8rem)' : '!max-h-80vw !max-w-50vh !sm:(max-h-18rem max-w-18rem)'"
+          :class="imgList.length > 1 ? '!w-6rem !h-6rem sm:(!w-8rem !h-8rem)' : '!max-h-80vw !max-w-50vh !sm:(max-h-18rem max-w-18rem)'"
           title="左键放大 | 右键删除"
         />
       </div>

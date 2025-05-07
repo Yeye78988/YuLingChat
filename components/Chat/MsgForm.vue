@@ -104,7 +104,7 @@ async function onSubmit() {
     }
 
     // 处理 AI机器人 TODO: 可改为全体呼叫
-    const { replaceText, aiRobitUidList } = resolteAiReply(formDataTemp.content, aiOptions.value);
+    const { replaceText, aiRobitUidList } = resolteAiReply(formDataTemp.content, aiOptions.value, chat.askAiRobotList);
     if (aiRobitUidList.length > 0) {
       if (!replaceText)
         return false;
@@ -662,7 +662,7 @@ defineExpose({
       <!-- 工具栏 TODO: AI机器人暂不支持 -->
       <template v-if="!isAiRoom">
         <div
-          class="relative m-b-2 flex items-center gap-3 px-2 sm:mb-0 sm:gap-4"
+          class="relative my-2 flex items-center gap-3 px-2 sm:mb-0 sm:gap-4"
         >
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
@@ -673,7 +673,7 @@ defineExpose({
           </el-tooltip>
           <!-- 语音 -->
           <template v-if="isSoundRecordMsg">
-            <div v-show=" !theAudioFile?.id" class="absolute-center-x">
+            <div v-show="!theAudioFile?.id" class="absolute-center-x">
               <BtnElButton
                 ref="pressHandleRef"
                 type="primary" class="group tracking-0.1em hover:shadow"
@@ -782,6 +782,56 @@ defineExpose({
                 @submit="onSubmitFile"
               />
             </div>
+            <!-- AI机器人选择器 -->
+            <el-select
+              v-if="aiOptions.length > 0"
+              v-model="chat.askAiRobotList"
+              placeholder="AI助手"
+
+              size="small"
+
+              style="width: 10rem;"
+              :multiple-limit="6"
+              no-match-text="没有找到机器人"
+              :fallback-placements="['top']"
+              no-data-text="暂无机器人"
+              placement="top"
+              tag-type="primary"
+              tag-effect="dark"
+              :show-arrow="false"
+              class="ai-select group text-1rem text-color"
+              popper-class="w-10rem global-custom-select"
+              :offset="8"
+
+              :value-on-clear="undefined"
+              clearable teleported collapse-tags multiple
+              :max-collapse-tags="2"
+            >
+              <template #prefix>
+                <i
+                  class="i-ri:robot-2-line p-2.6 text-small"
+                  :class="{ 'bg-theme-primary i-ri:robot-2-fill p-2.6': chat.askAiRobotList.length > 0 }"
+                />
+              </template>
+              <template #label="{ value }">
+                <CardAvatar
+                  class="h-6 w-6 shrink-0 rounded-1/2"
+                  :src="BaseUrlImg + value.avatar"
+                  :title="value.label"
+                />
+              </template>
+              <el-option
+                v-for="item in aiOptions"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item"
+              >
+                <div class="h-full w-8em flex items-center pr-1" :title="item.label">
+                  <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default" :src="BaseUrlImg + item.avatar" />
+                  <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
+                </div>
+              </el-option>
+            </el-select>
             <i ml-a block w-0 />
             <!-- 群通知消息 -->
             <div
@@ -944,7 +994,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .form-tools {
-    --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-x-hidden p-2 border-default-t";
+    --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-hidden px-2 pb-2 border-default-t";
     box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 16px;
     .tip {
     --at-apply: "op-0";
@@ -1039,6 +1089,37 @@ defineExpose({
       }
     }
   }
+}
+
+.ai-select {
+  :deep(.el-select__wrapper) {
+    --at-apply: "rounded-4 flex-row-c-c text-light pr-3 pl-2 h-8 min-w-10rem w-fit border-default-hover !bg-transparent !shadow-none";
+    // &:hover,
+    // &.is-hoving,
+    // &.is-focused {
+    //   --at-apply: "!w-10em";
+    // }
+    .el-select__placeholder {
+      --at-apply: "text-color tracking-0.1em op-80";
+    }
+    .el-tag {
+      --at-apply: "text-light rounded-4 !h-fit min-h-6 w-6 p-0 bg-none border-none cursor-pointer";
+      .el-tag__close {
+        --at-apply: "hidden";
+      }
+    }
+    .in-tooltip {
+      --at-apply: "h-fit";
+    }
+    .el-select__tags-text {
+      --at-apply: "flex-row-c-c";
+    }
+  }
+//  &.is-selected {
+//     :deep(.el-select__wrapper) {
+//       --at-apply: "!w-14rem";
+//     }
+//   }
 }
 
 // 语音

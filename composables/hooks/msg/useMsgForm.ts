@@ -872,6 +872,7 @@ export function checkAiReplyWhole(context: string | undefined | null, pattern: s
 export function resolteAiReply(
   text: string,
   aiOptions: AskAiRobotOption[],
+  selectedOptions: AskAiRobotOption[] = [],
   configs: AtConfigs = { regExp: /\/(\S+?)(?=\/|\s|$)/g },
 ): { aiRobitUidList: string[]; aiRobotList: AskAiRobotOption[]; replaceText: string } {
   const { regExp = /\/(\S+?)(?=\/|\s|$)/g } = configs;
@@ -891,6 +892,13 @@ export function resolteAiReply(
       }
     }
   }
+
+  // 添加已选择的机器人
+  selectedOptions.forEach((option) => {
+    if (!aiRobotList.some(a => a.userId === option.userId)) {
+      aiRobotList.push(option);
+    }
+  });
 
   // 替换所有匹配的AI昵称文本
   let replaceText = text;

@@ -188,8 +188,10 @@ body .el-message {
 }
 
 // 弹出层
-.el-popper.el-mention__popper {
-  --at-apply: "bg-color-2 rounded-10px border-default";
+.el-popper.el-mention__popper,
+.el-popper.el-select__popper.global-custom-select {
+  --at-apply: "bg-light dark:bg-dark-8 rounded-10px border-default";
+  .el-select-dropdown,
   .el-mention-dropdown {
     padding: 0.5em;
   }
@@ -200,13 +202,14 @@ body .el-message {
     .el-scrollbar__view.el-mention-dropdown__list {
       padding: 0;
     }
+    .el-scrollbar__bar {
+      opacity: 0.2;
+    }
   }
-
-  // .el-mention-dropdown__header {
-  //   padding: 0.2rem;
-  // }
+  .el-select-dropdown__item,
   .el-mention-dropdown__item {
-    --el-mention-option-hover-background: #958c9b44;
+    --el-fill-color-light: #958c9b1f;
+    --el-mention-option-hover-background: #958c9b1f;
     padding: 0.5em;
     border-radius: 6px;
   }
@@ -278,6 +281,19 @@ body .el-message {
       transition: transform 0.2s;
     }
   }
+  .mx-context-menu-item {
+    --mx-menu-active-backgroud: var(--el-color-primary);
+    --mx-menu-hover-backgroud: var(--el-color-primary);
+    --mx-menu-open-hover-backgroud: var(--el-color-primary);
+    --mx-menu-open-backgroud: #71717188;
+    &:hover {
+      .mx-icon-placeholder {
+        i { 
+          --at-apply: "light:text-light";
+        }
+      }
+    }
+  }
 
   //在这里覆盖默认css变量的值
   // --mx-menu-backgroud: var(--el-color-primary) !important;
@@ -286,11 +302,6 @@ body .el-message {
   --mx-menu-open-hover-backgroud: var(--el-color-primary);
   --mx-menu-open-backgroud: #71717188 !important;
 
-  //   --mx-menu-backgroud: #ececec;
-  // --mx-menu-hover-backgroud: #0165e1;
-  // --mx-menu-active-backgroud: #0165e1;
-  // --mx-menu-open-backgroud: #858585;
-  // --mx-menu-open-hover-backgroud: #0165e1;
   // --mx-menu-divider: #d2d2d2;
   // --mx-menu-text: #232323;
   // --mx-menu-hover-text: #fff;
