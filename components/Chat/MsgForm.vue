@@ -662,7 +662,7 @@ defineExpose({
       <!-- 工具栏 TODO: AI机器人暂不支持 -->
       <template v-if="!isAiRoom">
         <div
-          class="relative h-10 flex flex-shrink-0 items-center gap-3 px-2 sm:gap-4"
+          class="relative h-9 flex flex-shrink-0 items-center gap-3 px-2 sm:gap-4"
         >
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
@@ -1019,12 +1019,14 @@ defineExpose({
 }
 
 .input {
+  --at-apply: "flex-1";
   :deep(.el-form-item__content) {
     display: flex;
-    align-items: end;
+    margin-top: 0.5rem;
     .el-mention {
       width: auto;
       flex: 1;
+      height: 100%;
     }
   }
   :deep(.el-input__count) {
@@ -1037,8 +1039,9 @@ defineExpose({
   }
   :deep(.el-text__inner),
   :deep(.el-textarea__inner) {
-    resize:none;
+    resize: none;
     box-shadow: none !important;
+    height: 100%;
     background-color: transparent;
     caret-color: var(--el-color-primary);
     font-size: 1rem;
