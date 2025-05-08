@@ -24,7 +24,9 @@ const isSyncing = ref(false);
 // 监听
 watch(() => setting.isMobileSize, (val, oldVal) => {
   if (val !== oldVal) {
-    chat.scrollBottom(false);
+    nextTick(() => {
+      chat.scrollBottom(false);
+    });
   }
 }, {
   immediate: true,
