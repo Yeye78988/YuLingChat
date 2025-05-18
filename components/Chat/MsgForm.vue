@@ -662,7 +662,7 @@ defineExpose({
       <!-- 工具栏 TODO: AI机器人暂不支持 -->
       <template v-if="!isAiRoom">
         <div
-          class="relative h-9 flex flex-shrink-0 items-center gap-3 px-2 sm:gap-4"
+          class="relative h-9 flex flex-shrink-0 items-center gap-3 px-2"
         >
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
@@ -825,7 +825,7 @@ defineExpose({
               >
                 <div class="h-full w-8em flex items-center pr-1" :title="item.label">
                   <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default bg-color" :src="BaseUrlImg + item.avatar" />
-                  <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
+                  <span class="ml-2 flex-1 truncate text-xs text-color">{{ item.label }}</span>
                 </div>
               </el-option>
             </el-select>
@@ -1021,8 +1021,8 @@ defineExpose({
 .input {
   --at-apply: "flex-1";
   :deep(.el-form-item__content) {
+    --at-apply: "mt-2 sm:mt-0";
     display: flex;
-    margin-top: 0.5rem;
     .el-mention {
       width: auto;
       flex: 1;
@@ -1031,26 +1031,32 @@ defineExpose({
   }
   :deep(.el-input__count) {
     left: 0.8em;
-    bottom: -3.5em;
+    bottom: -2em;
     width: fit-content;
     background-color: transparent;
     transition: opacity 0.2s;
     opacity: 0;
   }
-  :deep(.el-text__inner),
-  :deep(.el-textarea__inner) {
-    resize: none;
-    box-shadow: none !important;
-    height: 100%;
-    background-color: transparent;
-    caret-color: var(--el-color-primary);
-    font-size: 1rem;
-    &:hover + .el-input__count  {
-      opacity: 1;
-    }
-    &::-webkit-input-placeholder {
-      font-size: 0.9em;
-      line-height: 1.7em;
+  :deep(.el-text),
+  :deep(.el-textarea) {
+    --at-apply: "h-full flex-1";
+
+    .el-input__inner,
+    .el-textarea__inner {
+      resize: none;
+      height: 100%;
+      box-shadow: none !important;
+      height: 100%;
+      background-color: transparent;
+      caret-color: var(--el-color-primary);
+      font-size: 1rem;
+      &:hover + .el-input__count  {
+        opacity: 1;
+      }
+      &::-webkit-input-placeholder {
+        font-size: 0.9em;
+        line-height: 1.7em;
+      }
     }
   }
   :deep(.el-input) {
@@ -1078,7 +1084,7 @@ defineExpose({
       .el-input__count {
         left: auto;
         right: 1.2em;
-        bottom: 0.8em;
+        bottom: 2rem;
       }
       .el-textarea {
         padding-left: 0.6em;

@@ -52,7 +52,7 @@ const openRoomDrawer = computed({
       <ChatRoomGroupPopup
         v-else
         key="chat-room-group-popup"
-        class="nav-padding-top-12 ml-a h-full w-1/4 w-260px flex flex-col gap-2 border-r-0 rounded-r-0 p-4 bg-color"
+        class="nav-padding-top-10 ml-a h-full w-1/4 w-260px flex flex-col gap-2 border-r-0 rounded-r-0 p-4 bg-color"
       />
     </template>
   </div>

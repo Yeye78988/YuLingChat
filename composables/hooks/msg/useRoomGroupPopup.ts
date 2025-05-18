@@ -2,8 +2,8 @@ import ContextMenu from "@imengyu/vue3-context-menu";
 import { mitter, MittEventType } from "~/composables/utils/useMitt";
 
 
-export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
-  const { editFormField } = opt;
+export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: number, itemHeight: number }) {
+  const { editFormField, overscan = 10, itemHeight = 40 } = opt;
 
   // store
   const ws = useWsStore();
@@ -16,7 +16,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   const theUser = ref<ChatMemberVO>(); // 添加好友
   const showSearch = ref(false);
   const searchUserWord = ref("");
-  const isShowApply = ref(false);
   // 计算
   const isTheGroupOwner = computed(() => chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER);
   const isTheGroupPermission = computed(() => chat.theContact?.member?.role === ChatRoomRoleEnum.OWNER || chat.theContact?.member?.role === ChatRoomRoleEnum.ADMIN); // 是否有权限（踢出群聊、）
@@ -33,8 +32,8 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
   const { list: vMemberList, scrollTo, containerProps, wrapperProps } = useVirtualList(
     memberList,
     {
-      itemHeight: 50,
-      overscan: 10,
+      itemHeight,
+      overscan,
     },
   );
 
@@ -56,10 +55,16 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     if (dom.scrollHeight - dom.scrollTop <= 500) {
       loadData();
     }
-  }, 200);
-  const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === 0
+  }, 100);
+  const isNotExistOrNorFriend = computed(() => chat.theContact?.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === 0
   const theContactClone = ref<Partial<ChatContactDetailVO>>();
   const isLord = computed(() => chat.theContact.member?.role === ChatRoomRoleEnum.OWNER);
+  const isLoading = computed(() => chat.roomMapCache[chat.theRoomId!]?.isLoading);
+  const isReload = computed(() => chat.roomMapCache[chat.theRoomId!]?.isReload);
+  const isLast = computed(() => chat.memberPageInfo.isLast);
+  const isEmpty = computed(() => chat.currentMemberList?.length === 0);
+
+  // 文本
   const TextMap = {
     name: "群名称",
     notice: "群公告",
@@ -204,11 +209,15 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
         chat?.roomMapCache?.[roomId]!.userList.push(...data.list);
       }
       chat.roomMapCache[roomId]!.isLoading = false;
+      // isReload 状态也应该在 try 块的末尾更新，确保无论成功与否都重置
+      chat.roomMapCache[roomId]!.isReload = false;
     }
     finally {
       await nextTick();
-      chat.roomMapCache[roomId]!.isLoading = false;
-      chat.roomMapCache[roomId]!.isReload = false;
+      if (chat.roomMapCache[roomId]) {
+        chat.roomMapCache[roomId]!.isLoading = false;
+        chat.roomMapCache[roomId]!.isReload = false;
+      }
     }
   }
 
@@ -298,15 +307,20 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     await nextTick();
     containerProps.onScroll();
     scrollTo(0);
+
     if (!newRoomId) {
       return;
     }
+    // 检查缓存之前，确保视图已重置
     if (chat.roomMapCache[newRoomId]?.cacheTime && Date.now() - chat.roomMapCache[newRoomId]?.cacheTime < 300000) { // 缓存5分钟
       return;
     }
     await reload(newRoomId);
+    // reload 后列表数据变化，再次确保滚动和视图更新
     await nextTick();
-    containerProps.onScroll(); // 切换会话成员列表滚动条位置重置
+    if (containerProps?.onScroll) {
+      containerProps.onScroll();
+    }
     scrollTo(0);
   }, {
     immediate: true,
@@ -495,6 +509,9 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string> }) {
     inputOssFileUploadRef,
     containerProps,
     wrapperProps,
+    isLoading,
+    isReload,
+    isTheGroupPermission,
     onSubmitImages,
     toggleImage,
     submitUpdateRoom,

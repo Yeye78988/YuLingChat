@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ChatContactVO } from "@/composables/api/chat/contact";
-import { RoomType } from "@/composables/api/chat/contact";
 import ContextMenu from "@imengyu/vue3-context-menu";
+import { RoomType } from "@/composables/api/chat/contact";
 
 const props = defineProps<{
   dto?: ContactPageDTO
@@ -330,7 +330,7 @@ onMounted(() => {
   >
     <!-- 搜索群聊 -->
     <div
-      class="nav-padding-top-8 header"
+      class="nav-padding-top-6 header"
       :class="setting.isMobileSize && !setting.isOpenContactSearch ? '!h-0 overflow-y-hidden' : ''"
     >
       <ElInput

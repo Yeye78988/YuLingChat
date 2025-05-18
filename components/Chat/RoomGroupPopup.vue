@@ -42,6 +42,8 @@ const {
   inputOssFileUploadRef,
   containerProps,
   wrapperProps,
+  isReload,
+  isLoading,
   onSubmitImages,
   toggleImage,
   submitUpdateRoom,
@@ -49,9 +51,10 @@ const {
   scrollTo,
   onMemberContextMenu,
   onExitOrClearGroup,
-
 } = useRoomGroupPopup({
   editFormField,
+  overscan: 10,
+  itemHeight: 44,
 });
 // 邀请进群
 function showJoinGroup() {
@@ -97,7 +100,7 @@ async function changShieldStatus() {
     class="group scroll relative"
     wrap-class="pb-20"
   >
-    <div flex-row-bt-c flex-shrink-0 flex-row truncate>
+    <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate px-2 pb-2 bg-color>
       <i
         class="i-solar:magnifer-linear block h-4.5 w-4.5 btn-info"
         @click="() => {
@@ -114,13 +117,13 @@ async function changShieldStatus() {
     </div>
     <!-- 搜索群聊 -->
     <div
-      class="header h-2em transition-height"
+      class="header sticky left-0 top-10 z-10 h-10 transition-height bg-color"
       :class="!showSearch ? '!h-0 overflow-y-hidden' : ''"
     >
       <ElInput
         ref="searchInputRef"
         v-model.lazy="searchUserWord"
-        style="height: 2em;"
+        style="height: 1.8rem;"
         name="search-content"
         type="text"
         clearable
@@ -128,14 +131,13 @@ async function changShieldStatus() {
         :prefix-icon="ElIconSearch"
         minlength="2"
         maxlength="30"
-        placeholder="搜索群友"
+        placeholder="搜索群成员"
         @blur.stop="() => searchUserWord === '' && (showSearch = false)"
         @input="scrollTo(0)"
       />
     </div>
     <div relative h-300px>
       <div
-        v-if="!chat.currentRoomCache.isReload"
         v-bind="containerProps"
         class="scroll-bar relative !h-300px"
         @scroll="onScroll"
@@ -149,14 +151,15 @@ async function changShieldStatus() {
             :key="`${chat.theRoomId!}_${p.data.userId}`"
             :class="p.data.activeStatus === ChatOfflineType.ONLINE ? 'live' : 'op-60 filter-grayscale filter-grayscale-100 '"
             class="user-card"
+            @dblclick="onMemberContextMenu($event, p.data)"
             @contextmenu="onMemberContextMenu($event, p.data)"
             @click="setting.isMobileSize && onMemberContextMenu($event, p.data)"
           >
             <div class="relative flex-row-c-c" :title="p.data.nickName || '未知'">
               <CardElImage
                 :default-src="p.data.avatar" fit="cover"
-                error-class="i-solar-user-line-duotone p-2.5 op-80"
-                class="h-2.4rem w-2.4rem flex-shrink-0 overflow-auto rounded-1/2 object-cover border-default"
+                error-class="i-solar-user-line-duotone p-2 op-80"
+                class="h-2rem w-2rem flex-shrink-0 overflow-auto rounded-1/2 object-cover border-default"
               />
               <span class="g-avatar" />
             </div>
@@ -169,6 +172,11 @@ async function changShieldStatus() {
                 {{ ChatRoomRoleEnumMap[p.data.roleType || ChatRoomRoleEnum.MEMBER] }}
               </el-tag>
             </div>
+          </div>
+          <!-- loading -->
+          <div v-show="isLoading && !isReload" class="flex-row-c-c text-mini">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin select-none" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="currentColor" d="M12 4.5a7.5 7.5 0 1 0 0 15a7.5 7.5 0 0 0 0-15M1.5 12C1.5 6.201 6.201 1.5 12 1.5S22.5 6.201 22.5 12S17.799 22.5 12 22.5S1.5 17.799 1.5 12" opacity=".1" /><path fill="currentColor" d="M12 4.5a7.46 7.46 0 0 0-5.187 2.083a1.5 1.5 0 0 1-2.075-2.166A10.46 10.46 0 0 1 12 1.5a1.5 1.5 0 0 1 0 3" /></g></svg>
+            &nbsp;加载中...
           </div>
         </div>
       <!-- <small
@@ -235,10 +243,9 @@ async function changShieldStatus() {
           ref="noticeInputRef"
           v-model="theContactClone.roomGroup.detail.notice"
           :disabled="!isLord || editFormField !== 'notice'"
-          autofocus
-          :rows="8"
+          :rows="editFormField === 'notice' ? 8 : 1"
           :maxlength="200"
-          class="scroll-bar mt-2 card-rounded-df p-3 border-default-2 bg-color"
+          class="scroll-bar mt-2 card-rounded-df border-none transition-200 bg-color"
           type="textarea"
           style="resize:none;width: 100%;"
           placeholder="未填写"
@@ -249,7 +256,7 @@ async function changShieldStatus() {
       </div>
       <div class="label-item mt-3">
         会话设置
-        <div class="mt-2 card-rounded-df px-3 py-2 text-xs border-default-2 bg-color">
+        <div class="mt-2 card-rounded-df text-xs">
           <div mb-2 flex-row-bt-c pb-2 border-default-b>
             设为置顶
             <el-switch
@@ -294,7 +301,7 @@ async function changShieldStatus() {
   --at-apply: "border-default z-1 absolute bottom-0.2em right-0.2em rounded-full block w-2 h-2 ";
 }
 .user-card {
-  --at-apply: "h-50px flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate rounded-2rem filter-grayscale w-full hover:(bg-color-2 op-100)";
+  --at-apply: "h-44px flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate rounded-2rem filter-grayscale w-full hover:(bg-color-2 op-100)";
   .tags {
     :deep(.el-tag) {
       transition: none;

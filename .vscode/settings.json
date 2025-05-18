@@ -13,7 +13,7 @@
 
   "prettier.enable": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
 
   // Silent the stylistic rules in you IDE, but still auto fix them
   "eslint.useFlatConfig": true,

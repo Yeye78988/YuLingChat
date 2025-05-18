@@ -30,7 +30,7 @@ const isEmptyPanel = computed(() => chat.theFriendOpt.type !== FriendOptType.Emp
       class="w-full transition-all sm:(relative mx-auto w-320px border-default-r p-0)"
     >
       <!-- 好友列表 -->
-      <ChatFriendTabs class="nav-padding-top-8 relative mx-a h-full flex-shrink-0 p-4 pb-0" />
+      <ChatFriendTabs class="nav-padding-top-6 relative mx-a h-full flex-shrink-0 p-4 pb-0" />
     </div>
     <div
       class="bg z-1 h-full flex-1 flex-shrink-0 flex-col bg-color-3 sm:card-bg-color-2"
@@ -56,7 +56,7 @@ const isEmptyPanel = computed(() => chat.theFriendOpt.type !== FriendOptType.Emp
           <ChatFriendMainType
             key="chat-friend-main-type"
             :data="chat.theFriendOpt"
-            class="nav-padding-top-8 relative z-999 mx-a h-full w-full flex-1 flex-shrink-0 sm:!bg-transparent"
+            class="nav-padding-top-6 relative z-999 mx-a h-full w-full flex-1 flex-shrink-0 sm:!bg-transparent"
           />
         </Transition>
       </template>
