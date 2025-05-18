@@ -164,15 +164,11 @@ onBeforeUnmount(() => {
         </div>
         <div class="ml-a flex-row-c-c flex-shrink-0">
           <template v-if="p.status === ChatApplyStatusType.Load">
-            <el-button-group class="shadow bg-color">
+            <el-button-group class="card-rounded-df transition-200 bg-color-2 hover:shadow">
               <BtnElButton size="small" @click="onArgeeFriend(p.applyId)">
                 同意
               </BtnElButton>
-              <BtnElButton
-                size="small"
-                style="padding: 0 0.3em;"
-                @click.stop="openItemId = openItemId === p.applyId ? undefined : p.applyId"
-              >
+              <BtnElButton size="small" style="padding: 0 0.3em;" @click.stop="openItemId = openItemId === p.applyId ? undefined : p.applyId">
                 <el-popover
                   :visible="openItemId === p.applyId"
                   popper-class="!border-default !p-1 !min-w-fit"

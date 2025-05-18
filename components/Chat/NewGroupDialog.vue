@@ -297,7 +297,7 @@ defineExpose({
               <el-button
                 class="w-2/5"
                 :disabled="form.uidList.length <= 0"
-                :type="form.roomId ? 'info' : 'warning'" @click="next()"
+                :type="form.roomId ? 'warning' : 'primary'" @click="next()"
               >
                 {{ form.roomId ? '邀请' : '下一步' }}
               </el-button>
