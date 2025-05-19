@@ -46,17 +46,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
   };
 
   /**
-   * 获取联系人数据
-   */
-  const getContact = (roomId: number): ChatContactExtra | undefined => {
-    return chat?.contactMap?.[roomId];
-  };
-
-  /**
    * 检查房间ID是否有效
    */
   const isValidRoom = (roomId?: number): roomId is number => {
-    return !!roomId && !!getContact(roomId);
+    return !!roomId && !!chat?.contactMap?.[roomId];
   };
 
   /**
@@ -81,7 +74,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     if (!isValidRoom(roomId))
       return;
 
-    const theContact = getContact(roomId);
+    const theContact = chat?.contactMap?.[roomId];
     if (!theContact)
       return;
     if (!theContact.pageInfo) {
@@ -93,7 +86,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     }
     const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
     // 检查是否应该加载数据
-    if (theContact.isLoading || theContact.isReload || thePageInfo.isLast || chat.isMsgListScroll) {
+    if (theContact.isLoading || theContact.isReload || thePageInfo.isLast) {
       return;
     }
 
@@ -204,8 +197,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         data.list.forEach((msg) => {
           const msgId = msg.message.id;
           if (msgId) {
+            if (!chat.contactMap[roomId]!.msgMap[msgId]) {
+              chat.contactMap[roomId]!.msgIds.push(msgId);
+            }
             chat.contactMap[roomId]!.msgMap[msgId] = msg;
-            chat.contactMap[roomId]!.msgIds.push(msgId);
           }
         });
 
@@ -223,7 +218,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       console.error("重新加载消息出错:", error);
       await nextTick();
       scrollBottom(false);
-      chat.saveScrollTop && chat.saveScrollTop();
     }
     finally {
       if (chat.contactMap[roomId]) {
@@ -286,7 +280,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         });
 
         // 检查是否需要同步消息
-        const contact = getContact(val);
+        const contact = chat?.contactMap?.[val];
         if (contact && (!contact.msgIds.length || contact.lastMsgId !== contact?.lastMsgId))
           reload(val);
       }
@@ -367,29 +361,13 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
   /**
    * 滚动到指定位置
    */
-  async function scrollTop(size: number, animated = false) {
-    if (chat.isMsgListScroll)
-      return;
-
-    chat.isMsgListScroll = true;
-
+  function scrollTop(size: number, animated = false) {
     // 执行滚动
     if (scrollbarRef.value?.wrapRef) {
       scrollbarRef.value.wrapRef.scrollTo({
         top: size || 0,
         behavior: animated ? "smooth" : undefined,
       });
-    }
-
-    // 处理动画完成后的状态重置
-    if (animated) {
-      await nextTick();
-      setTimeout(() => {
-        chat.isMsgListScroll = false;
-      }, SCROLL_DEBOUNCE_TIME);
-    }
-    else {
-      chat.isMsgListScroll = false;
     }
   }
 

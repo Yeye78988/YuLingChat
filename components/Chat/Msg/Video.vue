@@ -38,12 +38,7 @@ function showVideoDetail(e: MouseEvent) {
     },
   });
 }
-const {
-  width,
-  height,
-} = body?.thumbWidth !== undefined && body?.thumbHeight !== undefined
-  ? getImgSize(body.thumbWidth, body.thumbHeight, { maxWidth: 256, maxHeight: 256 })
-  : { width: 0, height: 0 };
+const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
 </script>
 
 <template>

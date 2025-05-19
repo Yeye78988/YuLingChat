@@ -194,6 +194,9 @@ body .el-message {
   .el-select-dropdown,
   .el-mention-dropdown {
     padding: 0.5em;
+    .el-select-dropdown__footer {
+      --at-apply: "p-0 pt-2 mt-2";
+    }
   }
   .el-scrollbar {
     .el-scrollbar__wrap {

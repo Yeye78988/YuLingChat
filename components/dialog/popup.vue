@@ -149,7 +149,7 @@ function onBeforeEnter(): void {
   dialogStyle.value = {
     transform: `scale(${minScale})`,
     opacity: "0",
-    transition: "none", // 确保没有过渡效果以立即应用初始状态
+    transition: "none",
   };
 }
 

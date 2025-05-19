@@ -805,10 +805,13 @@ defineExpose({
               clearable teleported collapse-tags multiple
               :max-collapse-tags="2"
             >
+              <template #footer>
+                <el-button text bg size="small" class="w-full" :disabled="!chat.askAiRobotList.length" @click="chat.askAiRobotList = []">
+                  清除选择{{ chat.askAiRobotList.length > 0 ? `（已选${chat.askAiRobotList.length}）` : '' }}
+                </el-button>
+              </template>
               <template #prefix>
-                <i
-                  class="robot-select-icon"
-                />
+                <i class="robot-select-icon" />
               </template>
               <template #label="{ value }">
                 <CardAvatar
@@ -991,7 +994,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .form-contain {
-    --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-hidden px-2 pb-2 border-default-t";
+    --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-hidden pt-1 px-2 pb-4 sm:pb-2 border-default-t";
     box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 16px;
     .tip {
     --at-apply: "op-0";
