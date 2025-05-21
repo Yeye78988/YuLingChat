@@ -195,13 +195,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       // 添加新消息
       if (data?.list?.length) {
         data.list.forEach((msg) => {
-          const msgId = msg.message.id;
-          if (msgId) {
-            if (!chat.contactMap[roomId]!.msgMap[msgId]) {
-              chat.contactMap[roomId]!.msgIds.push(msgId);
-            }
-            chat.contactMap[roomId]!.msgMap[msgId] = msg;
-          }
+          chat.appendMsg(msg);
         });
 
         if (thePageInfo) {

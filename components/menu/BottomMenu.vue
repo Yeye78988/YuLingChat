@@ -49,13 +49,13 @@ onBeforeUnmount(() => {
 });
 const { open: openExtendMenu, openItem } = useOpenExtendWind();
 // @unocss-include
-const menuList = ref<MenuItem[]>([
+const menuList = computed<MenuItem[]>(() => [
   {
     title: "聊天",
     path: "/",
     icon: "i-solar:chat-line-broken",
     activeIcon: "i-solar:chat-line-bold",
-    tipValue: chat.unReadContactList.reduce((acc, cur) => acc + cur.unreadCount, 0),
+    tipValue: chat.unReadCount,
     isDot: false,
   },
   {

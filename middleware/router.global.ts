@@ -64,16 +64,21 @@ function shouldBlockNavigation(
   // 移动尺寸特定限制
   if (setting.isMobileSize) {
     // 聊天详情页移动端返回处理
-    if (from.path === "/" && to.path !== "/" && !to.query?.dis
-      && !chat.isOpenContact && setting.isMobileSize) {
-      chat.isOpenContact = true;
-      setting.isOpenGroupMember = false;
-      return true;
+    if (from.path === "/" && to.path !== "/" && !to.query?.dis) {
+      if (setting.isOpenGroupMember) {
+        setting.isOpenGroupMember = false;
+        return true;
+      }
+      if (!chat.isOpenContact) {
+        chat.isOpenContact = true;
+        return true;
+      }
+      return false;
     }
 
     // 好友面板处理
     if (from.path === "/friend" && to.path !== "/friend"
-      && chat.showTheFriendPanel && setting.isMobileSize) {
+      && chat.showTheFriendPanel) {
       chat.showTheFriendPanel = false;
       return true;
     }

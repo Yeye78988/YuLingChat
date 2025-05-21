@@ -2,16 +2,6 @@
 <script lang="ts" setup>
 const chat = useChatStore();
 const setting = useSettingStore();
-
-const openRoomDrawer = computed({
-  get() {
-    return chat.theContact.type === RoomType.GROUP && setting.isOpenGroupMember;
-  },
-  set(val) {
-    if (chat.theContact.type === RoomType.GROUP)
-      setting.isOpenGroupMember = val;
-  },
-});
 </script>
 
 <template>
@@ -35,26 +25,6 @@ const openRoomDrawer = computed({
       <i i-solar:chat-line-bold-duotone class="mb-2 h-12 w-12" />
       <small>快开始聊天吧 ✨</small>
     </div>
-    <!-- 在线人数 -->
-    <template v-if="chat.theRoomId">
-      <!-- 移动尺寸 popup -->
-      <el-drawer
-        v-if="setting.isMobileSize"
-        v-model="openRoomDrawer" size="76%"
-        style="box-shadow: none;max-width: 300px;"
-        class="rounded-l-3"
-        modal-class="backdrop-blur-4px transition-[backdrop-filter] border-default"
-        lock-scroll
-        :with-header="false"
-      >
-        <ChatRoomGroupPopup class="ml-a h-full w-full flex flex-col gap-2 border-r-0 p-4 border-default-l bg-color" />
-      </el-drawer>
-      <ChatRoomGroupPopup
-        v-else
-        key="chat-room-group-popup"
-        class="nav-padding-top-10 ml-a h-full w-1/4 w-260px flex flex-col gap-2 border-r-0 rounded-r-0 p-4 bg-color"
-      />
-    </template>
   </div>
 </template>
 

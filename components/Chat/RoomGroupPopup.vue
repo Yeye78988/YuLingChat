@@ -187,7 +187,7 @@ async function changShieldStatus() {
       </small> -->
       </div>
     </div>
-    <div class="mt-2 w-full flex-1 overflow-y-auto border-0 border-t-1px pt-2 text-3.5 leading-1.8em border-default">
+    <div class="mt-4 w-full flex-1 select-none overflow-y-auto text-3.5 leading-1.8em border-default-t">
       <div relative mt-3>
         群头像
         <InputOssFileUpload
@@ -209,7 +209,7 @@ async function changShieldStatus() {
         />
       </div>
       <div mt-3 class="label-item">
-        群聊名称
+        <span select-none>群聊名称</span>
         <i v-show="isLord && editFormField !== 'name'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'name'" />
         <div
           class="dark:op-70" @click="() => {
@@ -234,7 +234,7 @@ async function changShieldStatus() {
         </div>
       </div>
       <div class="label-item">
-        <div mt-3>
+        <div mt-3 select-none>
           群公告
           <i v-show="isLord && editFormField !== 'notice'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'notice'" />
         </div>
@@ -254,9 +254,9 @@ async function changShieldStatus() {
           @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
         />
       </div>
-      <div class="label-item mt-3">
+      <div class="label-item mt-3 select-none">
         会话设置
-        <div class="mt-2 card-rounded-df text-xs">
+        <div class="mt-2 card-rounded-df">
           <div mb-2 flex-row-bt-c pb-2 border-default-b>
             设为置顶
             <el-switch

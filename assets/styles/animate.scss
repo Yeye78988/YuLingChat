@@ -468,12 +468,21 @@ html.stop-transition-all {
   position: absolute;
   z-index: -1;
 }
+// fade动画
+.fade-lr-move,
+.fade-lr-enter-active,
+.fade-lr-leave-active {
+  transition: 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+}
 
-// 页面
+.fade-lr-enter-from,
+.fade-lr-leave-to {
+  transform: translateX(100%);
+}
+
 .sliceX-enter-active,
 .sliceX-leave-active {
-  transform: scaleY(0.01) translateX(0);
-  transition: transform $transition-delay ease-in;
+  transform: translateX(0);
 }
 
 .sliceX-enter-from,

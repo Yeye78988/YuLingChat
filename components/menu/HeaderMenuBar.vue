@@ -21,12 +21,21 @@ async function toggleContactSearch() {
 }
 
 const route = useRoute();
+const hiddenCountTip = computed(() => chat.isOpenContact || !chat.unReadCount);
+
 async function toggleContactOpen() {
   if (route.path !== "/") {
     await navigateTo("/");
-    return;
+    return false;
   }
-  chat.isOpenContact = !chat.isOpenContact;
+  if (setting.isOpenGroupMember) {
+    setting.isOpenGroupMember = false;
+    return false;
+  }
+  if (!chat.isOpenContact) {
+    chat.isOpenContact = true;
+    return false;
+  }
 }
 const getAppTitle = computed(() => {
   if (route.path === "/")
@@ -56,6 +65,9 @@ const getAppTitle = computed(() => {
         :class="!chat.isOpenContact ? 'flex-row-c-c animate-zoom-in animate-duration-200 sm:hidden' : 'hidden '" @click="toggleContactOpen"
       >
         <i i-solar-alt-arrow-left-line-duotone p-3 />
+        <small v-show="!hiddenCountTip" class="unread-count-badge">
+          {{ chat.unReadCount > 99 ? '99+' : chat.unReadCount }}
+        </small>
       </div>
       <!-- <div class="left relative z-1000 flex-row-c-c gap-3 tracking-0.2em">
         <NuxtLink to="/" class="hidden flex-row-c-c sm:flex">
@@ -132,6 +144,9 @@ const getAppTitle = computed(() => {
 </template>
 
 <style lang="scss" scoped>
+.unread-count-badge {
+  --at-apply: "bg-color-2 shadow-sm !text-gray  shadow-inset text-0.7rem h-fit py-0.2em rounded-2em px-2";
+}
 .dark .nav {
   backdrop-filter: blur(1rem);
   background-size: 3px 3px;

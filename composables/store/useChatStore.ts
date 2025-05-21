@@ -126,6 +126,7 @@ export const useChatStore = defineStore(
       clearMessageQueue,
       msgBuilder,
     } = useMessageQueue();
+    const unReadCount = computed(() => unReadContactList.value.reduce((acc, cur) => acc + cur.unreadCount, 0));
 
     // 监听消息队列事件
     mitter.off(MittEventType.MESSAGE_QUEUE);
@@ -580,8 +581,8 @@ export const useChatStore = defineStore(
         contact.msgMap[msgId] = data;
         return;
       }
-      const index = contact.msgIds.findIndex(id => id === msgId);
-      if (index === -1) {
+      // const index = contact.msgIds.findIndex(id => id === msgId);
+      if (!contact.msgMap[msgId]) {
         contact.msgIds.push(msgId);
       }
       // 添加|更新消息
@@ -1006,6 +1007,7 @@ export const useChatStore = defineStore(
       isVisible,
 
       // 消息队列相关
+      unReadCount,
       messageQueue,
       isProcessingQueue,
       isExsistQueue,
