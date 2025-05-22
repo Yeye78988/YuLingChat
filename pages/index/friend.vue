@@ -33,7 +33,7 @@ const isEmptyPanel = computed(() => chat.theFriendOpt.type !== FriendOptType.Emp
       <ChatFriendTabs class="nav-padding-top-6 relative mx-a h-full flex-shrink-0 p-4 pb-0" />
     </div>
     <div
-      class="bg z-1 h-full flex-1 flex-shrink-0 flex-col bg-color-3 sm:card-bg-color-2"
+      class="bg z-1 h-full flex-1 flex-shrink-0 flex-col bg-color-2 sm:card-bg-color-2"
       :class="chat.showTheFriendPanel ? 'flex absolute sm:(p-0 relative) left-0 w-full' : 'hidden sm:flex'"
     >
       <template v-if="isEmptyPanel">
@@ -63,7 +63,7 @@ const isEmptyPanel = computed(() => chat.theFriendOpt.type !== FriendOptType.Emp
       <div
         v-else
         key="chat-friend-empty"
-        class="flex-row-c-c flex-1 flex-shrink-0 card-bg-color-2"
+        class="flex-row-c-c flex-1 flex-shrink-0 bg-color-2"
       >
         <div data-fades class="h-full w-full flex flex-col items-center justify-center text-gray-600 op-80 dark:(text-gray-300 op-50)">
           <i i-solar:users-group-two-rounded-bold-duotone class="mb-2 h-12 w-12" />

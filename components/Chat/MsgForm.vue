@@ -994,8 +994,8 @@ defineExpose({
 
 <style lang="scss" scoped>
 .form-contain {
-    --at-apply: "card-bg-color sm:bg-transparent relative sm:h-62 flex flex-col justify-between overflow-hidden pt-1 px-2 pb-4 sm:pb-2 border-default-t";
-    box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 16px;
+    --at-apply: "card-bg-color sm:(!bg-transparent h-62) relative flex flex-col justify-between overflow-hidden pt-1 px-2 pb-4 sm:pb-2";
+    box-shadow: rgba(0, 0, 0, 0.04) 0px -4px 16px;
     .tip {
     --at-apply: "op-0";
   }

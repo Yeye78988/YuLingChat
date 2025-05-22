@@ -21,25 +21,27 @@ const getType = computed(() => {
 // 点击更多
 function onClickMore() {
   switch (chat.theContact.type) {
+    case RoomType.SELFT:
+    case RoomType.AICHAT:
     case RoomType.GROUP:
       setting.isOpenGroupMember = !setting.isOpenGroupMember;
       break;
-    case RoomType.SELFT:
-    case RoomType.AICHAT:
-      const friendId = chat?.theContact?.targetUid;
-      if (!friendId) {
-        console.warn("friend userId is null");
-        return;
-      }
-      chat.setTheFriendOpt(FriendOptType.User, {
-        id: friendId,
-      });
-      navigateTo({
-        path: "/friend",
-        query: {
-          dis: 1,
-        },
-      });
+      // case RoomType.SELFT:
+      // case RoomType.AICHAT:
+      // const friendId = chat?.theContact?.targetUid;
+      // if (!friendId) {
+      //   console.warn("friend userId is null");
+      //   return;
+      // }
+      // chat.setTheFriendOpt(FriendOptType.User, {
+      //   id: friendId,
+      // });
+      // navigateTo({
+      //   path: "/friend",
+      //   query: {
+      //     dis: 1,
+      //   },
+      // });
       break;
   }
 }
@@ -55,7 +57,7 @@ function onClickMore() {
         :error-class="contactTypeIconClassMap[chat?.theContact?.type || RoomType.SELFT]"
         :alt="chat.theContact.name"
         :default-src="chat?.theContact?.avatar"
-        class="h-2rem w-2rem flex-shrink-0 object-cover sm:(h-2.2rem w-2.2rem) border-default card-default"
+        class="h-2rem w-2rem flex-shrink-0 object-cover sm:(h-2.2rem w-2.2rem) border-default-2 card-default"
       />
       <span truncate text-sm font-500>
         {{ chat.theContact.name }}

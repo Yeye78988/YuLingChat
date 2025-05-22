@@ -142,7 +142,7 @@ onDeactivated(() => {
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col" relative>
+  <div class="nav-padding-top-2 h-full w-full flex flex-col" relative>
     <div
       class="search-input flex-row-c-c"
     >

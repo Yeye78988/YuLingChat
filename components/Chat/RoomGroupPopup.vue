@@ -98,7 +98,7 @@ async function changShieldStatus() {
     v-if="setting.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
     class="group scroll relative"
-    wrap-class="pb-20"
+    wrap-class="pb-10"
   >
     <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate px-2 pb-2 bg-color>
       <i
@@ -117,8 +117,10 @@ async function changShieldStatus() {
     </div>
     <!-- 搜索群聊 -->
     <div
-      class="header sticky left-0 top-10 z-10 h-10 transition-height bg-color"
-      :class="!showSearch ? '!h-0 overflow-y-hidden' : ''"
+      class="header sticky left-0 top-10 z-10 h-10 transition-height"
+      :class="{
+        '!h-0 overflow-y-hidden': !showSearch,
+      }"
     >
       <ElInput
         ref="searchInputRef"
@@ -245,7 +247,7 @@ async function changShieldStatus() {
           :disabled="!isLord || editFormField !== 'notice'"
           :rows="editFormField === 'notice' ? 8 : 1"
           :maxlength="200"
-          class="scroll-bar mt-2 card-rounded-df border-none transition-200 bg-color"
+          class="scroll-bar mt-2 card-rounded-df border-none bg-transparent transition-200"
           type="textarea"
           style="resize:none;width: 100%;"
           placeholder="未填写"
@@ -256,7 +258,7 @@ async function changShieldStatus() {
       </div>
       <div class="label-item mt-3 select-none">
         会话设置
-        <div class="mt-2 card-rounded-df">
+        <div class="mt-2 card-rounded-df text-0.9em">
           <div mb-2 flex-row-bt-c pb-2 border-default-b>
             设为置顶
             <el-switch
