@@ -521,3 +521,44 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
     onExitOrClearGroup,
   };
 }
+
+
+/**
+ * 删除好友
+ *
+ * @param userId 用户id
+ * @param token token
+ */
+export function deleteFriendConfirm(userId: string, token: string, roomId?: number, callback?: (number?: isTrue) => void) {
+  ElMessageBox.confirm("是否删除该好友，对应聊天会话也会被删除？", {
+    title: "删除提示",
+    type: "warning",
+    customClass: "text-center",
+    confirmButtonText: "删除",
+    confirmButtonClass: "el-button--danger",
+    center: true,
+    cancelButtonText: "取消",
+    lockScroll: false,
+    callback: async (action: string) => {
+      if (action === "confirm") {
+        const contactInfoRes = !roomId ? await getSelfContactInfoByFriendUid(userId, token) : undefined;
+        const res = await deleteFriendById(userId, token);
+        const chat = useChatStore();
+        if (res.code === StatusCode.SUCCESS) {
+          // 记录删除 + 删除对应会话
+          mitter.emit(MittEventType.FRIEND_CONTROLLER, {
+            type: "delete",
+            payload: { userId },
+          });
+          if (contactInfoRes?.code === StatusCode.SUCCESS) {
+            chat.removeContact(contactInfoRes.data.roomId); // 清除对应会话
+          }
+          else {
+            return ElMessage.closeAll("error");
+          }
+        }
+        callback && callback(res.data);
+      }
+    },
+  });
+};

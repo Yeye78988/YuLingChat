@@ -65,22 +65,10 @@ const getAppTitle = computed(() => {
         :class="!chat.isOpenContact ? 'flex-row-c-c animate-zoom-in animate-duration-200 sm:hidden' : 'hidden '" @click="toggleContactOpen"
       >
         <i i-solar-alt-arrow-left-line-duotone p-3 />
-        <small v-show="!hiddenCountTip" class="unread-count-badge">
+        <small v-show="!hiddenCountTip" class="unread-count-badge font-500">
           {{ chat.unReadCount > 99 ? '99+' : chat.unReadCount }}
         </small>
       </div>
-      <!-- <div class="left relative z-1000 flex-row-c-c gap-3 tracking-0.2em">
-        <NuxtLink to="/" class="hidden flex-row-c-c sm:flex">
-          <img src="/logo.png" class="h-3 w-3" alt="logo">
-        </NuxtLink>
-        <strong hidden sm:block>{{ appName }}</strong>
-        <div
-          class="btn-primary"
-          :class="!chat.isOpenContact ? 'flex-row-c-c animate-zoom-in animate-duration-200 sm:hidden' : 'hidden '" @click="toggleContactOpen"
-        >
-          <i i-solar-alt-arrow-left-line-duotone p-3 />
-        </div>
-      </div> -->
     </slot>
     <!-- 拖拽区域 -->
     <div class="absolute left-0 top-0 z-0 h-full w-full flex-row-c-c" :data-tauri-drag-region="setting.isDesktop">

@@ -431,6 +431,7 @@ export const useChatStore = defineStore(
         contactMap.value[roomId].text = data.text || contactMap.value[roomId].text;
         contactMap.value[roomId].unreadCount = data.unreadCount !== undefined ? data.unreadCount : contactMap.value[roomId].unreadCount;
         contactMap.value[roomId].activeTime = data.activeTime ? data.activeTime : contactMap.value[roomId].activeTime;
+        contactMap.value[roomId].name = data.name !== undefined ? data.name : contactMap.value[roomId].name;
         contactMap.value[roomId].avatar = data.avatar !== undefined ? data.avatar : contactMap.value[roomId].avatar;
         callBack && callBack(contactMap.value[roomId]);
         delete updateContactList.value[roomId]; // 删除正在修改的load

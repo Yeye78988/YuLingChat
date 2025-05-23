@@ -5,18 +5,12 @@ defineProps<{
 
 const chat = useChatStore();
 const setting = useSettingStore();
-
 const msgFormRef = useTemplateRef("msgFormRef");
 
-// const openRoomDrawer = computed({
-//   get() {
-//     return chat.theContact.type === RoomType.GROUP && setting.isOpenGroupMember;
-//   },
-//   set(val) {
-//     if (chat.theContact.type === RoomType.GROUP)
-//       setting.isOpenGroupMember = val;
-//   },
-// });
+watch(
+  () => chat.theRoomId,
+  () => setting.isOpenGroupMember = false,
+);
 </script>
 
 <template>
@@ -29,9 +23,10 @@ const msgFormRef = useTemplateRef("msgFormRef");
     <ChatMsgForm ref="msgFormRef" class="border-default-2-t" />
     <!-- 在线人数 -->
     <Transition name="fade-lr" mode="out-in">
-      <div v-if="setting.isOpenGroupMember" class="absolute left-0 top-0 z-998 h-full w-full pt-0 sm:pt-20">
-        <div class="model absolute top-0 h-full w-full" @click="setting.isOpenGroupMember = false" />
-        <ChatRoomGroupPopup class="ml-a h-full max-w-full flex flex-1 flex-col gap-2 border-l-none p-4 shadow-lg sm:(max-w-17rem shadow-none) !sm:border-default-l bg-color" />
+      <div v-if="setting.isOpenGroupMember" class="member-popup">
+        <div class="model" @click="setting.isOpenGroupMember = false" />
+        <ChatRoomGroupPopup v-if="chat.theContact.type === RoomType.GROUP" class="member" />
+        <ChatRoomSelfPopup v-else class="member" />
       </div>
     </Transition>
   </div>
@@ -40,6 +35,17 @@ const msgFormRef = useTemplateRef("msgFormRef");
 <style lang="scss" scoped>
 .content {
   --at-apply: "bg-color-2 relative w-full flex flex-col";
+
+  .member-popup {
+    --at-apply: "absolute left-0 top-0 z-998 h-full w-full pt-0 sm:pt-20";
+
+    .model {
+      --at-apply: "absolute top-0 h-full w-full";
+    }
+    .member {
+      --at-apply: "ml-a h-full  max-w-full flex flex-1 flex-col gap-2 border-l-0 p-4 shadow-lg sm:(max-w-17rem shadow-none) !sm:border-default-2-l bg-color";
+    }
+  }
 
   :deep(.el-scrollbar) {
     .el-scrollbar__bar {

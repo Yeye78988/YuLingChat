@@ -197,6 +197,9 @@ export interface ChatContactVO {
    */
   unreadCount: number
 
+  /**
+   * 是否在会话中
+   */
   selfExist?: number
 
   /**

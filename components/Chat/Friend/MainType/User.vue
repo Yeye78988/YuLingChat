@@ -48,35 +48,11 @@ const userStore = useUserStore();
 
 // 删除好友
 function deleteFriend(userId: string) {
-  ElMessageBox.confirm("是否删除该好友，对应聊天会话也会被删除？", {
-    title: "删除提示",
-    type: "warning",
-    customClass: "text-center",
-    confirmButtonText: "删除",
-    confirmButtonClass: "el-button--danger",
-    center: true,
-    cancelButtonText: "取消",
-    lockScroll: false,
-    callback: async (action: string) => {
-      if (action === "confirm") {
-        const res = await deleteFriendById(userId, store.getToken);
-        if (res.code === StatusCode.SUCCESS) {
-          chat.setTheFriendOpt(FriendOptType.Empty, {});
-          // 记录删除 + 删除对应会话
-          mitter.emit(MittEventType.FRIEND_CONTROLLER, {
-            type: "delete",
-            payload: { userId },
-          });
-          const contactInfoRes = await getSelfContactInfoByFriendUid(userId, store.getToken);
-          if (contactInfoRes && contactInfoRes.code !== StatusCode.SUCCESS) {
-            return ElMessage.closeAll("error");
-          }
-          else {
-            chat.removeContact(contactInfoRes.data.roomId); // 清除对应会话
-          }
-        }
-      }
-    },
+  deleteFriendConfirm(userId, store.getToken, undefined, (done?: isTrue) => {
+    if (done === isTrue.TRUE) {
+      ElMessage.success("删除好友成功！");
+      chat.setTheFriendOpt(FriendOptType.Empty, {});
+    }
   });
 };
 

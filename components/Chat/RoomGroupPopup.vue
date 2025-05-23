@@ -98,7 +98,7 @@ async function changShieldStatus() {
     v-if="setting.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
     class="group scroll relative"
-    wrap-class="pb-10"
+    wrap-class="pb-16"
   >
     <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate px-2 pb-2 bg-color>
       <i
@@ -256,27 +256,25 @@ async function changShieldStatus() {
           @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
         />
       </div>
-      <div class="label-item mt-3 select-none">
+      <div class="label-item mt-3 select-none pt-2 border-default-2-t">
         会话设置
-        <div class="mt-2 card-rounded-df text-0.9em">
-          <div mb-2 flex-row-bt-c pb-2 border-default-b>
-            设为置顶
-            <el-switch
-              :model-value="isPin"
-              size="small"
-              :loading="isPinLoading"
-              :before-change="changIsPin"
-            />
-          </div>
-          <div flex-row-bt-c>
-            消息免打扰
-            <el-switch
-              :model-value="shieldStatus"
-              :loading="shieldStatusLoading"
-              size="small"
-              :before-change="changShieldStatus"
-            />
-          </div>
+        <div mt-2 flex-row-bt-c>
+          <small text-0.8rem text-small>设为置顶</small>
+          <el-switch
+            :model-value="isPin"
+            size="small"
+            :loading="isPinLoading"
+            :before-change="changIsPin"
+          />
+        </div>
+        <div mt-2 flex-row-bt-c>
+          <small text-0.8rem text-small>消息免打扰</small>
+          <el-switch
+            :model-value="shieldStatus"
+            :loading="shieldStatusLoading"
+            size="small"
+            :before-change="changShieldStatus"
+          />
         </div>
       </div>
     </div>
@@ -294,7 +292,7 @@ async function changShieldStatus() {
       </span>
     </btn-el-button>
     <!-- 渐变色 -->
-    <div class="shadow-linear absolute bottom-0 left-0 z-1 block h-20 w-full w-full cursor-pointer text-center" />
+    <div class="shadow-linear pointer-events-none absolute bottom-0 left-0 z-1 block h-20 w-full w-full select-none text-center" />
   </el-scrollbar>
 </template>
 
