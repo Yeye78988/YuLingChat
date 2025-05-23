@@ -1,5 +1,5 @@
 import type { ElScrollbar } from "element-plus";
-import type { ChatContactExtra, PageInfo } from "~/composables/store/useChatStore";
+import type { PageInfo } from "~/composables/store/useChatStore";
 
 const PAGINATION_SIZE = 20;
 const HIGHLIGHT_DURATION = 2000;
@@ -50,20 +50,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
    */
   const isValidRoom = (roomId?: number): roomId is number => {
     return !!roomId && !!chat?.contactMap?.[roomId];
-  };
-
-  /**
-   * 初始化页面信息
-   */
-  const initPageInfo = (theContact: ChatContactExtra): PageInfo => {
-    if (!theContact.pageInfo) {
-      theContact.pageInfo = {
-        cursor: undefined as undefined | string,
-        isLast: false,
-        size: PAGINATION_SIZE,
-      };
-    }
-    return theContact.pageInfo as PageInfo;
   };
 
   /**
@@ -119,35 +105,28 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       }
 
       const oldSize = theContact.scrollTopSize || 0;
-
-      // 更新滚动位置
-      nextTick(() => {
-        if (!theContact)
-          return;
-
-        chat.saveScrollTop && chat.saveScrollTop();
-
-        if (thePageInfo.cursor === null && !theContact.msgIds?.length) {
-          // 第一次加载默认没有动画
-          scrollBottom(false);
-          call && call(msgList.value);
-        }
-        else {
-          // 计算并更新滚动位置
-          const newSize = theContact.scrollTopSize || 0;
-          const msgRangeSize = newSize - oldSize;
-          if (msgRangeSize > 0) {
-            scrollTop(msgRangeSize);
-          }
-        }
-
-        // 重置加载状态
-        theContact.isLoading = false;
-      });
-
       // 更新页面信息
       thePageInfo.isLast = data.isLast;
       thePageInfo.cursor = data.cursor || undefined;
+
+      await nextTick();
+      chat.saveScrollTop && chat.saveScrollTop();
+      if (thePageInfo.cursor === null && !theContact.msgIds?.length) {
+        // 第一次加载默认没有动画
+        scrollBottom(false);
+        call && call(msgList.value);
+      }
+      else {
+        // 计算并更新滚动位置
+        const newSize = theContact.scrollTopSize || 0;
+        const msgRangeSize = newSize - oldSize;
+        if (msgRangeSize > 0) {
+          scrollTop(msgRangeSize);
+        }
+      }
+
+      // 重置加载状态
+      theContact.isLoading = false;
     }
     catch (error) {
       console.error("加载消息出错:", error);
@@ -172,7 +151,8 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     const contactData = chat.contactMap[roomId];
     if (!contactData)
       return;
-
+    if (contactData.isLoading || contactData.isReload)
+      return;
     // 重置滚动位置和页面信息
     contactData.scrollTopSize = 0;
     contactData.pageInfo = {
@@ -203,23 +183,21 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
           thePageInfo.cursor = data.cursor || undefined;
         }
       }
-
-      chat.saveScrollTop && chat.saveScrollTop();
+      scrollBottom(false);
       await nextTick();
       scrollBottom(false);
-      setTimeout(() => {
-        chat.contactMap[roomId]!.isLoading = false;
-        chat.contactMap[roomId]!.isReload = false;
-      }, 100);
+      chat.saveScrollTop && chat.saveScrollTop();
+      chat.contactMap[roomId]!.isLoading = false;
+      chat.contactMap[roomId]!.isReload = false;
     }
     catch (error) {
       console.error("重新加载消息出错:", error);
+      scrollBottom(false);
       await nextTick();
       scrollBottom(false);
-      setTimeout(() => {
-        chat.contactMap[roomId]!.isLoading = false;
-        chat.contactMap[roomId]!.isReload = false;
-      }, 100);
+      chat.saveScrollTop && chat.saveScrollTop();
+      chat.contactMap[roomId]!.isLoading = false;
+      chat.contactMap[roomId]!.isReload = false;
     }
   }
 
