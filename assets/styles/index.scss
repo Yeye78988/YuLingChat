@@ -190,7 +190,7 @@ body .el-message {
 // 弹出层
 .el-popper.el-mention__popper,
 .el-popper.el-select__popper.global-custom-select {
-  --at-apply: "bg-light dark:bg-dark-8 rounded-10px border-default";
+  --at-apply: "bg-white dark:bg-dark-8 rounded-10px border-default";
   .el-select-dropdown,
   .el-mention-dropdown {
     padding: 0.5em;

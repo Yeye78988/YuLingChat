@@ -290,7 +290,7 @@ onDeactivated(() => {
     <p class="nav-padding-top-6 my-4 pl-4 text-[var(--el-color-primary)] font-600 tracking-0.2em sm:pl-0">
       <i class="i-solar:ghost-bold mr-2 p-0.8em" />
       极物AI
-      <span float-right mr-3 rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span>
+      <!-- <span float-right mr-3 rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span> -->
     </p>
     <!-- 内容 -->
     <el-scrollbar ref="scollRef" wrap-class="shadow-sm shadow-inset" view-class="shadow-sm shadow-inset h-full  p-2 md:p-4" class="relative sm:card-rounded-df bg-color-2">

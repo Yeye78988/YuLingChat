@@ -18,7 +18,7 @@ export default defineConfig({
     ["card-bg-color-2", "bg-[#f2f2f2]  dark:bg-[#1b1b1b]"],
     ["input-bg-color", "bg-[#f2f2f2] dark:bg-dark-8"],
     ["card-default-br", "bg-[#ffffff93] dark:(bg-dark-5 bg-op-60) rounded-1.5 backdrop-blur-12px backdrop-saturate-180"],
-    ["card-default-br-2", "bg-light bg-op-90 dark:(bg-dark-5 bg-op-90) rounded-1.5 backdrop-blur-8px backdrop-saturate-180"],
+    ["card-default-br-2", "bg-white bg-op-90 dark:(bg-dark-5 bg-op-90) rounded-1.5 backdrop-blur-8px backdrop-saturate-180"],
     ["blur-card", "backdrop-blur-4 bg-[#75757528] rounded-1.5"],
     ["card-rounded-df", " rounded-1.5"],
     ["btn-default", "border-0 cursor-pointer rounded-4px hover:text-[var(--el-color-primary)] transition-200 text-white"],

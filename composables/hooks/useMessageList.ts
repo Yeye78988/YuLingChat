@@ -63,6 +63,11 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     const theContact = chat?.contactMap?.[roomId];
     if (!theContact)
       return;
+    const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
+    // 检查是否应该加载数据
+    if (theContact.isLoading || theContact.isReload || theContact.isSyncing || thePageInfo.isLast) {
+      return;
+    }
     if (!theContact.pageInfo) {
       theContact.pageInfo = {
         cursor: undefined as undefined | string,
@@ -70,38 +75,28 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         size: PAGINATION_SIZE,
       };
     }
-    const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
-    // 检查是否应该加载数据
-    if (theContact.isLoading || theContact.isReload || thePageInfo.isLast) {
-      return;
-    }
-
     // 设置加载状态
     theContact.isLoading = true;
 
     try {
-      const res = await getChatMessagePage(roomId, thePageInfo.size || PAGINATION_SIZE, thePageInfo.cursor, user.getToken);
-      if (res?.code !== StatusCode.SUCCESS) {
+      const { data, code } = await getChatMessagePage(roomId, thePageInfo.size || PAGINATION_SIZE, thePageInfo.cursor, user.getToken);
+      if (code !== StatusCode.SUCCESS) {
         console.warn("加载消息失败");
         return;
       }
 
-      const data = res.data;
-
-      // 确认房间ID未变更
-      if (roomId !== chat.theRoomId || !theContact)
-        return;
-
       // 处理新消息
       if (data?.list?.length) {
         // 将新消息添加到msgMap中
+        const newMsgIds: number[] = [];
         data.list.forEach((msg) => {
           const msgId = msg.message.id;
-          if (msgId) {
-            theContact.msgMap[msgId] = msg;
+          if (!theContact.msgMap[msgId]) {
+            newMsgIds.push(msgId);
           }
+          theContact.msgMap[msgId] = msg;
         });
-        theContact.msgIds.unshift(...data.list.map(msg => msg.message.id));
+        theContact.msgIds.unshift(...newMsgIds);
       }
 
       const oldSize = theContact.scrollTopSize || 0;
@@ -111,10 +106,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
       await nextTick();
       chat.saveScrollTop && chat.saveScrollTop();
+      call && call(msgList.value);
       if (thePageInfo.cursor === null && !theContact.msgIds?.length) {
         // 第一次加载默认没有动画
         scrollBottom(false);
-        call && call(msgList.value);
       }
       else {
         // 计算并更新滚动位置
@@ -124,7 +119,6 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
           scrollTop(msgRangeSize);
         }
       }
-
       // 重置加载状态
       theContact.isLoading = false;
     }
@@ -160,12 +154,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       isLast: false,
       size: PAGINATION_SIZE,
     };
-
     const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
-
     // 清空现有消息
-    chat.contactMap[roomId]!.msgMap = {};
-    chat.contactMap[roomId]!.msgIds = [];
+    // chat.contactMap[roomId]!.msgMap = {};
+    // chat.contactMap[roomId]!.msgIds = [];
     chat.contactMap[roomId]!.isReload = true;
     chat.contactMap[roomId]!.isLoading = true;
 
@@ -174,25 +166,30 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
       // 添加新消息
       if (data?.list?.length) {
-        data.list.forEach((msg) => {
-          chat.appendMsg(msg);
-        });
-
+        const ids: number[] = [];
+        for (const msg of data.list) {
+          if (!chat.contactMap[roomId]!.msgMap[msg.message.id]) {
+            ids.push(msg.message.id);
+          }
+          chat.contactMap[roomId]!.msgMap[msg.message.id] = msg;
+        }
+        chat.contactMap[roomId]!.msgIds = ids;
         if (thePageInfo) {
           thePageInfo.isLast = data.isLast;
           thePageInfo.cursor = data.cursor || undefined;
         }
       }
-      scrollBottom(false);
-      await nextTick();
-      scrollBottom(false);
-      chat.saveScrollTop && chat.saveScrollTop();
+      if (chat.theRoomId === roomId) {
+        // 滚动到底部
+        await nextTick();
+        scrollBottom(false);
+        chat.saveScrollTop && chat.saveScrollTop();
+      }
       chat.contactMap[roomId]!.isLoading = false;
       chat.contactMap[roomId]!.isReload = false;
     }
     catch (error) {
       console.error("重新加载消息出错:", error);
-      scrollBottom(false);
       await nextTick();
       scrollBottom(false);
       chat.saveScrollTop && chat.saveScrollTop();
@@ -211,7 +208,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     if (!isValidRoom(roomId))
       return;
 
-    if (!chat.contactMap[roomId]! || chat.contactMap[roomId]!.isSyncing === true)
+    if (!chat.contactMap[roomId] || chat.contactMap[roomId]!.isSyncing)
       return;
 
     try {
@@ -316,9 +313,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
    * 滚动到底部
    */
   function scrollBottom(animate = true) {
-    if (!scrollbarRef?.value?.wrapRef?.scrollHeight)
-      return;
-    scrollTop(scrollbarRef.value.wrapRef.scrollHeight, animate);
+    scrollTop(scrollbarRef?.value?.wrapRef?.scrollHeight || 0, animate);
   }
 
   /**
@@ -335,12 +330,10 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
    */
   function scrollTop(size: number, animated = false) {
     // 执行滚动
-    if (scrollbarRef.value?.wrapRef) {
-      scrollbarRef.value.wrapRef.scrollTo({
-        top: size || 0,
-        behavior: animated ? "smooth" : undefined,
-      });
-    }
+    scrollbarRef.value?.wrapRef?.scrollTo({
+      top: size,
+      behavior: animated ? "smooth" : undefined,
+    });
   }
 
   /**
