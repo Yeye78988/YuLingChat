@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 const user = useUserStore();
 function exitForm() {
-  user.showLoginAndRegister = "";
+  user.showLoginPageType = "";
 }
 
 const [autoAnimateRef, enable] = useAutoAnimate({});
@@ -15,7 +15,7 @@ onMounted(() => {
   <div>
     <transition name="fade">
       <div
-        v-if="user.showLoginAndRegister !== ''"
+        v-if="user.showLoginPageType !== ''"
         ref="autoAnimateRef"
         tag="div"
         name="popup"
@@ -25,9 +25,9 @@ onMounted(() => {
         @click.self="exitForm"
       >
         <!-- 登录 -->
-        <FormLoginForm v-if="user.showLoginAndRegister === 'login'" key="login-form" />
+        <FormLoginForm v-if="user.showLoginPageType === 'login'" key="login-form" />
         <!-- 注册 -->
-        <FormRegisterForm v-else-if="user.showLoginAndRegister === 'register'" key="register-form" />
+        <FormRegisterForm v-else-if="user.showLoginPageType === 'register'" key="register-form" />
         <!-- 找回密码 -->
         <!-- <FormRegisterForm key="form" v-if="user.showUpdatePwd" /> -->
       </div>

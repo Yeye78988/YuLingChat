@@ -149,7 +149,7 @@ function handleMobileWebNavigation(
 
   if (to.path !== "/login") {
     if (!user.isLogin) {
-      user.showLoginAndRegister = "login";
+      user.showLoginPageType = "login";
       return "/login";
     }
   }

@@ -6,7 +6,7 @@ enum FormType {
 }
 // 表单
 function onLogin(type: FormType) {
-  user.showLoginAndRegister = type === FormType.LOGIN ? "login" : "register";
+  user.showLoginPageType = type === FormType.LOGIN ? "login" : "register";
 }
 </script>
 

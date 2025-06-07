@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { appDescription, appKeywords, appName } from "@/constants/index";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { appDescription, appKeywords, appName } from "@/constants/index";
 
 useSeoMeta({
   title: "登录 - 极物聊天",
@@ -9,6 +9,7 @@ useSeoMeta({
   keywords: appKeywords,
 });
 const user = useUserStore();
+
 definePageMeta({
   key: route => route.fullPath,
   layout: "default",
@@ -16,21 +17,20 @@ definePageMeta({
 
 const setting = useSettingStore();
 onMounted(async () => {
-  user.showLoginAndRegister = "login";
-
+  user.showLoginPageType = "login";
   if (setting.isDesktop) {
-    watch(() => user.showLoginAndRegister, async (val) => {
+    watch(() => user.showLoginPageType, async (val) => {
       if (val !== "") {
-      // 关闭窗口动画
+        // 关闭窗口动画
         if (setting.settingPage.isCloseAllTransition) {
-          getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : 480));
+          getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : val === "register" ? 480 : val === "env-config" ? 600 : 520));
           return;
         }
         // 窗口动画
         invoke("animate_window_resize", {
           windowLabel: LOGIN_WINDOW_LABEL,
           toWidth: 360,
-          toHeight: val === LOGIN_WINDOW_LABEL ? 450 : 480,
+          toHeight: val === "login" ? 450 : val === "register" ? 480 : val === "env-config" ? 480 : 520,
           duration: 160,
           steps: 12,
         }).catch((err: any) => console.error("窗口动画失败:", err));
@@ -45,11 +45,11 @@ onMounted(async () => {
 <template>
   <div
     class="main-box relative overflow-hidden shadow bg-color"
-    grid="~ cols-1 md:cols-2"
-    :class="{
+    grid="~ cols-1 md:cols-2" :class="{
       'img-none is-desktop': setting.isDesktop,
       'is-mobile': setting.isMobileSize,
-      'show-register': user.showLoginAndRegister === 'register',
+      'show-register': user.showLoginPageType === 'register',
+      'show-env-config': user.showLoginPageType === 'env-config',
     }"
   >
     <div :data-tauri-drag-region="setting.isDesktop" class="absolute right-0 z-1000 w-100vw flex cursor-move items-center gap-2 sm:w-50vw">
@@ -57,6 +57,12 @@ onMounted(async () => {
         <BtnTheme
           :class="setting.isDesktop ? 'scale-90 op-50 group-hover:op-100' : ' h-2rem w-2rem rounded-1/2 card-default border-default' "
           title="切换主题"
+        />
+        <BtnEnvConfig
+          :class="setting.isDesktop ? 'scale-90 op-50 group-hover:op-100' : ' !h-2rem !w-2rem  !card-bg-color rounded-1/2 !border-default' "
+          :size="setting.isDesktop ? 'small' : ''"
+          :icon-class="user.showLoginPageType === 'env-config' ? 'i-solar:settings-minimalistic-bold-duotone text-0.9em' : 'i-solar:settings-minimalistic-outline text-1em'"
+          @click="user.showLoginPageType = (user.showLoginPageType === 'env-config' ? 'login' : 'env-config')"
         />
         <BtnAppDownload />
         <MenuController v-if="setting.isDesktop" key="header" :size="setting.isDesktop ? 'small' : ''" :show-max="false" />
@@ -102,18 +108,26 @@ onMounted(async () => {
           </div>
           <!-- 登录 -->
           <FormLoginForm
-            v-if="user.showLoginAndRegister === 'login'"
+            v-if="user.showLoginPageType === 'login'"
             key="login-form"
             style="--anima: blur-in;"
             class="login-form mt-a"
           />
           <!-- 注册 -->
           <FormRegisterForm
-            v-else-if="user.showLoginAndRegister === 'register'"
+            v-else-if="user.showLoginPageType === 'register'"
             key="register-form"
             style="--anima: blur-in;"
             :size="setting.isDesktop ? 'default' : 'large'"
             class="register-form"
+          />
+          <!-- 环境配置 -->
+          <SettingEnvConfigForm
+            v-else-if="user.showLoginPageType === 'env-config'"
+            key="env-config-form"
+            style="--anima: blur-in;"
+            :size="setting.isDesktop ? 'default' : 'large'"
+            class="env-config-form"
           />
         </div>
       </div>
@@ -183,6 +197,18 @@ onMounted(async () => {
 }
 
 .show-register {
+  .login-logo {
+    --at-apply: 'hidden';
+    .logo {
+      --at-apply: 'w-6 h-6';
+    }
+    .app-name {
+      --at-apply: 'text-1em';
+    }
+  }
+}
+
+.show-env-config {
   .login-logo {
     --at-apply: 'hidden';
     .logo {

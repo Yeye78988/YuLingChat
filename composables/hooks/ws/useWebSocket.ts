@@ -11,7 +11,7 @@ const WS_SYNC_DELAY = 200;
 export function useWebSocket() {
   const webSocketHandler = ref<WebSocket | BackWebSocket | null>(null);
   const user = useUserStore();
-  const fullWsUrl = computed(() => `${BaseWSUrl}?Authorization=${user.getToken}`);
+  const fullWsUrl = computed(() => `${BaseWSUrlRef.value}?Authorization=${user.getToken}`);
   const status = ref<WsStatusEnum>(WsStatusEnum.CLOSE);
   // 记录最后一次断开时刻
   const lastDisconnectTime = ref<number>(0);

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { UpdateInfo } from "@/composables/api/user/info";
 import type { UploadFile, UploadFiles, UploadProps } from "element-plus/es/components/upload";
+import type { UpdateInfo } from "@/composables/api/user/info";
 import { updateInfoByDTO } from "@/composables/api/user/info";
 import { compareObjects } from "@/composables/utils";
 
@@ -189,7 +189,7 @@ onMounted(() => {
         :disabled="!isEdit"
         class="avatar-uploader"
         drag
-        :action="`${BaseUrl}/user/info/avatar`"
+        :action="`${BaseUrlRef}/user/info/avatar`"
         :headers="{ Authorization: store.token }"
         method="PUT"
         :limit="1"

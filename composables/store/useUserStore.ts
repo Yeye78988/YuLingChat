@@ -14,7 +14,7 @@ export const useUserStore = defineStore(
     // 是否登录
     const isLogin = ref<boolean>(false);
     // 是否打开登录
-    const showLoginAndRegister = ref<"login" | "register" | "">("");
+    const showLoginPageType = ref<"login" | "register" | "env-config" | "">("");
     const showUpdatePwd = ref<boolean>(false);
     // 钱包信息
     const userWallet = ref<UserWallet>({
@@ -52,7 +52,7 @@ export const useUserStore = defineStore(
     const getToken = computed({
       get() {
         if (!isLogin.value || !token.value) {
-          showLoginAndRegister.value = "login";
+          showLoginPageType.value = "login";
           return "";
         }
         else {
@@ -203,7 +203,7 @@ export const useUserStore = defineStore(
       token,
       isLogin,
       showUpdatePwd,
-      showLoginAndRegister,
+      showLoginPageType,
       userInfo,
       userId,
       markPhone,

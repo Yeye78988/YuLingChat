@@ -14,7 +14,7 @@ export function httpRequest<T = unknown>(
   const user = useUserStore();
   const defaultOpts = {
     method,
-    baseURL: BaseUrl,
+    baseURL: BaseUrlRef.value,
     headers: {} as { Authoriztion?: string },
     // 请求拦截器
     onRequest: (config: any) => {

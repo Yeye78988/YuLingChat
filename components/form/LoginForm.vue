@@ -173,7 +173,7 @@ function onCloseTimer() {
 
 const store = useUserStore();
 function toRegister() {
-  store.showLoginAndRegister = "register";
+  store.showLoginPageType = "register";
 }
 
 const formRef = ref();

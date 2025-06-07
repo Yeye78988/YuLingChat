@@ -102,7 +102,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
               :disabled="!isEdit"
               class="avatar-uploader"
               drag
-              :action="`${BaseUrl}/user/info/avatar`"
+              :action="`${BaseUrlRef}/user/info/avatar`"
               :headers="{ Authorization: store.token }"
               method="PUT"
               :limit="1"

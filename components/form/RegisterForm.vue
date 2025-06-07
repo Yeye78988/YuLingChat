@@ -331,7 +331,7 @@ async function toLogin(token?: string) {
   // 自动登录成功
   store.$patch({
     token: data.data,
-    showLoginAndRegister: "",
+    showLoginPageType: "",
     isLogin: true,
   });
   ElMessage.success({
@@ -355,7 +355,7 @@ async function checkUsername() {
 }
 
 function toLoginForm() {
-  store.showLoginAndRegister = "login";
+  store.showLoginPageType = "login";
 }
 
 // onMounted(() => {

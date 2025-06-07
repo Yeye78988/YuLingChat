@@ -51,7 +51,7 @@ export function getRoomGroupUserPage(roomId: number | null = null, pageSize = 10
  */
 export function getRoomGroupAllUser(roomId: number, token: string): Promise<Result<ChatMemberSeVO[]>> {
   return useHttp.get<Result<ChatMemberSeVO[]>>(
-    `${BaseUrl}/chat/room/group/member/list/${roomId}`,
+    `/chat/room/group/member/list/${roomId}`,
     {},
     {
       headers: {

@@ -179,7 +179,7 @@ const menuList = ref([
               class="avatar-uploader"
               style="width: 100%; height: 100%; border-radius: 50%"
               drag
-              :action="`${BaseUrl}/user/info/avatar`"
+              :action="`${BaseUrlRef}/user/info/avatar`"
               :headers="{ Authorization: user.token }"
               method="PUT"
               :limit="1"
@@ -240,7 +240,7 @@ const menuList = ref([
                 <BtnElButton
                   size="large"
                   type="danger"
-                  transition-icon plain ml-3
+                  plain transition-icon ml-3
                   icon-class="i-solar:logout-3-broken"
                   @click="user.exitLogin"
                 >

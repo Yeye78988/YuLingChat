@@ -95,7 +95,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         e.stopPropagation();
         const user = useUserStore();
         if (binding.value !== undefined && Boolean(binding.value)) {
-          user.showLoginAndRegister = "login";
+          user.showLoginPageType = "login";
           return;
         }
         user?.getTokenFn && user?.getTokenFn();

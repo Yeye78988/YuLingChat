@@ -45,7 +45,7 @@ export interface SelectCommUserDTO {
 
 
 export function getCommUserInfoSe(userId: string, token: string) {
-  return useHttp.get<Result<CommUserVO>>(`${BaseUrl}/community/user/${userId}`, {
+  return useHttp.get<Result<CommUserVO>>(`/community/user/${userId}`, {
   }, {
     headers: { Authorization: token },
   });
