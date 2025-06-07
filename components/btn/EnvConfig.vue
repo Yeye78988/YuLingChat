@@ -4,10 +4,7 @@ interface Props {
   buttonClass?: string
 }
 
-const { size = "" } = withDefaults(defineProps<Props>(), {
-  size: "default",
-  buttonClass: "",
-});
+const { size = "" } = defineProps<Props>();
 
 const isSmallSize = computed(() => size === "default" || size === "" || size === undefined);
 const btnStyle = computed(() => ({
