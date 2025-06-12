@@ -105,7 +105,9 @@ const getRoleText = computed(() => room.value.role !== undefined ? chatRoomRoleT
         群成员：<span v-if="room.hotFlag !== isTrue.TRUE">( {{ room.allUserNum || 0 }}人 )</span>
         <span class="ml-a text-xs btn-primary" @click="chat.setTheFriendOpt(FriendOptType.GROUP_MEMBER, data.data)">查看全员</span>
       </p>
-      <ChatRoomGroupLine :data="data.data" />
+      <div class="h-8">
+        <ChatRoomGroupLine :data="data.data" />
+      </div>
     </div>
     <!-- 按钮操作 -->
     <div v-show="!isLoading" class="mx-a">

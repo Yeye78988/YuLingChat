@@ -21,16 +21,16 @@ const rules: FormRules<EnvConfigMap> = {
   VITE_API_BASE_URL: [
     { required: true, message: "请输入API基础URL", trigger: "blur" },
     {
-      pattern: /^https?:\/\/.+\/$/,
-      message: "URL格式不正确，应以http://或https://开头，以/结尾",
+      pattern: /^https?:\/\/.+/,
+      message: "URL格式不正确，应以http://或https://开头",
       trigger: "blur",
     },
   ],
   VITE_API_WS_BASE_URL: [
     { required: true, message: "请输入WebSocket URL", trigger: "blur" },
     {
-      pattern: /^wss?:\/\/.+\/$/,
-      message: "WebSocket URL格式不正确，应以ws://或wss://开头，以/结尾",
+      pattern: /^wss?:\/\/.+/,
+      message: "WebSocket URL格式不正确，应以ws://或wss://开头",
       trigger: "blur",
     },
   ],

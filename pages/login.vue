@@ -55,7 +55,7 @@ onMounted(async () => {
     <div :data-tauri-drag-region="setting.isDesktop" class="absolute right-0 z-1000 w-100vw flex cursor-move items-center gap-2 sm:w-50vw">
       <div class="group ml-a flex flex items-center gap-2 p-2 sm:px-3">
         <BtnTheme
-          :class="setting.isDesktop ? 'scale-90 op-50 group-hover:op-100' : ' h-2rem w-2rem rounded-1/2 card-default border-default' "
+          :class="setting.isDesktop ? 'op-50 h-2rem w-2rem card-rounded-df group-hover:op-100' : ' h-2rem w-2rem rounded-1/2 card-default border-default' "
           title="切换主题"
         />
         <BtnEnvConfig

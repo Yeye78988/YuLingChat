@@ -128,8 +128,6 @@ async function onExitOrDeleteFriend() {
           <div flex items-center>
             <span class="block max-w-10em flex-1 truncate sm:max-w-6em">
               {{ targetUserInfo.nickname || chat.theContact?.name || '未设置' }}
-              {{ targetUserInfo.nickname || chat.theContact?.name || '未设置' }}
-              {{ targetUserInfo.nickname || chat.theContact?.name || '未设置' }}
             </span>
             <i mx-1 flex-shrink-0 p-2 :class="targetUserInfo.gender === Gender.BOY ? 'i-tabler:gender-male text-blue' : targetUserInfo.gender === Gender.GIRL ? 'i-tabler:gender-female text-pink' : 'i-tabler:gender-transgender text-yellow'" />
             <BtnElButton

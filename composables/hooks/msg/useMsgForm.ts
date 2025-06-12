@@ -955,3 +955,21 @@ export function navigateToUserDetail(userId: string) {
     replace: false,
   });
 }
+
+/**
+ * 跳转到群聊详情
+ */
+export function navigateToGroupDetail(roomId: number) {
+  const chat = useChatStore();
+  chat.setTheFriendOpt(FriendOptType.Group, {
+    ...chat.contactMap[roomId],
+  });
+  navigateTo({
+    path: "/friend",
+    query: {
+      id: roomId,
+      dis: 1, // 移动尺寸禁止路由拦截
+    },
+    replace: false,
+  });
+}
