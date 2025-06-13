@@ -214,11 +214,7 @@ async function changShieldStatus() {
         <span select-none>群聊名称</span>
         <i v-show="isLord && editFormField !== 'name'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'name'" />
         <div
-          class="dark:op-70" @click="() => {
-            if (isLord && editFormField !== 'name') {
-              editFormField = 'name'
-            }
-          }"
+          class="dark:op-70"
         >
           <el-input
             v-if="theContactClone"
@@ -229,7 +225,6 @@ async function changShieldStatus() {
             :maxlength="30"
             style="width: fit-content;"
             placeholder="未填写"
-            @focus="editFormField = 'name'"
             @keydown.enter="submitUpdateRoom('name', theContactClone.name)"
             @blur.stop="submitUpdateRoom('name', theContactClone.name)"
           />
@@ -251,7 +246,6 @@ async function changShieldStatus() {
           type="textarea"
           style="resize:none;width: 100%;"
           placeholder="未填写"
-          @focus="editFormField = 'notice'"
           @keydown.enter.stop="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
           @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
         />
