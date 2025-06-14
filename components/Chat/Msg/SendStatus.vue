@@ -24,6 +24,22 @@ const titleMap: Record<MessageSendStatus, { title: string, className?: string }>
   },
 };
 const types = computed(() => titleMap[status as MessageSendStatus]);
+function confirmDeleteMessage(event: MouseEvent, msgId: any) {
+  ElMessageBox.confirm(
+    "确定删除此消息吗？",
+    "删除消息",
+    {
+      confirmButtonText: "删除",
+      cancelButtonText: "取消",
+      type: "warning",
+    },
+  ).then(() => {
+    // 确认删除消息
+    chat.deleteUnSendMessage(msgId);
+  }).catch(() => {
+    // 用户取消操作
+  });
+}
 </script>
 
 <template>
@@ -33,6 +49,7 @@ const types = computed(() => titleMap[status as MessageSendStatus]);
     class="my-a inline-block h-4.5 w-4.5"
     :class="types?.className"
     @click="chat.retryMessage(msgId)"
+    @contextmenu.prevent="confirmDeleteMessage($event, msgId)"
   />
 </template>
 

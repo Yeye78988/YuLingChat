@@ -4,6 +4,7 @@ import type { OssConstantItemType } from "~/init/system";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { readFile, stat } from "@tauri-apps/plugin-fs";
 
+// @unocss-include
 const MAX_CHAT_SECONDS = 120;
 const MimeType = "audio/mp3";
 /**
@@ -422,7 +423,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     const fileArr = Array.from(e.clipboardData.items).filter(v => v.kind === "file");
     if (!fileArr.length)
       return;
-
+    e.preventDefault();
     // if (fileArr.length > 1 || fileArr.length < 0) {
     //   fileArr.length > 1 && ElMessage.warning("不支持批量上传！");
     //   return;
@@ -920,7 +921,7 @@ export interface AtChatMemberOption {
   value: string
   userId: string
   username: string
-  nickName?: string
+  nickName: string
   avatar?: string
 }
 export interface AskAiRobotOption extends AtChatMemberOption {
@@ -973,3 +974,4 @@ export function navigateToGroupDetail(roomId: number) {
     replace: false,
   });
 }
+

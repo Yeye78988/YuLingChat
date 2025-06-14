@@ -10,7 +10,6 @@ const {
   src?: string
   defaultSrc?: string
   loadClass?: string
-  loadRootClass?: string
   errorRootClass?: string
   errorClass?: string
   previewSrcList?: string[]
@@ -62,6 +61,6 @@ function openPreview() {
 
 <style scoped lang="scss">
 .icon {
-  --at-apply: "block max-w-4/5 min-h-5 min-w-5 text-gray"
+  --at-apply: "block max-w-4/5 min-h-4 min-w-4 text-gray"
 }
 </style>

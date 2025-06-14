@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { ElForm, ElMention } from "element-plus";
-import ContextMenu from "@imengyu/vue3-context-menu";
+import type { ElForm } from "#components";
+import ContextMenuGlobal from "@imengyu/vue3-context-menu";
 
 const emit = defineEmits<{
   (e: "submit", newMsg: ChatMessageVO): void
@@ -10,16 +10,10 @@ const chat = useChatStore();
 const setting = useSettingStore();
 const route = useRoute();
 
-// 读取@用户列表 hook
-const { userOptions, userAtOptions, loadUser } = useLoadAtUserList();
-const { aiOptions, loadAi } = useLoadAiList();
-const isReplyAI = computed(() => chat.msgForm.content?.startsWith("/") && aiOptions.value?.length > 0);
-const isReplyAT = computed(() => chat.msgForm.content?.startsWith("@") && userOptions.value?.length > 0);
-const mentionList = computed(() => isReplyAI.value ? aiOptions.value : isReplyAT.value ? userAtOptions.value : []);
 // 表单
 const isSending = ref(false);
 const isDisabledFile = computed(() => !user?.isLogin || chat.theContact.selfExist === 0);
-const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
+const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友
 const isLord = computed(() => chat.theContact.type === RoomType.GROUP && chat.theContact.member?.role === ChatRoomRoleEnum.OWNER); // 群主
 const isSelfRoom = computed(() => chat.theContact.type === RoomType.SELFT); // 私聊
 const isAiRoom = computed(() => chat.theContact.type === RoomType.AICHAT); // 机器人
@@ -28,15 +22,53 @@ const maxContentLen = computed(() => chat.theContact.type === RoomType.AICHAT ? 
 const showGroupNoticeDialog = ref(false);
 const loadInputDone = ref(false); // 用于移动尺寸动画
 const loadInputTimer = shallowRef<NodeJS.Timeout>();
-const inputFocus = ref(false);
-
 // ref
-const inputContentRef = useTemplateRef<InstanceType<typeof ElMention>>("inputContentRef"); // 输入框
 const formRef = useTemplateRef<InstanceType<typeof ElForm>>("formRef"); // 表单
 
 // hooks
 const isDisableUpload = computed(() => isAiRoom.value || route.path !== "/");
-// Oss上传
+
+const {
+  inputFocus,
+  isReplyAI,
+  selectionRange,
+  msgInputRef,
+  focusRef,
+  // @和AI选择相关
+  showAtOptions,
+  showAiOptions,
+  selectedAtItemIndex,
+  selectedAiItemIndex,
+  optionsPosition,
+  filteredUserAtOptions,
+  filteredAiOptions,
+  userOptions,
+  aiOptions,
+  // scrollbar refs
+  atScrollbar,
+  aiScrollbar,
+  // 方法
+  loadUser,
+  loadAi,
+  updateSelectionRange,
+  clearInputContent,
+  handleInput,
+  handleKeyDown,
+  updateFormContent,
+  insertAiRobotTag,
+  insertAtUserTag,
+  resolveContentAtUsers,
+  focusAtEnd,
+  handleSelectAtUser,
+  handleSelectAiRobot,
+  getInputVaildText,
+  resetAtAndAiOptions,
+  onContextMenu,
+} = useMsgInputForm("msgInputRef", handleSubmit, {
+  atScrollbarRef: "atScrollbar",
+  aiScrollbarRef: "aiScrollbar",
+}, 160, "focusRef");
+
 const {
   imgList,
   fileList,
@@ -54,6 +86,7 @@ const {
   inputOssVideoUploadRef,
   inputOssFileUploadRef,
 } = useFileUpload({ img: "inputOssImgUploadRef", file: "inputOssFileUploadRef", video: "inputOssVideoUploadRef" }, isDisableUpload);
+
 // 录音
 const {
   isChating,
@@ -67,9 +100,25 @@ const {
   start: startAudio,
   handlePlayAudio, // 播放录音
 } = useRecording({ pressHandleRefName: "pressHandleRef", timeslice: 1000 });
+
 // computed
 const isBtnLoading = computed(() => isSending.value || isUploadImg.value || isUploadFile.value || isUploadVideo.value);
 const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOUND);
+
+
+/**
+ * 处理粘贴事件
+ */
+function handlePaste(e: ClipboardEvent) {
+  e.preventDefault();
+  // 处理纯文本粘贴
+  if (e.clipboardData) {
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  }
+  // 调用原有的粘贴处理方法（处理文件上传等）
+  onPaste(e);
+}
 
 /**
  * 发送消息
@@ -77,15 +126,23 @@ const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOU
 async function handleSubmit() {
   if (isSending.value)
     return;
-  formRef.value?.validate(async (action: boolean) => {
-    if (!action)
-      return;
-    if (chat.msgForm.msgType === MessageType.TEXT && (!chat.msgForm.content || chat.msgForm.content?.trim().length > maxContentLen.value))
-      return;
-    // 发送请求
-    await onSubmit().finally(() => {
-      isSending.value = false;
-    });
+
+  const content = getInputVaildText();
+
+  if (!content && chat.msgForm.msgType === MessageType.TEXT)
+    return;
+
+  chat.msgForm.content = content;
+
+  if (chat.msgForm.msgType === MessageType.TEXT && (!content || content.length > maxContentLen.value)) {
+    ElMessage.warning(`消息长度应在1到${maxContentLen.value}字符之间`);
+    return;
+  }
+
+  // 发送请求
+  isSending.value = true;
+  await onSubmit().finally(() => {
+    isSending.value = false;
   });
 }
 
@@ -96,10 +153,10 @@ async function onSubmit() {
       return;
 
     if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
-      const { atUidList } = resolveAtUsers(formDataTemp.content, userOptions.value);
+      const atUidList = resolveContentAtUsers(msgInputRef.value);
       if (atUidList?.length) {
-        chat.atUserList = [...atUidList];
-        formDataTemp.body.atUidList = [...new Set(atUidList)];
+        chat.atUserList = atUidList;
+        formDataTemp.body.atUidList = atUidList.map(item => item.userId);
       }
     }
 
@@ -270,18 +327,6 @@ function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
 }
 
 /**
- * 单按键触发事件
- */
-function onInputExactKey(key: "ArrowUp" | "ArrowDown") {
-  if (!setting.downUpChangeContact) {
-    return;
-  }
-  if (!chat.msgForm.content?.trim() && (key === "ArrowUp" || key === "ArrowDown")) {
-    chat.onDownUpChangeRoom(key === "ArrowDown" ? "down" : "up");
-  }
-}
-
-/**
  * 发送语音
  * @param callback 上传成功回调
  */
@@ -313,6 +358,7 @@ function resetForm() {
       atUidList: [],
     },
   };
+  clearInputContent();
   imgList.value = [];
   fileList.value = [];
   videoList.value = []; // 清空视频
@@ -327,6 +373,9 @@ function resetForm() {
   isSending.value = false;
   chat.setReplyMsg({});
   resetAudio();
+
+  // 清除@和AI选择
+  resetAtAndAiOptions();
 }
 
 /**
@@ -360,7 +409,7 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
       },
     ],
   };
-  ContextMenu.showContextMenu(opt);
+  ContextMenuGlobal.showContextMenu(opt);
 }
 
 function removeOssFile(type: OssFileType = OssFileType.IMAGE, key?: string, index: number = 0) {
@@ -371,21 +420,33 @@ function removeOssFile(type: OssFileType = OssFileType.IMAGE, key?: string, inde
     [OssFileType.SOUND]: undefined,
     [OssFileType.FONT]: undefined,
   };
-  const item = filesMap?.[type]?.value.find(f => f.key === key);
-  if (item && key)
+
+  const targetList = filesMap[type];
+  if (!targetList || !key)
+    return;
+
+  const item = targetList.value.find(f => f.key === key);
+  if (item) {
     item.subscribe.unsubscribe();
-  const keys = [key, ...(item?.children || []).map(f => f.key)];
-  keys.forEach(k => k && deleteOssFile(k, user.getToken));
+    const keys = [key, ...(item.children || []).map(f => f.key)];
+    keys.forEach(k => k && deleteOssFile(k, user.getToken));
+  }
+
+  // 重置上传组件
   ElMessage.closeAll("error");
-  inputOssFileUploadRef?.value?.resetInput?.();
-  inputOssImgUploadRef?.value?.resetInput?.();
-  inputOssVideoUploadRef?.value?.resetInput?.();
-  filesMap?.[type]?.value.splice(
-    index,
-    1,
-  );
-  if (filesMap?.[type]?.value?.length === 0) {
-    chat.msgForm.msgType = MessageType.TEXT; // 默认
+  const resetFunctions = [
+    inputOssFileUploadRef?.value?.resetInput,
+    inputOssImgUploadRef?.value?.resetInput,
+    inputOssVideoUploadRef?.value?.resetInput,
+  ];
+  resetFunctions.forEach(fn => fn?.());
+
+  // 移除文件
+  targetList.value.splice(index, 1);
+
+  // 如果列表为空，重置消息类型
+  if (targetList.value.length === 0) {
+    chat.msgForm.msgType = MessageType.TEXT;
     chat.msgForm.body.url = undefined;
   }
 }
@@ -512,11 +573,12 @@ watch(() => chat.theRoomId, (newVal, oldVal) => {
   else {
     loadInputTimer.value = setTimeout(() => {
       loadInputDone.value = true;
-    }, 400);
+    }, 300);
     return;
   }
-  if (inputContentRef.value?.input)
-    inputContentRef.value?.input?.focus(); // 聚焦
+  nextTick(() => {
+    focusAtEnd();
+  });
 }, {
   immediate: true,
 });
@@ -528,8 +590,7 @@ watch(() => chat.replyMsg?.message?.id, (val) => {
     replyMsgId: val,
   };
   nextTick(() => {
-    if (inputContentRef.value?.input)
-      inputContentRef.value?.input?.focus(); // 聚焦
+    focusAtEnd();
   });
 });
 
@@ -537,7 +598,9 @@ watch(() => chat.replyMsg?.message?.id, (val) => {
 onMounted(() => {
   // 监听快捷键
   window.addEventListener("keydown", startAudio);
-  !setting.isMobileSize && inputContentRef.value?.input?.focus(); // 聚焦
+  nextTick(() => {
+    focusAtEnd();
+  });
   // At 用户
   mitter.on(MittEventType.CHAT_AT_USER, (e) => {
     if (isReplyAI.value) {
@@ -549,49 +612,50 @@ onMounted(() => {
     const user = userOptions.value.find(u => u.userId === userId);
     if (!user)
       return ElMessage.warning("该用户不可艾特！");
+
     if (type === "add") {
-      inputContentRef.value?.input?.focus(); // 聚焦
-      if (chat?.msgForm?.content?.includes(`@${user.nickName}(#${user.username}) `))
+      // 检查是否已经存在该用户标签
+      const existingTag = msgInputRef.value?.querySelector(`[data-uid="${user.userId}"]`);
+      if (existingTag)
         return;
-      chat.msgForm.content += `@${user.nickName}(#${user.username}) `;
+
+      focusAtEnd();
+      insertAtUserTag(user);
     }
     else if (type === "remove") {
-      const atIndex = chat?.msgForm?.content?.lastIndexOf?.(`@${user.nickName}(#${user.username}) `) ?? -1;
-      if (atIndex === -1 || !chat?.msgForm?.content)
-        return;
-      chat.msgForm.content = chat.msgForm.content?.slice(0, atIndex) + chat.msgForm.content?.slice(atIndex + `@${user.nickName}(#${user.username}) `.length);
-    }
-    else if (type === "clear") {
-    //
+      // 移除指定用户的标签
+      const userTag = msgInputRef.value?.querySelector(`[data-uid="${user.userId}"]`);
+      if (userTag) {
+        userTag.remove();
+        updateFormContent();
+      }
     }
   });
+
   // / 询问ai机器人
   mitter.on(MittEventType.CAHT_ASK_AI_ROBOT, (e) => {
     const { type, payload: userId } = e;
     const robot = aiOptions.value.find(u => u.userId === userId);
     if (type === "add" && robot) {
-      if (robot) {
-        chat.msgForm.content += `/${robot.nickName}(#${robot.username}) `;
-        inputContentRef.value?.input?.focus(); // 聚焦
-      }
-    }
-    else if (type === "remove" && robot) {
-    //
-    }
-    else if (type === "clear") {
-    //
+      // 检查是否已经存在该机器人标签
+      const existingTag = msgInputRef.value?.querySelector(`[data-uid="${robot.userId}"]`);
+      if (existingTag)
+        return;
+
+      focusAtEnd();
+      insertAiRobotTag(robot);
     }
   });
+
   // 处理聚焦
   mitter.on(MittEventType.MSG_FORM, ({
     type,
-    // payload ={}
   }: MsgFormEventPlaoyload) => {
     if (type === "focus") {
-      inputContentRef.value?.input?.focus(); // 聚焦
+      focusAtEnd();
     }
     else if (type === "blur") {
-      inputContentRef.value?.input?.blur(); // 聚焦
+      msgInputRef.value?.blur();
     }
   });
 });
@@ -616,6 +680,9 @@ defineExpose({
   onClickOutside: () => {
     showMobileTools.value = false;
   },
+  focus: focusAtEnd,
+  getSelectionRange: () => selectionRange.value,
+  updateSelectionRange,
 });
 </script>
 
@@ -870,81 +937,118 @@ defineExpose({
           {{ (isChating && speechRecognition.isSupported || theAudioFile?.id) ? (audioTransfromText || '...') : `识别你的声音 🎧${speechRecognition.isSupported ? '' : '（不支持）'}` }}
         </p>
       </template>
-      <!-- 内容（文本） -->
-      <el-form-item
-        v-if="!isSoundRecordMsg"
-        prop="content"
-        class="input relative h-fit w-full"
-        style="padding: 0;margin:  0;"
-        :rules="[
-          { min: 1, max: maxContentLen, message: `长度在 1 到 ${maxContentLen} 个字符`, trigger: `change` },
-        ]"
-      >
-        <el-scrollbar max-height="32vh" wrap-class="h-full card-rounded-df " class="input relative h-fit w-full card-rounded-df">
-          <el-mention
-            v-if="loadInputDone"
-            ref="inputContentRef"
-            v-model.lazy="chat.msgForm.content"
-            :options="mentionList"
-            :prefix="isReplyAI ? ['/'] : ['@']"
-            popper-class="at-select border-default"
-            :check-is-whole="(pattern: string, value: string) => isReplyAI ? checkAiReplyWhole(chat.msgForm.content, pattern, value) : checkAtUserWhole(chat.msgForm.content, pattern, value)"
-            :rows="setting.isMobileSize ? 1 : 6"
-            :maxlength="maxContentLen"
-            :placeholder="aiOptions.length ? '输入 / 唤起AI助手' : ''"
-            :autosize="setting.isMobileSize"
-            type="textarea"
-            resize="none"
-            :class="{
-              focused: chat.msgForm.content,
-            }"
-            placement="top"
-            autofocus
-            :show-word-limit="!setting.isMobileSize"
-            whole
-            :offset="10"
-            :popper-options="{
-              placement: 'top-start',
-            }"
-            @focus="inputFocus = true"
-            @blur="inputFocus = false"
-            @paste.stop="onPaste($event)"
-            @keydown.exact.enter.stop.prevent="handleSubmit()"
-            @keydown.exact.arrow-up.stop.prevent="onInputExactKey('ArrowUp')"
-            @keydown.exact.arrow-down.stop.prevent="onInputExactKey('ArrowDown')"
-          >
-            <template #label="{ item }">
-              <div class="h-full w-9rem flex items-center pr-1" :title="item.label">
-                <CardElImage class="h-6 w-6 rounded-full border-default" :src="BaseUrlImg + item.avatar" />
-                <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
-              </div>
-            </template>
-          </el-mention>
+      <!-- 富文本输入框 -->
+      <div v-if="!isSoundRecordMsg" ref="focusRef" class="input-wrapper relative h-fit w-full">
+        <el-scrollbar
+          :max-height="setting.isMobileSize ? '50vh' : '10em'"
+          class="h-full w-full flex-1" wrap-class="h-full"
+          view-class="h-full"
+        >
+          <div
+            id="message-input"
+            ref="msgInputRef"
+            class="rich-editor"
+            :class="{ focused: inputFocus }"
+            contenteditable
+            spellcheck="false"
+            :data-placeholder="!setting.isMobileSize && aiOptions.length ? '输入 / 唤起AI助手' : ''"
+            @input="handleInput"
+            @paste="handlePaste"
+            @keydown="handleKeyDown"
+            @keyup="updateSelectionRange"
+            @click="updateSelectionRange"
+            @contextmenu.self="onContextMenu"
+            @compositionend="updateSelectionRange"
+          />
         </el-scrollbar>
+        <!-- @用户选择框 -->
+        <div
+          v-if="showAtOptions && filteredUserAtOptions.length > 0"
+          class="at-options"
+          :style="{
+            left: `${optionsPosition.left}px`,
+            top: `${optionsPosition.top}px`,
+            width: `${optionsPosition.width}px`,
+          }"
+        >
+          <ListVirtualScrollList
+            ref="atScrollbar"
+            :items="filteredUserAtOptions"
+            :selected-index="selectedAtItemIndex"
+            :item-height="32"
+            max-height="12rem"
+            wrap-class="px-1.5"
+            class="py-1.5"
+            item-class="at-item"
+            active-class="active"
+            @item-click="(item) => handleSelectAtUser(item)"
+            @item-hover="(item, index) => selectedAtItemIndex = index"
+          >
+            <template #default="{ item }">
+              <CardAvatar class="avatar" :src="BaseUrlImg + item.avatar" />
+              <span class="name">{{ item.nickName }}</span>
+            </template>
+          </ListVirtualScrollList>
+        </div>
+        <!-- AI机器人选择框 -->
+        <div
+          v-if="showAiOptions && filteredAiOptions.length > 0"
+          class="ai-options"
+          :style="{
+            left: `${optionsPosition.left}px`,
+            top: `${optionsPosition.top}px`,
+            width: `${optionsPosition.width}px`,
+          }"
+        >
+          <ListVirtualScrollList
+            ref="aiScrollbar"
+            :items="filteredAiOptions"
+            :item-height="32"
+            :selected-index="selectedAiItemIndex"
+            item-class="ai-item"
+            active-class="active"
+            max-height="12rem"
+            wrap-class="px-1.5"
+            class-name="py-1.5"
+            @item-click="handleSelectAiRobot"
+            @item-hover="(item, index) => selectedAiItemIndex = index"
+          >
+            <template #default="{ item }">
+              <CardAvatar class="avatar" :src="BaseUrlImg + item.avatar" />
+              <span class="name">{{ item.nickName }}</span>
+            </template>
+          </ListVirtualScrollList>
+        </div>
+
         <BtnElButton
           v-if="setting.isMobileSize"
           :disabled="!user.isLogin || isSending || isNotExistOrNorFriend"
           type="primary"
           style="height: 2.2rem !important;"
-          class="mb-1px ml-2 mr-2 mt-a w-4.5rem"
+          class="mb-1px ml-2 mr-2 w-4.5rem"
           :loading="isBtnLoading"
           @click="handleSubmit()"
         >
           发送
         </BtnElButton>
-      </el-form-item>
-      <!-- 发送 -->
+      </div>
+
+      <!-- 发送按钮 -->
       <div
-        v-if="!setting.isMobileSize"
+        v-if="!setting.isMobileSize && !isSoundRecordMsg"
         class="hidden items-end p-1 pt-0 sm:flex"
       >
         <div class="tip ml-a hidden sm:block text-mini">
-          Enter发送, Shift+Enter换行
+          <p>
+            <i i-solar:plain-2-line-duotone mr-1.8 p-1.6 />Enter
+          </p>
+          <p mt-1>
+            <i i-solar:reply-2-bold-duotone mr-1 p-2 />Shift+Enter
+          </p>
         </div>
         <BtnElButton
-          class="group ml-a overflow-hidden tracking-0.2em shadow sm:ml-2"
+          class="group ml-a overflow-hidden card-rounded-df tracking-0.2em shadow sm:ml-2"
           type="primary"
-          round
           :disable="isNotExistOrNorFriend"
           :icon-class="isSending || isNotExistOrNorFriend ? '' : 'i-solar:chat-round-dots-linear mr-1'"
           size="small"
@@ -996,10 +1100,10 @@ defineExpose({
 
 <style lang="scss" scoped>
 .form-contain {
-    --at-apply: "card-bg-color sm:(!bg-transparent h-62) relative flex flex-col justify-between overflow-hidden pt-1 px-2 pb-4 sm:pb-2";
-    box-shadow: rgba(0, 0, 0, 0.04) 0px -4px 16px;
-    .tip {
-    --at-apply: "op-0";
+  --at-apply: "card-bg-color sm:(!bg-transparent h-62) relative flex flex-col justify-between pt-1 px-2 pb-4 sm:pb-2";
+  box-shadow: rgba(0, 0, 0, 0.04) 0px -4px 16px;
+  .tip {
+    --at-apply: "op-0 transition-100";
   }
   &:hover {
     .tip {
@@ -1007,148 +1111,79 @@ defineExpose({
     }
   }
 }
-.at-select {
-  :deep(.el-select__wrapper),
-  :deep(.el-select-v2__input-wrapper),
-  :deep(.el-input__wrapper) {
-    box-shadow: none !important;
-    background-color: transparent;
-    padding: 0;
-  }
-  :deep(.el-form-item__error) {
-    padding-left: 1rem;
-  }
-}
-:deep(.el-form-item__content) {
-  padding: 0;
-}
 
-.input {
-  --at-apply: "flex-1";
-  :deep(.el-form-item__content) {
-    --at-apply: "mt-2 sm:mt-0";
-    display: flex;
-    .el-mention {
-      width: auto;
-      flex: 1;
-      height: 100%;
+.input-wrapper {
+  --at-apply: "flex-1 mt-2 sm:mt-0";
+  display: flex;
+  position: relative;
+
+  .rich-editor {
+    --at-apply: "text-0.9em w-full h-full min-h-32px p-2 outline-none rounded text-color bg-color-3 sm:!bg-transparent";
+    caret-color: var(--el-color-primary);
+    word-break: break-word;
+    white-space: pre-wrap;
+
+    &:empty:before {
+      content: attr(data-placeholder);
+      --at-apply: "text-small ";
+      pointer-events: none;
+    }
+
+    &:hover:before {
+      --at-apply: "op-100";
+    }
+    // @用户标签样式
+    :deep(.at-user-tag),
+    // AI机器人标签样式
+    :deep(.ai-robot-tag) {
+      --at-apply: "";
+
+      .at-user-inner {
+        --at-apply: "inline text-0.9em pl-1 text-theme-primary dark:text-theme-info font-500";
+      }
+      .ai-robot-inner {
+        --at-apply: "inline pr-2 pl-1 mr-1 py-1 cursor-pointer bg-color border-default-2-hover select-none text-0.8em card-rounded-df";
+      }
+      .ai-robot-inner {
+        --at-apply: "text-";
+      }
+      .ai-robot-inner::before {
+        content: "";
+        --at-apply: "p-2 mr-1 text-theme-primary i-ri:robot-2-line";
+      }
     }
   }
-  :deep(.el-input__count) {
-    left: 0.8em;
-    bottom: -2em;
-    width: fit-content;
-    background-color: transparent;
-    transition: opacity 0.2s;
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
+    transform: translateX(-50%) translateY(5px);
   }
-  :deep(.el-text),
-  :deep(.el-textarea) {
-    --at-apply: "h-full flex-1";
-
-    .el-input__inner,
-    .el-textarea__inner {
-      resize: none;
-      height: 100%;
-      box-shadow: none !important;
-      height: 100%;
-      background-color: transparent;
-      caret-color: var(--el-color-primary);
-      font-size: 1rem;
-      &:hover + .el-input__count  {
-        opacity: 1;
-      }
-      &::-webkit-input-placeholder {
-        font-size: 0.9em;
-        line-height: 1.7em;
-      }
-    }
-  }
-  :deep(.el-input) {
-
-    --at-apply: "p-2";
-    .el-input__wrapper {
-      box-shadow: none !important;
-      outline: none !important;
-      --at-apply: "bg-color-2";
-    }
-    .el-input__suffix {
-      display: none !important;
-    }
-    .el-input-group__append {
-      border: none;
-      outline: none;
-      box-shadow: none;
-      --at-apply: "w-5em card-rounded-df px-4 ml-2 text-center bg-[var(--el-color-primary)] text-white text-center ";
-    }
-  }
-
-  // 移动端尺寸下scss
-  @media (max-width: 768px) {
-    :deep(.el-form-item__content) {
-      .el-input__count {
-        left: auto;
-        right: 1.2em;
-        bottom: 2rem;
-      }
-      .el-textarea {
-        padding-left: 0.6em;
-        .el-textarea__inner {
-          min-height: 2.2rem !important;
-          --at-apply: "bg-light-900 dark:bg-[#111111] shadow-lg shadow-inset";
-        }
-      }
-    }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
-.ai-select {
-  :deep(.el-select__wrapper) {
-    --at-apply: "rounded-4 flex-row-c-c pr-3 pl-2 h-7 min-w-9rem w-fit !border-default !sm:border-(1px solid transparent) sm:!bg-transparent !shadow-none";
-    &:hover,
-    &.is-hoving,
-    &.is-focused {
-      --at-apply: "!border-default";
-    }
-    .el-select__placeholder {
-      --at-apply: "!text-color tracking-0.1em op-80";
-    }
-    .el-tag {
-      --at-apply: "text-light rounded-4 !h-fit min-h-5 w-5 p-0 bg-none border-none cursor-pointer";
-      .el-tag__close {
-        --at-apply: "hidden";
-      }
-    }
-    .in-tooltip {
-      --at-apply: "h-fit";
-    }
-    .el-select__tags-text {
-      --at-apply: "flex-row-c-c";
-    }
-    .el-select__selected-item {
-      animation: latter-slice-left 0.3s both;
-      &.el-select__placeholder {
-        animation: none;
-      }
-    }
-  }
-  .robot-select-icon {
-    --at-apply: "text-color p-2.4 i-ri:robot-2-line";
-  }
+.at-options, .ai-options {
+  --at-apply: "absolute z-99 bg-color border-default rounded-3 -translate-y-full w-160px";
+  box-shadow: var(--el-box-shadow-light);
 
-  &.selected-items {
-    :deep(.el-select__wrapper) {
-      --at-apply: "!border-default";
-      .robot-select-icon {
-        --at-apply: "bg-theme-primary";
-      }
-      .el-select__prefix {
-        --at-apply: "relative";
-        &::after {
-          content: "";
-          --at-apply: "absolute -z-1 inset-0 rounded-full bg-theme-primary animate-ping";
-        }
-      }
+  :deep(.at-item),
+  :deep(.ai-item) {
+    --at-apply: "flex items-center px-2 py-1 cursor-pointer hover:bg-color-2 card-rounded-df";
+
+    .avatar {
+      --at-apply: "h-6 w-6 rounded-full border-default";
+    }
+
+    .name {
+      --at-apply: "ml-2 flex-1 truncate text-xs";
+    }
+
+    &.active {
+      --at-apply: "bg-color-2";
     }
   }
 }
@@ -1232,5 +1267,56 @@ defineExpose({
 .grid-container {
   height: auto;
   transform-origin: top;
+}
+
+.ai-select {
+  :deep(.el-select__wrapper) {
+    --at-apply: "rounded-4 flex-row-c-c pr-3 pl-2 h-7 min-w-9rem w-fit !border-default !sm:border-(1px solid transparent) sm:!bg-transparent !shadow-none";
+    &:hover,
+    &.is-hoving,
+    &.is-focused {
+      --at-apply: "!border-default";
+    }
+    .el-select__placeholder {
+      --at-apply: "!text-color tracking-0.1em op-80";
+    }
+    .el-tag {
+      --at-apply: "text-light rounded-4 !h-fit min-h-5 w-5 p-0 bg-none border-none cursor-pointer";
+      .el-tag__close {
+        --at-apply: "hidden";
+      }
+    }
+    .in-tooltip {
+      --at-apply: "h-fit";
+    }
+    .el-select__tags-text {
+      --at-apply: "flex-row-c-c";
+    }
+    .el-select__selected-item {
+      animation: latter-slice-left 0.3s both;
+      &.el-select__placeholder {
+        animation: none;
+      }
+    }
+  }
+  .robot-select-icon {
+    --at-apply: "text-color p-2.4 i-ri:robot-2-line";
+  }
+
+  &.selected-items {
+    :deep(.el-select__wrapper) {
+      --at-apply: "!border-default";
+      .robot-select-icon {
+        --at-apply: "bg-theme-primary";
+      }
+      .el-select__prefix {
+        --at-apply: "relative";
+        &::after {
+          content: "";
+          --at-apply: "absolute -z-1 inset-0 rounded-full bg-theme-primary animate-ping";
+        }
+      }
+    }
+  }
 }
 </style>

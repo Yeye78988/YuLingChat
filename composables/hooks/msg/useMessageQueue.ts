@@ -286,6 +286,39 @@ export function useMessageQueue() {
       },
     });
   };
+  // 删除未发送的消息
+  const deleteUnSendMessage = (messageId: any) => {
+    const item = queueManager.get(messageId);
+    if (!item) {
+      return;
+    }
+
+    // 只能删除未发送的消息（PENDING 或 ERROR 状态）
+    if (item.status === MessageSendStatus.SENDING || item.status === MessageSendStatus.SUCCESS) {
+      return;
+    }
+
+    // 从队列中移除
+    queueManager.remove(messageId);
+
+    // 从消息列表中删除
+    const chat = useChatStore();
+    const roomId = item.tempMsg?.message.roomId;
+    if (roomId && chat.contactMap[roomId]) {
+      const contact = chat.contactMap[roomId];
+      const msgIndex = contact.msgIds.indexOf(messageId);
+      if (msgIndex !== -1) {
+        contact.msgIds.splice(msgIndex, 1);
+      }
+      delete contact.msgMap[messageId];
+    }
+
+    // 触发删除事件
+    mitter.emit(MittEventType.MESSAGE_QUEUE, {
+      type: "delete",
+      payload: { queueItem: item },
+    });
+  };
 
   // 清空消息队列
   const clearMessageQueue = () => {
@@ -323,6 +356,7 @@ export function useMessageQueue() {
     resolveQueueItem,
     processMessageQueue,
     retryMessage,
+    deleteUnSendMessage,
     clearMessageQueue,
     msgBuilder,
   };

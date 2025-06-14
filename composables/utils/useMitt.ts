@@ -86,7 +86,7 @@ export interface MessageQueueData {
   msg?: ChatMessageVO;
 }
 
-export type MessageQueueType = "add" | "success" | "error" | "retry" | "clear";
+export type MessageQueueType = "add" | "success" | "error" | "retry" | "clear" | "delete" | "update";
 export interface MessageQueuePayload {
   type: MessageQueueType,
   payload?: MessageQueueData

@@ -123,6 +123,7 @@ export const useChatStore = defineStore(
       resolveQueueItem,
       processMessageQueue,
       retryMessage,
+      deleteUnSendMessage,
       clearMessageQueue,
       msgBuilder,
     } = useMessageQueue();
@@ -156,7 +157,17 @@ export const useChatStore = defineStore(
           appendMsg(msg); // 保证顺序
         }
       }
-      else if (type === "error") { // 消息发送失败
+      else if (type === "delete") { // 消息删除
+      //   if (!queueItem?.id) return;
+      //   // 删除消息
+      //   const roomId = queueItem.formData.roomId;
+      //   if (roomId) {
+      //       const contact = contactMap.value[roomId];
+      //       if (contact && contact.msgMap[queueItem.id]) {
+      //         // 删除消息
+      //         delete contact.msgMap[queueItem.id];
+      //       }
+      //     }
       }
     });
 
@@ -507,7 +518,7 @@ export const useChatStore = defineStore(
      * @param roomId 房间id
      * @param successCallBack
      */
-    function deleteContactConfirm(roomId: number, successCallBack: () => void) {
+    function deleteContactConfirm(roomId: number, successCallBack?: () => void) {
       ElMessageBox.confirm("是否删除该聊天（非聊天记录）？", {
         title: "提示",
         center: true,
@@ -1017,6 +1028,7 @@ export const useChatStore = defineStore(
       addToMessageQueue,
       processMessageQueue,
       retryMessage,
+      deleteUnSendMessage,
       clearMessageQueue,
       msgBuilder,
 
