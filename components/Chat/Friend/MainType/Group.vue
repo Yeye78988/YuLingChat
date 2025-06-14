@@ -58,9 +58,9 @@ const getRoleText = computed(() => room.value.role !== undefined ? chatRoomRoleT
       <div flex flex-col gap-1 py-1>
         <strong h-1.2em truncate text-1.2rem leading-1em>{{ room.groupName }}</strong>
         <p mt-a truncate text-xs text-color>
-          在线：
+          成员：
           <span class="content" :title="getCreateTime">
-            {{ room.onlineNum || 0 }}人
+            <span class="text-theme-info">{{ room.onlineNum || 0 }}</span> / {{ room.hotFlag === isTrue.TRUE ? '∞' : (room.allUserNum || 0) }}
           </span>
         </p>
         <p truncate text-mini>

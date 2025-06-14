@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { OssFile } from "@/composables/api/res";
 import type { InputHTMLAttributes } from "vue";
+import type { OssFile } from "@/composables/api/res";
+import * as qiniu from "qiniu-js";
 import { deleteOssFile, getOssErrorCode, getResToken, OssFileType, uploadOssFileSe } from "@/composables/api/res";
 import { StatusCode } from "@/types/result";
-import * as qiniu from "qiniu-js";
 
 const {
   limit = 1,

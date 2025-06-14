@@ -5,6 +5,7 @@ import ContextMenuGlobal from "@imengyu/vue3-context-menu";
 const emit = defineEmits<{
   (e: "submit", newMsg: ChatMessageVO): void
 }>();
+const MAX_SEND_IMG_COUNT = 9;
 const user = useUserStore();
 const chat = useChatStore();
 const setting = useSettingStore();
@@ -46,8 +47,7 @@ const {
   aiOptions,
   // scrollbar refs
   atScrollbar,
-  aiScrollbar,
-  // 方法
+  aiScrollbar, // 方法
   loadUser,
   loadAi,
   updateSelectionRange,
@@ -57,6 +57,11 @@ const {
   updateFormContent,
   insertAiRobotTag,
   insertAtUserTag,
+  getImageFiles,
+  clearImages,
+  handlePaste,
+  handleDrop,
+  handleDragOver,
   resolveContentAtUsers,
   focusAtEnd,
   handleSelectAtUser,
@@ -77,10 +82,11 @@ const {
   isUploadFile,
   isUploadVideo,
   isDragDropOver,
+  uploadFile,
   onSubmitImg,
   onSubmitFile,
   onSubmitVideo,
-  onPaste,
+  // onPaste: onPasteImg,
   showVideoDialog,
   inputOssImgUploadRef,
   inputOssVideoUploadRef,
@@ -107,17 +113,14 @@ const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOU
 
 
 /**
- * 处理粘贴事件
+ * 处理粘贴事件 - 支持图片粘贴
  */
-function handlePaste(e: ClipboardEvent) {
-  e.preventDefault();
-  // 处理纯文本粘贴
-  if (e.clipboardData) {
-    const text = e.clipboardData.getData("text/plain");
-    document.execCommand("insertText", false, text);
-  }
-  // 调用原有的粘贴处理方法（处理文件上传等）
-  onPaste(e);
+async function handlePasteEvent(e: ClipboardEvent) {
+  // 使用 hook 中的增强粘贴处理
+  await handlePaste(e);
+
+  // 如果需要，可以继续调用原有的文件上传处理
+  // onPaste(e);
 }
 
 /**
@@ -129,13 +132,25 @@ async function handleSubmit() {
 
   const content = getInputVaildText();
 
-  if (!content && chat.msgForm.msgType === MessageType.TEXT)
+  // 检查编辑器中是否有图片需要处理
+  const imageFiles = getImageFiles();
+  if (!content && chat.msgForm.msgType === MessageType.TEXT && imageFiles.length === 0)
     return;
 
   chat.msgForm.content = content;
 
   if (chat.msgForm.msgType === MessageType.TEXT && (!content || content.length > maxContentLen.value)) {
-    ElMessage.warning(`消息长度应在1到${maxContentLen.value}字符之间`);
+    ElMessage.warning(`消息长度应小于${maxContentLen.value}字符！`);
+    return;
+  }
+
+  // 如果有图片，先发送图片
+  if (imageFiles.length > 0) {
+    if (imageFiles.length > MAX_SEND_IMG_COUNT) {
+      ElMessage.warning(`最多只能发送${MAX_SEND_IMG_COUNT}张图片！`);
+      return;
+    }
+    await handleImageSubmit(imageFiles);
     return;
   }
 
@@ -144,6 +159,31 @@ async function handleSubmit() {
   await onSubmit().finally(() => {
     isSending.value = false;
   });
+}
+
+/**
+ * 处理图片发送
+ */
+async function handleImageSubmit(files: File[]) {
+  try {
+    isSending.value = true;
+    // 上传每一张图片
+    for (const file of files) {
+      await uploadFile("image", file);
+    }
+    await onSubmit();
+
+    // 清空编辑器
+    clearInputContent();
+    clearImages();
+  }
+  catch (error) {
+    console.error("发送图片失败:", error);
+    ElMessage.error("发送图片失败");
+  }
+  finally {
+    isSending.value = false;
+  }
 }
 
 async function onSubmit() {
@@ -359,6 +399,7 @@ function resetForm() {
     },
   };
   clearInputContent();
+  clearImages(); // 清除编辑器中的图片
   imgList.value = [];
   fileList.value = [];
   videoList.value = []; // 清空视频
@@ -713,7 +754,7 @@ defineExpose({
     </Teleport>
     <!-- 预览 -->
     <ChatMsgAttachview
-      :img-list="imgList"
+      :img-list="[]"
       :video-list="videoList"
       :file-list="fileList"
       :reply-msg="chat.replyMsg"
@@ -940,8 +981,9 @@ defineExpose({
       <!-- 富文本输入框 -->
       <div v-if="!isSoundRecordMsg" ref="focusRef" class="input-wrapper relative h-fit w-full">
         <el-scrollbar
-          :max-height="setting.isMobileSize ? '50vh' : '10em'"
-          class="h-full w-full flex-1" wrap-class="h-full"
+          :max-height="setting.isMobileSize ? (showMobileTools ? '2.2rem' : '30vh') : '10em'"
+          class="h-full w-full flex-1"
+          wrap-class="h-full transition-max-height rounded bg-color-3 sm:(!bg-transparent rounded-0)"
           view-class="h-full"
         >
           <div
@@ -953,7 +995,9 @@ defineExpose({
             spellcheck="false"
             :data-placeholder="!setting.isMobileSize && aiOptions.length ? '输入 / 唤起AI助手' : ''"
             @input="handleInput"
-            @paste="handlePaste"
+            @paste="handlePasteEvent"
+            @drop="handleDrop"
+            @dragover="handleDragOver"
             @keydown="handleKeyDown"
             @keyup="updateSelectionRange"
             @click="updateSelectionRange"
@@ -1025,7 +1069,7 @@ defineExpose({
           :disabled="!user.isLogin || isSending || isNotExistOrNorFriend"
           type="primary"
           style="height: 2.2rem !important;"
-          class="mb-1px ml-2 mr-2 w-4.5rem"
+          class="ml-2 mr-2 mt-a w-4.4rem"
           :loading="isBtnLoading"
           @click="handleSubmit()"
         >
@@ -1118,7 +1162,7 @@ defineExpose({
   position: relative;
 
   .rich-editor {
-    --at-apply: "text-0.9em w-full h-full min-h-32px p-2 outline-none rounded text-color bg-color-3 sm:!bg-transparent";
+    --at-apply: "text-0.9em w-full h-full min-h-36px p-2 outline-none text-color ";
     caret-color: var(--el-color-primary);
     word-break: break-word;
     white-space: pre-wrap;
@@ -1132,7 +1176,7 @@ defineExpose({
     &:hover:before {
       --at-apply: "op-100";
     }
-    // @用户标签样式
+     // @用户标签样式
     :deep(.at-user-tag),
     // AI机器人标签样式
     :deep(.ai-robot-tag) {
@@ -1150,6 +1194,29 @@ defineExpose({
       .ai-robot-inner::before {
         content: "";
         --at-apply: "p-2 mr-1 text-theme-primary i-ri:robot-2-line";
+      }
+    }
+
+    // 图片容器样式
+    :deep(.image-container) {
+      --at-apply: "inline-block relative m-1";
+
+      .inserted-image {
+        --at-apply: "block hover:shadow-sm transition-200 rounded-1 border-default-2";
+      }
+      .image-delete-btn {
+        --at-apply: "absolute -top-2 -right-2 w-5 h-5 text-xs bg-theme-danger text-white rounded-full cursor-pointer flex-row-c-c z-10 sm:opacity-0 transition-all duration-200";
+        &:before {
+          content: "";
+          --at-apply: "i-carbon:close";
+        }
+
+        &:hover {
+          --at-apply:  "scale-110";
+        }
+      }
+      &:hover .image-delete-btn {
+        --at-apply: "opacity-100";
       }
     }
   }

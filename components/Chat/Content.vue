@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { ChatMsgForm, ChatMsgFormV2 } from "#components";
-
 defineProps<{
   roomId?: string
 }>();
@@ -22,7 +20,7 @@ watch(
     <!-- 消息列表 -->
     <ChatMessageList @click="msgFormRef?.onClickOutside()" />
     <!-- 发送 -->
-    <component :is="setting.isMobileSize ? ChatMsgForm : ChatMsgFormV2" ref="msgFormRef" class="border-default-2-t" />
+    <ChatMsgFormV2 ref="msgFormRef" class="border-default-2-t" />
     <!-- 在线人数 -->
     <Transition name="fade-lr" mode="out-in">
       <div v-if="setting.isOpenGroupMember" class="member-popup">
