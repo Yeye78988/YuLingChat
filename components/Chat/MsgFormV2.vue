@@ -81,7 +81,6 @@ const {
   resetOptions,
   handleSelectAtUser,
   handleSelectAiRobot,
-  scrollToSelectedItem,
 
   // 事件处理器
   handleInput,
@@ -210,15 +209,13 @@ async function handlePasteEvent(e: ClipboardEvent) {
   if (!clipboardData)
     return;
 
-  if (isDisableUpload?.value)
-    return false;
-    // 判断粘贴上传
+  // 判断粘贴上传
   if (!e.clipboardData?.items?.length) {
     return false;
   }
   // 拿到粘贴板上的 image file 对象
   const fileArr = Array.from(e.clipboardData.items).filter(v => v.kind === "file");
-  if (!fileArr.length) { // 没有图片，处理文本
+  if (!fileArr.length) { // 处理文本
     const text = clipboardData.getData("text/plain");
     if (text) {
       document.execCommand("insertText", false, text);
@@ -226,7 +223,10 @@ async function handlePasteEvent(e: ClipboardEvent) {
     }
     return false;
   }
-  e.preventDefault();
+
+  if (isDisableUpload?.value) // 处理文件
+    return false;
+
   for (let i = 0; i < fileArr.length; i++) {
     const item = fileArr[i];
     if (!item || item.kind !== "file") {
@@ -1348,7 +1348,7 @@ defineExpose({
 
     &:empty:before {
       content: attr(data-placeholder);
-      --at-apply: "text-small ";
+      --at-apply: "text-small";
       pointer-events: none;
     }
 
