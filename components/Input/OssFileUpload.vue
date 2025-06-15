@@ -24,7 +24,8 @@ const {
   accept = "image/*",
   acceptDesc = ["image/jpeg", "image/png", "image/bmp", "image/webp", "image/jpg", "image/tiff", "image/tif", "image/ico", "image/x-icon"],
   uploadType = OssFileType.IMAGE,
-  uploadQuality = 0.4,
+  uploadQuality = undefined,
+  autoUpload = true,
   preview = true,
 } = defineProps<Props>();
 // emit
@@ -32,6 +33,7 @@ const emit = defineEmits<{
   (e: "submit", newKey: string, pathList: string[], fileList: OssFile[]): any
   (e: "errorMsg", errorStr: string): any
   (e: "update:modelValue", date: OssFile[]): any
+  (e: "onChange", files: File[]): any
 }>();
 
 interface Props {
@@ -44,7 +46,8 @@ interface Props {
   preview?: boolean
   disable?: boolean
   isAnimate?: boolean
-  uploadQuality?: number
+  uploadQuality?: number | undefined
+  autoUpload?: boolean
   inputProps?: InputHTMLAttributes
   /**
    * 文件类型
@@ -65,6 +68,40 @@ interface Props {
 }
 
 const user = useUserStore();
+
+/**
+ * 根据文件大小和限制自动计算图片质量
+ * @param fileSize 文件大小（字节）
+ * @param maxSize 最大文件大小限制（字节）
+ * @returns 计算出的图片质量（0-1之间）
+ */
+function calculateAutoQuality(fileSize: number, maxSize?: number): number {
+  // 如果没有设置大小限制，使用默认质量
+  if (!maxSize) {
+    return 0.6;
+  }
+
+  // 如果文件已经小于限制的80%，使用较高质量
+  if (fileSize <= maxSize * 0.8) {
+    return 0.8;
+  }
+
+  // 如果文件大小接近限制，需要更低的质量
+  const ratio = fileSize / maxSize;
+
+  if (ratio <= 1) {
+    // 线性插值：当文件大小从80%增长到100%时，质量从0.8降到0.4
+    return Math.max(0.4, 0.8 - (ratio - 0.8) * 2);
+  }
+  else if (ratio <= 1.5) {
+    // 文件超过限制但不太多，使用较低质量
+    return Math.max(0.2, 0.4 - (ratio - 1) * 0.4);
+  }
+  else {
+    // 文件明显超过限制，使用最低质量
+    return 0.1;
+  }
+}
 
 // 已上传文件列表 (public)
 const fileList = ref<OssFile[]>(modelValue || []);
@@ -95,6 +132,14 @@ async function hangdleChange(e: Event) {
   const t = e.target as HTMLInputElement;
   if (!t.files?.length)
     return;
+
+  // 如果不自动上传，只触发onChange事件
+  if (!autoUpload) {
+    const files = Array.from(t.files);
+    emit("onChange", files);
+    return;
+  }
+
   // 单文件
   if (limit === 1) {
     if (fileList.value.length)
@@ -106,7 +151,7 @@ async function hangdleChange(e: Event) {
       percent: 0,
       file: t.files[0],
     };
-    onUpload(ossFile);
+    await onUpload(ossFile);
   }
   else {
     // 多文件
@@ -128,9 +173,9 @@ async function hangdleChange(e: Event) {
         file: p,
       };
     }) as OssFile[];
-    for (const p of data) {
-      onUpload(p);
-    }
+
+    // 并发上传多个文件
+    await Promise.allSettled(data.map(p => onUpload(p)));
   }
 }
 
@@ -138,14 +183,14 @@ async function hangdleChange(e: Event) {
  * 上传文件
  * @param ossFile 文件对象
  */
-async function onUpload(ossFile: OssFile) {
+async function onUpload(ossFile: OssFile): Promise<boolean> {
   // 文件校验
   if (fileList.value.length + 1 > limit) { // 限制上传数量
     error.value = `最多只能上传${limit}个文件`;
     emit("errorMsg", error.value);
     await nextTick();
     resetInput();
-    return;
+    return false;
   }
   // 保留其他错误检查
   error.value = "";
@@ -155,13 +200,13 @@ async function onUpload(ossFile: OssFile) {
       error.value = `文件大小不能超过${formatFileSize(size)}`;
       emit("errorMsg", error.value);
       resetInput();
-      return;
+      return false;
     }
     if (minSize !== undefined && ossFile?.file?.size && ossFile?.file?.size < minSize) {
       error.value = `文件大小不能小于${formatFileSize(minSize)}`;
       emit("errorMsg", error.value);
       resetInput();
-      return;
+      return false;
     }
     else {
       error.value = "";
@@ -173,16 +218,21 @@ async function onUpload(ossFile: OssFile) {
   if (upToken.code !== StatusCode.SUCCESS) {
     error.value = upToken.message;
     ossFile.status = "warning";
-    return;
-  }
-  // 保存上传凭证
+    return false;
+  } // 保存上传凭证
   ossFile.key = upToken.data.key;
+
+  // 计算图片质量：如果uploadQuality为undefined则自动计算，否则使用指定值
+  const calculatedQuality = uploadQuality !== undefined
+    ? uploadQuality
+    : calculateAutoQuality(ossFile.file?.size || 0, size);
+
   const options = {
-    quality: uploadQuality || 0.6,
+    quality: calculatedQuality,
     noCompressIfLarger: true,
   };
   if (!ossFile?.file)
-    return;
+    return false;
 
   // ------------添加到队列-----------
   // 上传中 只能压缩图片
@@ -199,7 +249,8 @@ async function onUpload(ossFile: OssFile) {
       };
     });
 
-    qiniu.compressImage(ossFile?.file, options).then((res) => {
+    try {
+      const res = await qiniu.compressImage(ossFile?.file, options);
       // 压缩后检查文件大小
       const compressedFile = res.dist as File;
 
@@ -207,36 +258,38 @@ async function onUpload(ossFile: OssFile) {
         error.value = `文件大小不能超过${formatFileSize(size)}`;
         emit("errorMsg", error.value);
         resetInput();
-        return;
+        return false;
       }
       if (minSize !== undefined && compressedFile.size < minSize) {
         error.value = `文件大小不能小于${formatFileSize(minSize)}`;
         emit("errorMsg", error.value);
         resetInput();
-        return;
+        return false;
       }
 
       // 如果通过大小检查，继续上传
-      qiniuUpload(compressedFile, ossFile?.key || "", upToken.data.uploadToken, ossFile);
-    }).catch((e) => {
+      fileList.value.push(ossFile);
+      return await qiniuUploadPromise(compressedFile, ossFile?.key || "", upToken.data.uploadToken, ossFile);
+    }
+    catch (e) {
       console.warn(e);
       ossFile.status = "warning";
       error.value = "图片压缩失败，请稍后再试！";
       emit("errorMsg", error.value);
-    }).finally(() => {
-      if (!error.value)
-        fileList.value.push(ossFile);
-    });
+      throw e;
+    }
   }
   else if (uploadType === OssFileType.VIDEO && ossFile?.file) { // 视频先获取一帧，作为封面
-    // 2. 获取封面
-    generateVideoThumbnail(ossFile.file, { quality: 0.15, mimeType: "image/png" }).then(async ({
-      blob,
-      width,
-      height,
-      duration,
-      size,
-    }: VideoFileInfo) => {
+    try {
+      // 2. 获取封面
+      const {
+        blob,
+        width,
+        height,
+        duration,
+        size,
+      }: VideoFileInfo = await generateVideoThumbnail(ossFile.file, { quality: 0.15, mimeType: "image/png" });
+
       const coverUrl = URL.createObjectURL(blob);
       const coverFileRaw = new File([blob], "cover.png", { type: blob.type }) as File;
       const coverFile = ref<OssFile>({
@@ -253,36 +306,81 @@ async function onUpload(ossFile: OssFile) {
       ossFile.children = [ // 封面复制
         coverFile.value,
       ];
+
       // 1. 先上传封面图片
       const coverRes = await getResToken(OssFileType.IMAGE, user.getToken);
       fileList.value.push(ossFile);
       if (coverRes.code !== StatusCode.SUCCESS || !ossFile.file) {
         error.value = coverRes.message;
         ossFile.status = "warning";
-        return;
+        return false;
       }
       coverFile.value.key = coverRes.data.key;
+
       // 图片文件上传 压缩
       console.log(formatFileSize(blob.size));
-      qiniuUpload(coverFileRaw as File, coverFile.value.key as string, coverRes.data.uploadToken, coverFile.value, false, (theCover) => {
+
+      // 等待封面上传完成
+      await qiniuUploadPromise(coverFileRaw as File, coverFile.value.key as string, coverRes.data.uploadToken, coverFile.value, false, (theCover) => {
         if (ossFile.status === "success") {
           ossFile.status = theCover.status;
         }
       });
+
       // 2. 上传视频
-      qiniuUpload(ossFile.file, ossFile?.key || "", upToken.data.uploadToken, ossFile);
-    }).catch((e) => {
+      return await qiniuUploadPromise(ossFile.file, ossFile?.key || "", upToken.data.uploadToken, ossFile);
+    }
+    catch (e) {
       console.warn(e);
       ossFile.status = "warning";
       error.value = "视频封面获取失败，请稍后再试！";
       emit("errorMsg", error.value);
-    });
+      throw e;
+    }
   }
   else {
-    qiniuUpload(ossFile.file, ossFile?.key || "", upToken.data.uploadToken, ossFile);
     fileList.value.push(ossFile);
+    return await qiniuUploadPromise(ossFile.file, ossFile?.key || "", upToken.data.uploadToken, ossFile);
   }
 }
+// Promise 包装的上传函数
+function qiniuUploadPromise(dist: File, key: string, token: string, file: OssFile, isPush = true, done?: (theFile: OssFile) => void): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const observable = uploadOssFileSe(dist, key, token);
+    const subscribe = observable.subscribe({
+      next(res) {
+        const current = fileList.value.find(p => p.key === key) || file;
+        current.percent = +(res.total.percent?.toFixed?.(2) || 0);
+      },
+      error(e) {
+        const theFile = fileList.value.find(p => p.key === key) || file;
+        theFile.status = "warning";
+        const err = e as any;
+        if (err?.code) {
+          error.value = getOssErrorCode(err?.code) || "上传失败，请稍后再试！";
+          emit("errorMsg", error.value);
+        }
+        else {
+          theFile.status = "exception";
+          ElMessage.error("上传失败，稍后再试！");
+        }
+        reject(e);
+      },
+      complete() {
+        const current = fileList.value.find(p => p.key === key) || file;
+        current.status = "success";
+        current.percent = 100;
+        done && done(current);
+        resetRawInp();
+        isPush && emit("update:modelValue", fileList.value);
+        isPush && emit("submit", current.key!, pathList.value, fileList.value);
+        resolve(true);
+      },
+    });
+    file.subscribe = subscribe;
+  });
+}
+
 // 封装上传处理
 function qiniuUpload(dist: File, key: string, token: string, file: OssFile, isPush = true, done?: (theFile: OssFile) => void) {
   const observable = uploadOssFileSe(dist, key, token);
@@ -608,6 +706,6 @@ defineExpose({
   }
 }
 .pre-btn {
-  --at-applay: "h-1/5 max-h-1.4rem max-w-1.4rem  min-h-0.8rem min-w-0.8rem w-1/5 cursor-pointer"
+  --at-aplay: "h-1/5 max-h-1.4rem max-w-1.4rem  min-h-0.8rem min-w-0.8rem w-1/5 cursor-pointer"
 }
 </style>
