@@ -492,7 +492,7 @@ export const useChatStore = defineStore(
           contact = newRes.data;
         }
         else {
-          contact = contactMap.value[id as number] as ChatContactDetailVO;
+          contact = (res.data || contactMap.value[id as number]) as ChatContactDetailVO;
         }
       }
       if (contact) {

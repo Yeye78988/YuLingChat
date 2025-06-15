@@ -13,7 +13,7 @@ const {
   reload,
   onScroll,
   init,
-} = useMessageList("scrollbarRef");
+} = useMessageList();
 
 // 初始化
 init();

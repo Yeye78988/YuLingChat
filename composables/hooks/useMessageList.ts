@@ -11,7 +11,7 @@ const REPLY_SEARCH_INTERVAL = 120;
  * 消息列表 Hook
  * 提供消息列表相关的功能
  */
-export function useMessageList(scrollbarRefName = "scrollbarRef") {
+export function useMessageList() {
   const chat = useChatStore();
   const user = useUserStore();
   const setting = useSettingStore();
@@ -27,7 +27,7 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
 
   // 滚动相关
   type ScrollbarRefType = InstanceType<typeof ElScrollbar>;
-  const scrollbarRef = useTemplateRef<ScrollbarRefType>(scrollbarRefName);
+  const scrollbarRef = ref<ScrollbarRefType>();
   const timer = ref<number | null>(null);
 
   // 防抖函数 - 消息已读上报
