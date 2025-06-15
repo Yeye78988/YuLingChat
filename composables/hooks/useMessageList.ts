@@ -89,13 +89,14 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
       if (data?.list?.length) {
         // 将新消息添加到msgMap中
         const newMsgIds: number[] = [];
-        data.list.forEach((msg) => {
+        for (let i = 0; i < data.list.length; i++) {
+          const msg = data.list[i] as ChatMessageVO;
           const msgId = msg.message.id;
           if (!theContact.msgMap[msgId]) {
             newMsgIds.push(msgId);
           }
           theContact.msgMap[msgId] = msg;
-        });
+        }
         theContact.msgIds.unshift(...newMsgIds);
       }
 
@@ -142,14 +143,11 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
     if (!isValidRoom(roomId))
       return;
 
-    const contactData = chat.contactMap[roomId];
-    if (!contactData)
-      return;
-    if (contactData.isLoading || contactData.isReload)
+    if (!chat.contactMap[roomId] || chat.contactMap[roomId]?.isLoading || chat.contactMap[roomId]?.isReload)
       return;
     // 重置滚动位置和页面信息
-    contactData.scrollTopSize = 0;
-    contactData.pageInfo = {
+    chat.contactMap[roomId]!.scrollTopSize = 0;
+    chat.contactMap[roomId]!.pageInfo = {
       cursor: undefined as undefined | string,
       isLast: false,
       size: PAGINATION_SIZE,
@@ -185,14 +183,14 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
         scrollBottom(false);
         chat.saveScrollTop && chat.saveScrollTop();
       }
-      chat.contactMap[roomId]!.isLoading = false;
-      chat.contactMap[roomId]!.isReload = false;
     }
     catch (error) {
       console.error("重新加载消息出错:", error);
       await nextTick();
       scrollBottom(false);
       chat.saveScrollTop && chat.saveScrollTop();
+    }
+    finally {
       chat.contactMap[roomId]!.isLoading = false;
       chat.contactMap[roomId]!.isReload = false;
     }
@@ -313,7 +311,11 @@ export function useMessageList(scrollbarRefName = "scrollbarRef") {
    * 滚动到底部
    */
   function scrollBottom(animate = true) {
-    scrollTop(scrollbarRef?.value?.wrapRef?.scrollHeight || 0, animate);
+    if (!scrollbarRef?.value?.wrapRef?.scrollHeight) {
+      return false;
+    }
+    scrollTop(scrollbarRef?.value?.wrapRef?.scrollHeight, animate);
+    return true;
   }
 
   /**

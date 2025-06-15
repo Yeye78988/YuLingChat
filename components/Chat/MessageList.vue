@@ -13,7 +13,7 @@ const {
   reload,
   onScroll,
   init,
-} = useMessageList();
+} = useMessageList("scrollbarRef");
 
 // 初始化
 init();
@@ -24,12 +24,8 @@ const isSyncing = ref(false);
 // 监听
 watch(() => setting.isMobileSize, (val, oldVal) => {
   if (val !== oldVal) {
-    nextTick(() => {
-      chat.scrollBottom(false);
-    });
+    chat.scrollBottom(false);
   }
-}, {
-  immediate: true,
 });
 
 onMounted(() => {
