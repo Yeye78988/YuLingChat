@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { ElForm, ElMention } from "element-plus";
+import type { OssConstantItemType } from "~/init/system";
 import ContextMenu from "@imengyu/vue3-context-menu";
 
 const emit = defineEmits<{
@@ -19,7 +20,6 @@ const mentionList = computed(() => isReplyAI.value ? aiOptions.value : isReplyAT
 // 表单
 const isSending = ref(false);
 const isDisabledFile = computed(() => !user?.isLogin || chat.theContact.selfExist === 0);
-const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
 const isLord = computed(() => chat.theContact.type === RoomType.GROUP && chat.theContact.member?.role === ChatRoomRoleEnum.OWNER); // 群主
 const isSelfRoom = computed(() => chat.theContact.type === RoomType.SELFT); // 私聊
 const isAiRoom = computed(() => chat.theContact.type === RoomType.AICHAT); // 机器人
@@ -34,6 +34,15 @@ const inputFocus = ref(false);
 const inputContentRef = useTemplateRef<InstanceType<typeof ElMention>>("inputContentRef"); // 输入框
 const formRef = useTemplateRef<InstanceType<typeof ElForm>>("formRef"); // 表单
 
+// 是否在房间
+const isNotExistOrNorFriend = computed(() => {
+  const res = chat.theContact.selfExist === isTrue.FALESE;
+  if (res) {
+    inputContentRef.value?.input?.blur(); // 失去焦点
+  }
+  return res;
+}); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
+
 // hooks
 const isDisableUpload = computed(() => isAiRoom.value || route.path !== "/");
 // Oss上传
@@ -45,10 +54,13 @@ const {
   isUploadFile,
   isUploadVideo,
   isDragDropOver,
+  uploadFile,
   onSubmitImg,
   onSubmitFile,
   onSubmitVideo,
   onPaste,
+  listenDragDrop,
+  unlistenDragDrop,
   showVideoDialog,
   inputOssImgUploadRef,
   inputOssVideoUploadRef,
@@ -70,6 +82,17 @@ const {
 // computed
 const isBtnLoading = computed(() => isSending.value || isUploadImg.value || isUploadFile.value || isUploadVideo.value);
 const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOUND);
+
+onMounted(() => {
+  listenDragDrop(resolveFileUpload);
+});
+onUnmounted(() => {
+  unlistenDragDrop();
+});
+async function resolveFileUpload(fileType: OssConstantItemType, file: File) {
+  await uploadFile(fileType, file);
+  await onSubmit();
+}
 
 /**
  * 发送消息
@@ -972,7 +995,7 @@ defineExpose({
       v-if="showMobileTools && !isAiRoom && setting.isMobileSize"
       class="w-full overflow-hidden"
     >
-      <div class="grid-container min-h-28vh flex select-none">
+      <div class="grid-container min-h-32vh flex select-none">
         <div class="grid grid-cols-4 my-a w-full gap-4 p-4">
           <div
             v-for="tool in mobileTools"
@@ -1219,7 +1242,7 @@ defineExpose({
 .slide-height-enter-active,
 .slide-height-leave-active {
   transition: all 0.3s ease;
-  max-height: 28vh;
+  max-height: 32vh;
   opacity: 1;
   overflow: hidden;
 }

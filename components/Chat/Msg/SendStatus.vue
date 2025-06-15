@@ -6,10 +6,11 @@ const {
   msgId: any
 }>();
 const chat = useChatStore();
-const titleMap: Record<MessageSendStatus, { title: string, className?: string }> = {
+const titleMap: Record<MessageSendStatus, { title: string, className?: string, closeName?: string }> = {
   [MessageSendStatus.ERROR]: {
     title: "发送失败，点击重试",
     className: "i-solar:refresh-linear  bg-theme-danger hover:rotate-180 btn-danger",
+    closeName: "i-solar:trash-bin-minimalistic-2-line-duotone  btn-danger cursor-pointer",
   },
   [MessageSendStatus.PENDING]: {
     title: "待发送",
@@ -32,6 +33,7 @@ function confirmDeleteMessage(event: MouseEvent, msgId: any) {
       confirmButtonText: "删除",
       cancelButtonText: "取消",
       type: "warning",
+      center: true,
     },
   ).then(() => {
     // 确认删除消息
@@ -49,7 +51,13 @@ function confirmDeleteMessage(event: MouseEvent, msgId: any) {
     class="my-a inline-block h-4.5 w-4.5"
     :class="types?.className"
     @click="chat.retryMessage(msgId)"
-    @contextmenu.prevent="confirmDeleteMessage($event, msgId)"
+  />
+  <i
+    v-if="status && types?.closeName"
+    :title="types?.closeName"
+    class="my-a inline-block h-4.5 w-4.5"
+    :class="types?.closeName"
+    @click="confirmDeleteMessage($event, msgId)"
   />
 </template>
 

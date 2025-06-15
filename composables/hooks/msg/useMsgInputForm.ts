@@ -1,5 +1,7 @@
 import ContextMenuGlobal from "@imengyu/vue3-context-menu";
 
+export const MAX_UPLOAD_IMAGE_COUNT = 9;
+// @unocss-include
 /**
  * 消息输入框hook
  */
@@ -348,61 +350,105 @@ export function useMsgInputForm(
 
     return element;
   }
-
   /**
    * 优化的标签插入逻辑
    */
-  function insertTag(element: HTMLElement, tagData: { type: string, uid: string, username: string, text: string }, matchRegex: RegExp) {
-    if (!msgInputRef.value || !element || !tagData.uid)
-      return;
+  function insertTag(
+    element: HTMLElement,
+    tagData: { type: string, uid: string, username: string, text: string },
+    matchRegex: RegExp,
+    isSpace: boolean = false,
+  ): boolean {
+  // 参数验证
+    if (!msgInputRef.value || !element || !tagData.uid) {
+      console.warn("插入标签失败：缺少必要参数");
+      return false;
+    }
 
     try {
-      // 检查是否已存在 - 使用缓存
+    // 检查是否已存在相同标签
       const existingTags = getDomCache(`${tagData.type}-tags`, `[data-uid="${tagData.uid}"]`);
-      if (existingTags.length > 0)
-        return;
+      if (existingTags.length > 0) {
+        console.log("标签已存在，跳过插入");
+        return false;
+      }
 
+      // 获取当前选区
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) {
         focusAtEnd();
-        if (!selection || selection.rangeCount === 0)
-          return;
+        // 重新获取选区
+        const newSelection = window.getSelection();
+        if (!newSelection || newSelection.rangeCount === 0) {
+          console.warn("无法获取有效选区");
+          return false;
+        }
       }
 
-      const range = selection.getRangeAt(0);
+      const range = selection?.getRangeAt(0);
+      if (!range) {
+        return false;
+      }
       const { startContainer, startOffset } = range;
 
-      // 安全删除匹配字符
+      // 处理匹配文本删除
+      let deletedMatchLength = 0;
       if (startContainer.nodeType === Node.TEXT_NODE) {
         const textNode = startContainer as Text;
         const beforeText = textNode.textContent?.substring(0, startOffset) || "";
         const match = beforeText.match(matchRegex);
 
-        if (match && match[0].length <= 50) { // 限制匹配长度
-          const deleteStart = Math.max(0, startOffset - match[0].length);
-          textNode.deleteData(deleteStart, match[0].length);
+        if (match && match[0].length > 0 && match[0].length <= 50) {
+          const matchLength = match[0].length;
+          const deleteStart = Math.max(0, startOffset - matchLength);
+
+          // 删除匹配的文本
+          textNode.deleteData(deleteStart, matchLength);
+
+          // 更新 range 位置
           range.setStart(textNode, deleteStart);
           range.setEnd(textNode, deleteStart);
+
+          deletedMatchLength = matchLength;
         }
       }
 
-      // 插入标签和空格
-      const space = document.createTextNode(" ");
+      // 插入标签元素
       range.deleteContents();
-      range.insertNode(space);
       range.insertNode(element);
-      range.collapse(false);
 
-      // 清理DOM缓存
+      // 将光标定位到标签后面
+      range.setStartAfter(element);
+      range.collapse(true);
+
+      // 更新选区
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+
+      // 清理和更新
       clearDomCache();
       updateFormContent();
 
+      // 确保焦点在正确位置
       nextTick(() => {
-        focusAtEnd();
+        msgInputRef.value?.focus();
+
+        // 确保光标在标签后面
+        const newSelection = window.getSelection();
+        if (newSelection && newSelection.rangeCount > 0) {
+          const newRange = newSelection.getRangeAt(0);
+          newRange.setStartAfter(element);
+          newRange.collapse(true);
+          newSelection.removeAllRanges();
+          newSelection.addRange(newRange);
+        }
       });
+
+      return true;
     }
     catch (error) {
-      console.warn("Insert tag error:", error);
+      console.error("插入标签失败:", error);
+      return false;
     }
   }
 
@@ -605,10 +651,10 @@ export function useMsgInputForm(
       console.warn("Handle key down error:", error);
     }
   }
-
   // 组件卸载时清理资源
   onUnmounted(() => {
     clearDomCache();
+    clearImages(); // 清理图片并释放 blob URLs
     if (cacheClearTimer) {
       clearTimeout(cacheClearTimer);
     }
@@ -752,7 +798,292 @@ export function useMsgInputForm(
     chat.askAiRobotList = aiRobots;
     return aiRobots;
   }
+  /**
+   * 插入图片到编辑器 - 重构版本，确保光标在输入框内
+   */
+  function insertImage(file: File | string, alt: string = "") {
+    if (!msgInputRef.value) {
+      console.warn("msgInputRef 不存在");
+      return;
+    }
 
+    // TODO: 非ai机器人输入框
+    if (chat.isAIRoom || isReplyAI.value) {
+      ElMessage.error("AI对话暂不支持图片输入！");
+      return;
+    }
+
+    // 限制最多图片数量
+    if (getImageCounts() >= MAX_UPLOAD_IMAGE_COUNT) {
+      ElMessage.error(`最多只能添加 ${MAX_UPLOAD_IMAGE_COUNT} 张图片！`);
+      return;
+    }
+
+    try {
+      // 确保输入框获得焦点
+      msgInputRef.value.focus();
+
+      // 等待下一个tick确保焦点生效
+      nextTick(() => {
+        try {
+          const selection = window.getSelection();
+          let range: Range;
+
+          // 检查是否有有效的选区，且选区在输入框内
+          if (selection && selection.rangeCount > 0) {
+            const currentRange = selection.getRangeAt(0);
+
+            // 验证选区是否在输入框内
+            const isInInputBox = msgInputRef.value!.contains(currentRange.commonAncestorContainer)
+              || msgInputRef.value === currentRange.commonAncestorContainer;
+
+            if (isInInputBox) {
+              range = currentRange;
+            }
+            else {
+              // 选区不在输入框内，创建新的选区到末尾
+              range = createRangeAtEnd();
+            }
+          }
+          else {
+            // 没有选区，创建新的选区到末尾
+            range = createRangeAtEnd();
+          }
+
+          // 插入图片
+          insertImageAtRange(file, alt, range);
+        }
+        catch (error) {
+          console.warn("插入图片时发生错误:", error);
+          // 发生错误时，尝试在末尾插入
+          try {
+            const fallbackRange = createRangeAtEnd();
+            insertImageAtRange(file, alt, fallbackRange);
+          }
+          catch (fallbackError) {
+            console.error("插入图片失败:", fallbackError);
+            ElMessage.error("插入图片失败，请重试");
+          }
+        }
+      });
+    }
+    catch (error) {
+      console.warn("Insert image error:", error);
+      ElMessage.error("插入图片失败，请重试");
+    }
+  }
+
+  /**
+   * 创建指向输入框末尾的选区
+   */
+  function createRangeAtEnd(): Range {
+    const range = document.createRange();
+    range.selectNodeContents(msgInputRef.value!);
+    range.collapse(false); // 折叠到末尾
+
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    return range;
+  }
+
+  /**
+   * 在指定范围插入图片
+   */
+  interface ImageContainer extends HTMLSpanElement {
+    __imageFile?: File;
+    __objectUrl?: string;
+  }
+
+  function insertImageAtRange(file: File | string, alt: string, range: Range): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+      // 创建图片容器
+        const imageContainer = createSafeElement("span", "image-container", {
+          "data-type": "image",
+          "contenteditable": "false",
+          "role": "img",
+          "tabindex": "0",
+        }) as ImageContainer;
+
+        // 创建图片元素
+        const img = document.createElement("img");
+        img.className = "inserted-image";
+        img.style.cssText = "max-width: 12rem; max-height: 9rem; border-radius: 0.3rem; cursor: pointer;";
+        img.draggable = false;
+        img.setAttribute("role", "img");
+        img.setAttribute("tabindex", "0");
+
+        let objectUrl: string | null = null;
+
+        // 错误处理
+        img.onerror = () => {
+          console.error("图片加载失败");
+          if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+          }
+          reject(new Error("图片加载失败"));
+        };
+
+        // 成功加载处理
+        img.onload = () => {
+        // 图片加载完成后释放临时URL
+          if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+            objectUrl = null;
+          }
+          resolve();
+        };
+
+        if (typeof file === "string") {
+        // URL字符串
+          img.src = file;
+          img.alt = alt || "图片";
+        }
+        else {
+        // File对象
+          if (!file.type.startsWith("image/")) {
+            reject(new Error("文件类型不支持"));
+            return;
+          }
+
+          objectUrl = URL.createObjectURL(file);
+          img.src = objectUrl;
+          img.alt = alt || file.name || "图片";
+
+          // 存储文件信息
+          imageContainer.__imageFile = file;
+          imageContainer.__objectUrl = objectUrl;
+        }
+
+        // 创建删除按钮
+        const deleteBtn = createSafeElement("span", "image-delete-btn", {
+          "title": "删除图片",
+          "role": "button",
+          "tabindex": "0",
+          "aria-label": "删除图片",
+        });
+
+        // 统一的事件处理
+        const handleClick = (e: Event) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const target = e.target as HTMLElement;
+
+          if (target.classList.contains("image-delete-btn")) {
+          // 删除图片
+            const storedUrl = imageContainer.__objectUrl;
+            if (storedUrl) {
+              URL.revokeObjectURL(storedUrl);
+            }
+
+            imageContainer.remove();
+            updateFormContent();
+          }
+          else if (target.tagName === "IMG") {
+          // 预览图片
+            useImageViewer.open({
+              urlList: [img.src],
+              initialIndex: 0,
+            });
+          }
+        };
+
+        // 键盘事件处理
+        const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleClick(e);
+          }
+        };
+
+        // 绑定事件
+        imageContainer.addEventListener("click", handleClick);
+        imageContainer.addEventListener("keydown", handleKeyDown);
+
+        // 组装元素
+        imageContainer.appendChild(img);
+        imageContainer.appendChild(deleteBtn);
+
+        requestAnimationFrame(() => {
+          try {
+            const selection = window.getSelection();
+            // 在范围内插入图片
+            range.deleteContents();
+            range.insertNode(imageContainer);
+
+            // 光标定位到图片后面（紧贴）
+            range.setStartAfter(imageContainer);
+            range.collapse(true);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+
+            // 确保输入框保持焦点
+            msgInputRef?.value?.focus();
+
+            // 更新表单内容
+            updateFormContent();
+          }
+          catch (error) {
+            console.error("DOM操作失败:", error);
+            reject(error);
+          }
+        });
+      }
+      catch (error) {
+        console.error("插入图片失败:", error);
+        reject(error);
+      }
+    });
+  }
+
+
+  function getImageCounts() {
+    if (!msgInputRef.value)
+      return 0;
+
+    const imageContainers = msgInputRef.value.querySelectorAll(".image-container");
+    return imageContainers.length;
+  }
+  /**
+   * 获取编辑器中的图片文件
+   */
+  function getImageFiles(): File[] {
+    if (!msgInputRef.value)
+      return [];
+
+    const imageContainers = msgInputRef.value.querySelectorAll(".image-container");
+    const files: File[] = [];
+
+    imageContainers.forEach((container) => {
+      const file = (container as any).__imageFile;
+      if (file instanceof File) {
+        files.push(file);
+      }
+    });
+
+    return files;
+  }
+
+  /**
+   * 清理图片预览
+   */
+  function clearImages() {
+    if (!msgInputRef.value)
+      return;
+
+    const imageContainers = msgInputRef.value.querySelectorAll(".image-container");
+    imageContainers.forEach((container) => {
+      // 释放 blob URL，避免内存泄漏
+      const objectUrl = (container as any).__objectUrl;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+      container.remove();
+    });
+    updateFormContent();
+  }
 
   // 通用剪贴板操作
   const clipboardActions = {
@@ -762,9 +1093,11 @@ export function useMsgInputForm(
         try {
           await navigator.clipboard.writeText(selection.toString());
           selection.deleteFromDocument();
+          updateFormContent();
         }
         catch (err) {
           document.execCommand("cut");
+          updateFormContent();
         }
       }
     },
@@ -783,19 +1116,44 @@ export function useMsgInputForm(
 
     async paste() {
       try {
+        // 先尝试从剪贴板读取数据
+        const clipboardData = await navigator.clipboard.read();
+
+        for (const item of clipboardData) {
+          if (item.types.some(type => type.startsWith("image/"))) {
+            const imageType = item.types.find(type => type.startsWith("image/"));
+            if (imageType) {
+              const blob = await item.getType(imageType);
+              const file = new File([blob], `pasted-image-${Date.now()}.${imageType.split("/")[1]}`, { type: imageType });
+              insertImage(file);
+              return;
+            }
+          }
+        }
+
+        // 如果没有图片，处理文本
         const text = await navigator.clipboard.readText();
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          range.deleteContents();
-          range.insertNode(document.createTextNode(text));
-          range.collapse(false);
+        if (text) {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(text));
+            range.collapse(false);
+            updateFormContent();
+          }
         }
       }
       catch (err) {
-        navigator.clipboard.readText().then((text) => {
+        // 降级处理
+        try {
+          const text = await navigator.clipboard.readText();
           document.execCommand("insertText", false, text);
-        });
+          updateFormContent();
+        }
+        catch (e) {
+          console.warn("Paste failed:", e);
+        }
       }
     },
 
@@ -809,7 +1167,6 @@ export function useMsgInputForm(
       }
     },
   };
-
   // 右键菜单
   function onContextMenu(e: MouseEvent) {
     e.preventDefault();
@@ -890,9 +1247,7 @@ export function useMsgInputForm(
 
     // scrollbar refs
     atScrollbar,
-    aiScrollbar,
-
-    // 方法
+    aiScrollbar, // 方法
     loadUser,
     loadAi,
     updateSelectionRange,
@@ -901,6 +1256,10 @@ export function useMsgInputForm(
     updateFormContent,
     insertAiRobotTag,
     insertAtUserTag,
+    insertImage,
+    getImageCounts,
+    getImageFiles,
+    clearImages,
     updateOptionsPosition,
     scrollToSelectedItem,
     resolveContentAtUsers,

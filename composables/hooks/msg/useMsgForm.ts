@@ -460,10 +460,13 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
    * @returns void
    */
   async function uploadFile(type: OssConstantItemType, file: File, showUrl?: string) {
+    if (disabled?.value === true)
+      return false;
+    let done = false;
     if (type === "video") {
       inputOssImgUploadRef.value?.resetInput?.();
       inputOssFileUploadRef.value?.resetInput?.();
-      await inputOssVideoUploadRef.value?.onUpload({
+      done = await inputOssVideoUploadRef.value?.onUpload({
         id: showUrl || URL.createObjectURL(file),
         key: undefined,
         status: "",
@@ -475,12 +478,12 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     else if (type === "file") {
       if (isUploadFile.value) {
         ElMessage.warning("文件正在上传中，请稍后再试！");
-        return;
+        return false;
       }
       inputOssImgUploadRef.value?.resetInput?.();
       inputOssFileUploadRef.value?.resetInput?.();
       fileList.value = [];
-      await inputOssFileUploadRef.value?.onUpload({
+      done = await inputOssFileUploadRef.value?.onUpload({
         id: showUrl || URL.createObjectURL(file),
         key: undefined,
         status: "",
@@ -492,7 +495,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     else if (type === "image") {
       inputOssImgUploadRef.value?.resetInput?.();
       inputOssFileUploadRef.value?.resetInput?.();
-      await inputOssImgUploadRef.value?.onUpload({
+      done = await inputOssImgUploadRef.value?.onUpload({
         id: showUrl || URL.createObjectURL(file),
         key: undefined,
         status: "",
@@ -501,6 +504,8 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
       });
       chat.msgForm.msgType = MessageType.IMG; // 图片
     }
+    return done;
+
     // else if (type === "audio") {
     //   inputOssImgUploadRef.value?.resetInput?.();
     //   inputOssFileUploadRef.value?.resetInput?.();
@@ -525,14 +530,18 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     position: undefined,
   });
   let unlisten: UnlistenFn | undefined;
-  const isListend = ref(false);
-  async function listenDragDrop() {
+
+  /**
+   * 监听拖拽上传
+   * @param onDragDropCall 插入图片的回调
+   * @returns 监听拖拽上传
+   */
+  async function listenDragDrop(onDragDropCall: (fileType: OssConstantItemType, file: File) => void) {
     const setting = useSettingStore();
     unlisten?.();
-    if (!setting.isDesktop || unlisten || isListend.value) {
+    if (!setting.isDesktop || unlisten) {
       return;
     }
-    isListend.value = true;
 
     unlisten = await getCurrentWebview().onDragDropEvent(async (event) => {
       if (event.payload.type === "over") {
@@ -575,7 +584,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
               if (!ossInfo?.fileSize) {
                 return;
               }
-              if (info.size > ossInfo.fileSize) { // 20MB
+              if (info.size > ossInfo.fileSize) {
                 ElMessage.warning(`文件大小超过限制，最大支持${formatFileSize(ossInfo.fileSize)}`);
                 return;
               }
@@ -584,8 +593,8 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
                 const file = new File([blod], path.replaceAll("\\", "/")?.split("/").pop() || `${Date.now()}.${path.split(".").pop()}`, {
                   type: typeInfo.mineType || "application/octet-stream",
                 });
-                const url = URL.createObjectURL(file);
-                uploadFile(typeInfo.type, file, url); // 上传文件
+                // 上传文件
+                onDragDropCall(typeInfo.type, file);
               });
             }
           });
@@ -597,14 +606,10 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
       }
     });
   }
-  // 生命周期
-  onMounted(listenDragDrop);
-  // onActivated(listenDragDrop);
-  onBeforeUnmount(() => {
+  const unlistenDragDrop = () => {
     unlisten?.();
     unlisten = undefined;
-    isListend.value = false;
-  });
+  };
 
   return {
     imgList,
@@ -625,6 +630,8 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     onSubmitFile,
     onSubmitVideo,
     onPaste,
+    unlistenDragDrop,
+    listenDragDrop,
     showVideoDialog,
   };
 }

@@ -66,6 +66,9 @@ export const useChatStore = defineStore(
     const theRoomId = ref<number | undefined>(undefined); // 当前会话id
     const contactMap = ref<Record<number, ChatContactExtra>>({});
     const theContact = computed<Partial<ChatContactExtra>>(() => theRoomId.value ? (contactMap.value?.[theRoomId.value] || {}) : {});
+    const isAIRoom = computed(() => theContact.value.type === RoomType.AICHAT);
+    const isGroupRoom = computed(() => theContact.value.type === RoomType.GROUP);
+    const isFriendRoom = computed(() => theContact.value.type === RoomType.SELFT);
     const sortedContacts = computed(() => Object.values(contactMap.value).sort((a, b) => {
       const pinDiff = (b.pinTime || 0) - (a.pinTime || 0);
       if (pinDiff !== 0)
@@ -1002,6 +1005,9 @@ export const useChatStore = defineStore(
       getContactList,
       theRoomId,
       theContact,
+      isAIRoom,
+      isGroupRoom,
+      isFriendRoom,
       replyMsg,
       atUserList,
       askAiRobotList,

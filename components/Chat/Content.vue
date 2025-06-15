@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { ChatRoomSelfPopup } from "#components";
+import { ChatRoomGroupPopup } from "#components";
+
 defineProps<{
   roomId?: string
 }>();
@@ -15,18 +18,19 @@ watch(
 
 <template>
   <div id="chat-content" class="content flex-1">
-    <!-- 房间信息 -->
-    <ChatRoomInfo class="relative z-10 shadow-sm border-default-3-b" />
-    <!-- 消息列表 -->
-    <ChatMessageList @click="msgFormRef?.onClickOutside()" />
-    <!-- 发送 -->
-    <ChatMsgFormV2 ref="msgFormRef" class="border-default-2-t" />
+    <div class="relative h-full flex flex-1 flex-col transition-200" :class="{ 'scale-94 op-50 transform-origin-lc': setting.isOpenGroupMember && setting.isMobileSize }">
+      <!-- 房间信息 -->
+      <ChatRoomInfo class="relative z-10 shadow-sm border-default-3-b" />
+      <!-- 消息列表 -->
+      <ChatMessageList @click="msgFormRef?.onClickOutside()" />
+      <!-- 发送 -->
+      <ChatMsgFormV2 ref="msgFormRef" class="border-default-2-t" />
+    </div>
     <!-- 在线人数 -->
     <Transition name="fade-lr" mode="out-in">
       <div v-if="setting.isOpenGroupMember" class="member-popup">
         <div class="model" @click="setting.isOpenGroupMember = false" />
-        <ChatRoomGroupPopup v-if="chat.theContact.type === RoomType.GROUP" class="member" />
-        <ChatRoomSelfPopup v-else class="member" />
+        <component :is="chat.theContact.type === RoomType.GROUP ? ChatRoomGroupPopup : ChatRoomSelfPopup" class="member" />
       </div>
     </Transition>
   </div>

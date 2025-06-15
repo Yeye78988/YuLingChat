@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { ElForm } from "#components";
+import type { OssConstantItemType } from "~/init/system";
 import ContextMenuGlobal from "@imengyu/vue3-context-menu";
 
 const emit = defineEmits<{
   (e: "submit", newMsg: ChatMessageVO): void
 }>();
-const MAX_SEND_IMG_COUNT = 9;
 const user = useUserStore();
 const chat = useChatStore();
 const setting = useSettingStore();
@@ -14,7 +14,6 @@ const route = useRoute();
 // 表单
 const isSending = ref(false);
 const isDisabledFile = computed(() => !user?.isLogin || chat.theContact.selfExist === 0);
-const isNotExistOrNorFriend = computed(() => chat.theContact.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友
 const isLord = computed(() => chat.theContact.type === RoomType.GROUP && chat.theContact.member?.role === ChatRoomRoleEnum.OWNER); // 群主
 const isSelfRoom = computed(() => chat.theContact.type === RoomType.SELFT); // 私聊
 const isAiRoom = computed(() => chat.theContact.type === RoomType.AICHAT); // 机器人
@@ -57,11 +56,9 @@ const {
   updateFormContent,
   insertAiRobotTag,
   insertAtUserTag,
+  insertImage,
   getImageFiles,
   clearImages,
-  handlePaste,
-  handleDrop,
-  handleDragOver,
   resolveContentAtUsers,
   focusAtEnd,
   handleSelectAtUser,
@@ -73,6 +70,15 @@ const {
   atScrollbarRef: "atScrollbar",
   aiScrollbarRef: "aiScrollbar",
 }, 160, "focusRef");
+
+// 是否在房间
+const isNotExistOrNorFriend = computed(() => {
+  const res = chat.theContact.selfExist === isTrue.FALESE;
+  if (res) {
+    msgInputRef.value?.blur(); // 失去焦点
+  }
+  return res;
+}); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
 
 const {
   imgList,
@@ -86,12 +92,72 @@ const {
   onSubmitImg,
   onSubmitFile,
   onSubmitVideo,
-  // onPaste: onPasteImg,
+  listenDragDrop,
+  unlistenDragDrop,
   showVideoDialog,
   inputOssImgUploadRef,
   inputOssVideoUploadRef,
   inputOssFileUploadRef,
 } = useFileUpload({ img: "inputOssImgUploadRef", file: "inputOssFileUploadRef", video: "inputOssVideoUploadRef" }, isDisableUpload);
+
+// 拖拽区域处理
+const { isOverDropZone } = useDropZone(focusRef, {
+  onDrop: (files: File[] | null) => {
+    if (!files || files.length === 0)
+      return;
+    // 遍历处理每个文件
+    files.forEach((file) => {
+      const type = getSimpleOssTypeByExtName(file.name);
+      if (!type) {
+        ElMessage.warning(`不支持的文件类型！`);
+        return;
+      }
+      resolveFileUpload(type?.type, file);
+    });
+  },
+  // 接受所有文件类型
+  dataTypes: undefined,
+  // 支持多文件拖拽
+  multiple: true,
+  // 对未处理的事件不阻止默认行为
+  preventDefaultForUnhandled: false,
+});
+
+onMounted(() => {
+  listenDragDrop(resolveFileUpload);
+});
+onUnmounted(() => {
+  unlistenDragDrop();
+});
+
+// 处理图片插入输入框
+function onOssImgChange(imgRaws: File[]) {
+  for (const imgRaw of imgRaws) {
+    if (imgRaw instanceof File) {
+      // 插入图片到输入框
+      insertImage(imgRaw);
+    }
+  }
+}
+
+/**
+ * 处理文件上传
+ *
+ * @param fileType 文件类型
+ * @param file 文件对象
+ */
+async function resolveFileUpload(fileType: OssConstantItemType, file: File) {
+  // 图片
+  if (fileType === "image" && !setting.isMobileSize) {
+    insertImage(file);
+    return;
+  }
+  const done = await uploadFile(fileType, file);
+  if (!done) {
+    return;
+  }
+  await onSubmit();
+}
 
 // 录音
 const {
@@ -117,10 +183,49 @@ const isSoundRecordMsg = computed(() => chat.msgForm.msgType === MessageType.SOU
  */
 async function handlePasteEvent(e: ClipboardEvent) {
   // 使用 hook 中的增强粘贴处理
-  await handlePaste(e);
+  e.preventDefault();
 
-  // 如果需要，可以继续调用原有的文件上传处理
-  // onPaste(e);
+  const clipboardData = e.clipboardData;
+  if (!clipboardData)
+    return;
+
+  if (isDisableUpload?.value)
+    return false;
+    // 判断粘贴上传
+  if (!e.clipboardData?.items?.length) {
+    return false;
+  }
+  // 拿到粘贴板上的 image file 对象
+  const fileArr = Array.from(e.clipboardData.items).filter(v => v.kind === "file");
+  if (!fileArr.length) { // 没有图片，处理文本
+    const text = clipboardData.getData("text/plain");
+    if (text) {
+      document.execCommand("insertText", false, text);
+      updateFormContent();
+    }
+    return false;
+  }
+  e.preventDefault();
+  for (let i = 0; i < fileArr.length; i++) {
+    const item = fileArr[i];
+    if (!item || item.kind !== "file") {
+      continue;
+    }
+    const file = item.getAsFile();
+    let type: OssConstantItemType | undefined;
+    if (item.type.includes("image")) {
+      type = "image";
+    }
+    else if (item.type.includes("video")) {
+      type = "video";
+    }
+    else if (FILE_TYPE_ICON_MAP[item.type]) {
+      type = "file";
+    }
+    if (type !== undefined) {
+      file && await resolveFileUpload(type, file);
+    }
+  }
 }
 
 /**
@@ -139,18 +244,21 @@ async function handleSubmit() {
 
   chat.msgForm.content = content;
 
-  if (chat.msgForm.msgType === MessageType.TEXT && (!content || content.length > maxContentLen.value)) {
-    ElMessage.warning(`消息长度应小于${maxContentLen.value}字符！`);
+  // 如果有图片，先发送图片
+  if (imageFiles.length > 0) {
+    if (imageFiles.length >= MAX_UPLOAD_IMAGE_COUNT) {
+      ElMessage.warning(`最多只能发送${MAX_UPLOAD_IMAGE_COUNT}张图片！`);
+      return;
+    }
+    chat.msgForm.msgType = MessageType.IMG;
+    // 发送图片
+    await handleImageSubmit(imageFiles);
     return;
   }
 
-  // 如果有图片，先发送图片
-  if (imageFiles.length > 0) {
-    if (imageFiles.length > MAX_SEND_IMG_COUNT) {
-      ElMessage.warning(`最多只能发送${MAX_SEND_IMG_COUNT}张图片！`);
-      return;
-    }
-    await handleImageSubmit(imageFiles);
+  // 处理文本
+  if (chat.msgForm.msgType === MessageType.TEXT && (!content || content.length > maxContentLen.value)) {
+    ElMessage.warning(`消息长度应小于${maxContentLen.value}字符！`);
     return;
   }
 
@@ -168,8 +276,20 @@ async function handleImageSubmit(files: File[]) {
   try {
     isSending.value = true;
     // 上传每一张图片
+    let doneCount = 0;
     for (const file of files) {
-      await uploadFile("image", file);
+      const done = await uploadFile("image", file);
+      if (done) {
+        doneCount += 1;
+      }
+    }
+    // 校验
+    if (doneCount === 0) {
+      return false;
+    }
+    else if (doneCount !== files.length) {
+      console.log("部分上传失败！");
+      return false;
     }
     await onSubmit();
 
@@ -188,6 +308,7 @@ async function handleImageSubmit(files: File[]) {
 
 async function onSubmit() {
   const formDataTemp = JSON.parse(JSON.stringify(chat.msgForm));
+  // 纯文本类
   if (chat.msgForm.content) {
     if (document.querySelector(".at-select")) // enter冲突at选择框
       return;
@@ -222,8 +343,7 @@ async function onSubmit() {
       return false;
     }
     if (imgList.value.length > 1) {
-      await multiSubmitImg();
-      return false;
+      return await multiSubmitImg();
     }
   }
   // 文件
@@ -597,7 +717,6 @@ function setReadAndScrollBottom() {
 
 // watch
 // 房间号变化
-let timer: any = 0;
 watch(() => chat.theRoomId, (newVal, oldVal) => {
   if (newVal === oldVal) {
     return;
@@ -639,6 +758,7 @@ watch(() => chat.replyMsg?.message?.id, (val) => {
 onMounted(() => {
   // 监听快捷键
   window.addEventListener("keydown", startAudio);
+
   nextTick(() => {
     focusAtEnd();
   });
@@ -704,9 +824,6 @@ onMounted(() => {
 onUnmounted(() => {
   mitter.off(MittEventType.CAHT_ASK_AI_ROBOT);
   mitter.off(MittEventType.CHAT_AT_USER);
-  clearTimeout(timer);
-  clearInterval(timer);
-  timer = null;
   loadInputTimer.value && clearTimeout(loadInputTimer.value);
   window.removeEventListener("keydown", startAudio);
 });
@@ -838,16 +955,17 @@ defineExpose({
                 :size="setting.systemConstant.ossInfo?.image?.fileSize"
                 :min-size="1024"
                 :limit="9"
+                :auto-upload="false"
                 :disable="isDisabledFile"
                 class="i-solar:album-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
                 pre-class="hidden"
                 :upload-type="OssFileType.IMAGE"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
-                :upload-quality="0.5"
                 @error-msg="(msg:string) => {
                   ElMessage.error(msg)
                 }"
                 @submit="onSubmitImg"
+                @on-change="onOssImgChange"
               />
               <!-- 视频 -->
               <InputOssFileUpload
@@ -979,9 +1097,22 @@ defineExpose({
         </p>
       </template>
       <!-- 富文本输入框 -->
-      <div v-if="!isSoundRecordMsg" ref="focusRef" class="input-wrapper relative h-fit w-full">
+      <div
+        v-if="!isSoundRecordMsg"
+        ref="focusRef"
+        class="input-wrapper relative h-fit w-full"
+      >
+        <!-- 拖拽悬停效果 -->
+        <div
+          v-if="isOverDropZone"
+          key="drag-over"
+          class="absolute left-0 top-0 z-999 h-full w-full flex-row-c-c select-none card-rounded-df backdrop-blur border-default-dashed text-small"
+        >
+          <i class="i-solar:upload-minimalistic-linear mr-2 p-2.6" />
+          拖拽文件到此处上传
+        </div>
         <el-scrollbar
-          :max-height="setting.isMobileSize ? (showMobileTools ? '2.2rem' : '30vh') : '10em'"
+          :max-height="setting.isMobileSize ? (showMobileTools ? '2.4rem' : '30vh') : '10em'"
           class="h-full w-full flex-1"
           wrap-class="h-full transition-max-height rounded bg-color-3 sm:(!bg-transparent rounded-0)"
           view-class="h-full"
@@ -996,11 +1127,10 @@ defineExpose({
             :data-placeholder="!setting.isMobileSize && aiOptions.length ? '输入 / 唤起AI助手' : ''"
             @input="handleInput"
             @paste="handlePasteEvent"
-            @drop="handleDrop"
-            @dragover="handleDragOver"
             @keydown="handleKeyDown"
             @keyup="updateSelectionRange"
             @click="updateSelectionRange"
+            @focus="showMobileTools = false"
             @contextmenu.self="onContextMenu"
             @compositionend="updateSelectionRange"
           />
@@ -1069,7 +1199,7 @@ defineExpose({
           :disabled="!user.isLogin || isSending || isNotExistOrNorFriend"
           type="primary"
           style="height: 2.2rem !important;"
-          class="ml-2 mr-2 mt-a w-4.4rem"
+          class="ml-2 mt-a w-4.4rem"
           :loading="isBtnLoading"
           @click="handleSubmit()"
         >
@@ -1080,7 +1210,7 @@ defineExpose({
       <!-- 发送按钮 -->
       <div
         v-if="!setting.isMobileSize && !isSoundRecordMsg"
-        class="hidden items-end p-1 pt-0 sm:flex"
+        class="hidden items-end sm:flex"
       >
         <div class="tip ml-a hidden sm:block text-mini">
           <p>
@@ -1094,7 +1224,7 @@ defineExpose({
           class="group ml-a overflow-hidden card-rounded-df tracking-0.2em shadow sm:ml-2"
           type="primary"
           :disable="isNotExistOrNorFriend"
-          :icon-class="isSending || isNotExistOrNorFriend ? '' : 'i-solar:chat-round-dots-linear mr-1'"
+          :icon-class="isSending || isNotExistOrNorFriend ? '' : 'i-solar:plain-2-line-duotone mr-1.6'"
           size="small"
           :loading="isBtnLoading"
           style="padding: 0.8rem;width: 6rem;"
@@ -1120,7 +1250,7 @@ defineExpose({
       v-if="showMobileTools && !isAiRoom && setting.isMobileSize"
       class="w-full overflow-hidden"
     >
-      <div class="grid-container min-h-28vh flex select-none">
+      <div class="grid-container h-32vh flex select-none overflow-hidden">
         <div class="grid grid-cols-4 my-a w-full gap-4 p-4">
           <div
             v-for="tool in mobileTools"
@@ -1129,8 +1259,8 @@ defineExpose({
             :class="[tool.className, tool.disabled ? 'op-50 pointer-events-none' : 'cursor-pointer']"
             @click="!tool.disabled ? tool.onClick?.() : undefined"
           >
-            <span h-12 w-12 flex-row-c-c card-default>
-              <i class="p-3" :class="[tool.icon]" />
+            <span h-15 w-15 flex-row-c-c card-default>
+              <i class="p-3.6" :class="[tool.icon]" />
             </span>
             <span class="text-xs">{{ tool.label }}</span>
           </div>
@@ -1144,7 +1274,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .form-contain {
-  --at-apply: "card-bg-color sm:(!bg-transparent h-62) relative flex flex-col justify-between pt-1 px-2 pb-4 sm:pb-2";
+  --at-apply: "card-bg-color sm:(!bg-transparent h-62) relative flex flex-col justify-between px-4 pb-4 pt-1  sm:(p-2 pt-1)";
   box-shadow: rgba(0, 0, 0, 0.04) 0px -4px 16px;
   .tip {
     --at-apply: "op-0 transition-100";
@@ -1160,6 +1290,30 @@ defineExpose({
   --at-apply: "flex-1 mt-2 sm:mt-0";
   display: flex;
   position: relative;
+
+  // 拖拽悬停效果样式
+  .drag-overlay {
+    background: rgba(255, 255, 255, 0.95);
+    animation: fadeInDrag 0.2s ease-in-out;
+
+    .drag-content {
+      border: 2px dashed var(--el-border-color);
+      background: var(--el-bg-color);
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: var(--el-color-primary);
+        border-style: solid;
+        color: var(--el-color-primary);
+        transform: scale(1.02);
+      }
+
+      i {
+        color: var(--el-color-primary);
+        font-size: 2rem;
+      }
+    }
+  }
 
   .rich-editor {
     --at-apply: "text-0.9em w-full h-full min-h-36px p-2 outline-none text-color ";
@@ -1199,7 +1353,7 @@ defineExpose({
 
     // 图片容器样式
     :deep(.image-container) {
-      --at-apply: "inline-block relative m-1";
+      --at-apply: "inline-block relative mx-1";
 
       .inserted-image {
         --at-apply: "block hover:shadow-sm transition-200 rounded-1 border-default-2";
@@ -1230,6 +1384,17 @@ defineExpose({
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeInDrag {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -1320,19 +1485,19 @@ defineExpose({
 // 添加高度渐变动画
 .slide-height-enter-active,
 .slide-height-leave-active {
-  transition: all 0.3s ease;
-  max-height: 28vh;
+  height: 32vh;
+  will-change: height, opacity;
+  transition: height 0.2s ease, opacity 0.2s ease;
   opacity: 1;
   overflow: hidden;
 }
 
 .slide-height-enter-from,
 .slide-height-leave-to {
-  max-height: 0;
+  height: 0;
   opacity: 0;
 }
 .grid-container {
-  height: auto;
   transform-origin: top;
 }
 
