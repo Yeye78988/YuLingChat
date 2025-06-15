@@ -29,42 +29,63 @@ const formRef = useTemplateRef<InstanceType<typeof ElForm>>("formRef"); // 表�
 const isDisableUpload = computed(() => isAiRoom.value || route.path !== "/");
 
 const {
+  // 核心 refs 和状态
   inputFocus,
-  isReplyAI,
-  selectionRange,
   msgInputRef,
   focusRef,
-  // @和AI选择相关
+  selectionRange,
+
+  // 管理器
+  imageManager,
+  selectionManager,
+
+  // @ 和 AI 选择状态
   showAtOptions,
   showAiOptions,
   selectedAtItemIndex,
   selectedAiItemIndex,
   optionsPosition,
+
+  // 计算选项
   filteredUserAtOptions,
   filteredAiOptions,
   userOptions,
   aiOptions,
-  // scrollbar refs
+
+  // 状态
+  isReplyAI,
+
+  // 滚动条引用
   atScrollbar,
-  aiScrollbar, // 方法
+  aiScrollbar,
+
+  // 加载函数
   loadUser,
   loadAi,
-  updateSelectionRange,
-  clearInputContent,
-  handleInput,
-  handleKeyDown,
+
+  // 内容管理
   updateFormContent,
-  insertAiRobotTag,
-  insertAtUserTag,
-  insertImage,
-  getImageFiles,
-  clearImages,
+  clearInputContent,
+  getInputVaildText,
   resolveContentAtUsers,
-  focusAtEnd,
+
+  // 选区和范围
+  updateSelectionRange,
+  updateOptionsPosition,
+
+  // 标签插入
+  insertAtUserTag,
+  insertAiRobotTag,
+
+  // 选项处理器
+  resetOptions,
   handleSelectAtUser,
   handleSelectAiRobot,
-  getInputVaildText,
-  resetAtAndAiOptions,
+  scrollToSelectedItem,
+
+  // 事件处理器
+  handleInput,
+  handleKeyDown,
   onContextMenu,
 } = useMsgInputForm("msgInputRef", handleSubmit, {
   atScrollbarRef: "atScrollbar",
@@ -135,7 +156,7 @@ function onOssImgChange(imgRaws: File[]) {
   for (const imgRaw of imgRaws) {
     if (imgRaw instanceof File) {
       // 插入图片到输入框
-      insertImage(imgRaw);
+      imageManager.insert(imgRaw);
     }
   }
 }
@@ -149,7 +170,7 @@ function onOssImgChange(imgRaws: File[]) {
 async function resolveFileUpload(fileType: OssConstantItemType, file: File) {
   // 图片
   if (fileType === "image" && !setting.isMobileSize) {
-    insertImage(file);
+    imageManager.insert(file);
     return;
   }
   const done = await uploadFile(fileType, file);
@@ -238,7 +259,7 @@ async function handleSubmit() {
   const content = getInputVaildText();
 
   // 检查编辑器中是否有图片需要处理
-  const imageFiles = getImageFiles();
+  const imageFiles = imageManager.getFiles();
   if (!content && chat.msgForm.msgType === MessageType.TEXT && imageFiles.length === 0)
     return;
 
@@ -295,7 +316,7 @@ async function handleImageSubmit(files: File[]) {
 
     // 清空编辑器
     clearInputContent();
-    clearImages();
+    imageManager.clear();
   }
   catch (error) {
     console.error("发送图片失败:", error);
@@ -314,7 +335,7 @@ async function onSubmit() {
       return;
 
     if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
-      const atUidList = resolveContentAtUsers(msgInputRef.value);
+      const atUidList = resolveContentAtUsers();
       if (atUidList?.length) {
         chat.atUserList = atUidList;
         formDataTemp.body.atUidList = atUidList.map(item => item.userId);
@@ -519,7 +540,7 @@ function resetForm() {
     },
   };
   clearInputContent();
-  clearImages(); // 清除编辑器中的图片
+  imageManager.clear();
   imgList.value = [];
   fileList.value = [];
   videoList.value = []; // 清空视频
@@ -536,7 +557,7 @@ function resetForm() {
   resetAudio();
 
   // 清除@和AI选择
-  resetAtAndAiOptions();
+  resetOptions();
 }
 
 /**
@@ -729,16 +750,15 @@ watch(() => chat.theRoomId, (newVal, oldVal) => {
   loadInputTimer.value && clearTimeout(loadInputTimer.value);
   if (!setting.isMobileSize) {
     loadInputDone.value = true;
+    nextTick(() => {
+      selectionManager.focusAtEnd();
+    });
   }
   else {
     loadInputTimer.value = setTimeout(() => {
       loadInputDone.value = true;
     }, 300);
-    return;
   }
-  nextTick(() => {
-    focusAtEnd();
-  });
 }, {
   immediate: true,
 });
@@ -750,7 +770,8 @@ watch(() => chat.replyMsg?.message?.id, (val) => {
     replyMsgId: val,
   };
   nextTick(() => {
-    focusAtEnd();
+    selectionManager.focusAtEnd()
+    ;
   });
 });
 
@@ -760,7 +781,8 @@ onMounted(() => {
   window.addEventListener("keydown", startAudio);
 
   nextTick(() => {
-    focusAtEnd();
+    selectionManager.focusAtEnd()
+    ;
   });
   // At 用户
   mitter.on(MittEventType.CHAT_AT_USER, (e) => {
@@ -780,7 +802,8 @@ onMounted(() => {
       if (existingTag)
         return;
 
-      focusAtEnd();
+      selectionManager.focusAtEnd()
+      ;
       insertAtUserTag(user);
     }
     else if (type === "remove") {
@@ -803,7 +826,8 @@ onMounted(() => {
       if (existingTag)
         return;
 
-      focusAtEnd();
+      selectionManager.focusAtEnd()
+      ;
       insertAiRobotTag(robot);
     }
   });
@@ -813,7 +837,8 @@ onMounted(() => {
     type,
   }: MsgFormEventPlaoyload) => {
     if (type === "focus") {
-      focusAtEnd();
+      selectionManager.focusAtEnd()
+      ;
     }
     else if (type === "blur") {
       msgInputRef.value?.blur();
@@ -838,7 +863,7 @@ defineExpose({
   onClickOutside: () => {
     showMobileTools.value = false;
   },
-  focus: focusAtEnd,
+  focus: selectionManager.focusAtEnd,
   getSelectionRange: () => selectionRange.value,
   updateSelectionRange,
 });

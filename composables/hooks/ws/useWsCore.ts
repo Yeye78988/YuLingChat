@@ -136,6 +136,22 @@ export function useWsWorker() {
     return worker.value;
   }
 
+  async function _reload() {
+    await initWorker();
+
+    // 初始化WebSocket连接
+    ws.initDefault(() => {
+      // 设置消息处理
+      setupMessageHandlers();
+      // 发送状态到Worker
+      sendStatusToWorker();
+    });
+  }
+  /**
+   * 重新加载Worker
+   */
+  const reload = useThrottleFn(_reload, 3000);
+
   /**
    * 设置Worker事件处理器
    */
@@ -173,21 +189,6 @@ export function useWsWorker() {
       console.error(e);
       reload();
     };
-  }
-
-  /**
-   * 重新加载Worker
-   */
-  async function reload() {
-    await initWorker();
-
-    // 初始化WebSocket连接
-    ws.initDefault(() => {
-      // 设置消息处理
-      setupMessageHandlers();
-      // 发送状态到Worker
-      sendStatusToWorker();
-    });
   }
 
   /**
