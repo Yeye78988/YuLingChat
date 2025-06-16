@@ -29,6 +29,12 @@ function onScroll(e: {
 }) {
   isScrollTop.value = e.scrollTop === 0;
 }
+
+function handleEndReached() {
+  if (!isLoading.value && !pageInfo.value.isLast) {
+    loadData(props.dto);
+  }
+}
 /**
  * 加载会话列表
  */
@@ -253,25 +259,23 @@ function onClickContact(room: ChatContactVO) {
 // 监听当前选中的房间ID变化
 watch(() => chat.theRoomId, (newRoomId) => {
   if (newRoomId) {
-    requestAnimationFrame(() => {
-      // 查找当前选中的联系人元素
-      const selectedElement = document.querySelector(`#contact-${newRoomId}`);
-      if (selectedElement) {
-        // 检查元素是否在视图中可见
-        const rect = selectedElement.getBoundingClientRect();
-        const scrollContainer = scrollbarRef.value?.wrapRef;
-        if (scrollContainer) {
-          const containerRect = scrollContainer.getBoundingClientRect();
-          // 如果元素不在视图中，则滚动到可见位置
-          if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
-            selectedElement.scrollIntoView({
-              behavior: "smooth",
-              block: "nearest",
-            });
-          }
+    // 查找当前选中的联系人元素
+    const selectedElement = document.querySelector(`#contact-${newRoomId}`);
+    if (selectedElement) {
+      // 检查元素是否在视图中可见
+      const rect = selectedElement.getBoundingClientRect();
+      const scrollContainer = scrollbarRef.value?.scrollbarRef?.wrapRef;
+      if (scrollContainer) {
+        const containerRect = scrollContainer.getBoundingClientRect();
+        // 如果元素不在视图中，则滚动到可见位置
+        if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
+          selectedElement.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
         }
       }
-    });
+    }
   }
 }, { immediate: false });
 
@@ -302,8 +306,9 @@ const menuList = [
   },
 ];
 
-reload();
 onMounted(() => {
+  reload();
+
   // 监听
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {
     // 重连
@@ -373,93 +378,84 @@ onMounted(() => {
         {{ showWsStatusTxt }}
       </div>
     </div>
+
     <!-- 会话列表 -->
-    <el-scrollbar
+    <!-- 添加骨架屏 -->
+    <div v-if="isReload" key="skeleton" class="main-bg-color absolute z-2 h-full w-full overflow-y-auto">
+      <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
+    </div>
+
+    <ListVirtualScrollList
       ref="scrollbarRef"
+      :overscan="20"
+      :items="chat.getContactList"
+      :item-height="setting.isMobileSize ? '4.5rem' : '5rem'"
+      max-height="100%"
       wrap-class="w-full relative h-full"
-      class="contact-list"
+      :class-name="['contact-list', isAnimateDelay ? 'stop-transition' : '']"
+      item-class="contact-item"
+      :get-item-key="(room) => room.roomId"
+      :selected-index="chat.getContactList.findIndex(room => room.roomId === chat.theRoomId)"
       @scroll="onScroll"
+      @end-reached="handleEndReached"
+      @item-click="onClickContact"
     >
-      <ListAutoIncre
-        :immediate="false"
-        :auto-stop="false"
-        :is-scroll-top="isScrollTop"
-        :no-more="pageInfo.isLast"
-        enable-pull-to-refresh
-        loading-class="op-0"
-        :damping="0.7"
-        :pull-distance="90"
-        :pull-trigger-distance="60"
-        :refresh-timeout="3000"
-        :on-refresh="reload"
-        @load="loadData(dto)"
-      >
-        <!-- 添加骨架屏 -->
-        <div v-if="isReload" key="skeleton" class="main-bg-color absolute z-2 w-full overflow-y-auto">
-          <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
-        </div>
-        <ListTransitionGroup
-          :immediate="false"
-          tag="div"
+      <template #default="{ item: room }">
+        <div
+          :id="`contact-${room.roomId}`"
+          class="contact"
           :class="{
-            reload: isReload,
+            'is-pin': room.pinTime,
+            'is-checked': room.roomId === chat.theRoomId,
+            'is-shield': room.shieldStatus === isTrue.TRUE,
           }"
-          class="relative"
+          @contextmenu.stop="onContextMenu($event, room)"
         >
-          <div
-            v-for="room in chat.getContactList"
-            :id="`contact-${room.roomId}`"
-            :key="room.roomId"
-            class="contact"
-            :class="{
-              'is-pin': room.pinTime,
-              'is-checked': room.roomId === chat.theRoomId,
-              'is-shield': room.shieldStatus === isTrue.TRUE,
-            }"
-            @contextmenu.stop="onContextMenu($event, room)"
-            @click="onClickContact(room)"
+          <el-badge
+            :hidden="!room.unreadCount"
+            :max="99"
+            :value="room.unreadCount"
+            class="badge h-3em w-3em flex-shrink-0"
           >
-            <el-badge
-              :hidden="!room.unreadCount" :max="99" :value="room.unreadCount"
-              class="badge h-3em w-3em flex-shrink-0"
-            >
-              <CardElImage
-                :error-class="contactTypeIconClassMap[room.type]"
-                :default-src="room.avatar" fit="cover"
-                class="h-full w-full card-rounded-df object-cover shadow-sm card-bg-color-2"
-              />
-            </el-badge>
-            <div class="flex flex-1 flex-col justify-between truncate">
-              <div flex truncate>
-                <p class="text truncate text-black dark:text-white">
-                  {{ room.name }}
-                </p>
-                <!-- AI机器人 -->
-                <i v-if="RoomTypeTagType[room.type]" i-ri:robot-2-line class="ai-icon" />
-                <span class="text ml-a w-fit flex-shrink-0 text-right text-0.7em leading-2em text-color">
-                  {{ formatContactDate(room.activeTime) }}
-                </span>
-              </div>
-              <p class="text mt-1 flex text-small">
-                <small
-                  class="h-1.5em flex-1 truncate"
-                  :class="{ 'text-[var(--el-color-info)] font-600': room.unreadCount && room.shieldStatus !== isTrue.TRUE }"
-                >
-                  {{ room.text }}
-                </small>
-                <small v-if="room.shieldStatus === isTrue.TRUE" class="text i-carbon:notification-off ml-1 flex-shrink-0 overflow-hidden text-3 text-small" />
-                <small v-if="room.pinTime" class="text i-solar:pin-bold-duotone ml-1 flex-shrink-0 overflow-hidden text-3 text-color" />
+            <CardElImage
+              :error-class="contactTypeIconClassMap[(room as ChatContactVO).type]"
+              :default-src="room.avatar"
+              fit="cover"
+              class="h-full w-full card-rounded-df object-cover shadow-sm card-bg-color-2"
+            />
+          </el-badge>
+          <div class="flex flex-1 flex-col justify-between truncate">
+            <div flex truncate>
+              <p class="text truncate text-black dark:text-white">
+                {{ room.name }}
               </p>
+              <!-- AI机器人 -->
+              <i v-if="RoomTypeTagType[room.type]" i-ri:robot-2-line class="ai-icon" />
+              <span class="text ml-a w-fit flex-shrink-0 text-right text-0.7em leading-2em text-color">
+                {{ formatContactDate(room.activeTime) }}
+              </span>
             </div>
+            <p class="text mt-1 flex text-small">
+              <small
+                class="h-1.5em flex-1 truncate"
+                :class="{ 'text-[var(--el-color-info)] font-600': room.unreadCount && room.shieldStatus !== isTrue.TRUE }"
+              >
+                {{ room.text }}
+              </small>
+              <small v-if="room.shieldStatus === isTrue.TRUE" class="text i-carbon:notification-off ml-1 flex-shrink-0 overflow-hidden text-3 text-small" />
+              <small v-if="room.pinTime" class="text i-solar:pin-bold-duotone ml-1 flex-shrink-0 overflow-hidden text-3 text-color" />
+            </p>
           </div>
-        </ListTransitionGroup>
-        <template #done>
-          <!-- <div class="my-4 w-full text-center text-mini">
-             {{ pageInfo.isLast ? '没有更多了' : '' }}
-          </div> -->
-        </template>
-      </ListAutoIncre>
-    </el-scrollbar>
+        </div>
+      </template>
+
+      <template #empty>
+        <div data-fades class="flex-row-c-c flex-col py-10vh text-small">
+          <i class="i-solar:chat-round-bold-duotone mb-4 p-5" />
+          <span>快去找人聊天吧！</span>
+        </div>
+      </template>
+    </ListVirtualScrollList>
   </div>
 </template>
 
@@ -475,7 +471,7 @@ onMounted(() => {
 
   .contact {
     // transition: background-color 100ms ease-in-out;
-    --at-apply: "h-18 card-bg-color dark:bg-transparent flex items-center gap-3 p-4 sm:(border-transparent p-3 w-full text-color card-rounded-df mb-2 card-bg-color)  w-full text-sm  cursor-pointer  !hover:bg-[#f8f8f8] !dark:hover:bg-[#151515]";
+    --at-apply: " h-full card-bg-color dark:bg-transparent flex items-center gap-3 p-4 sm:(h-18 border-transparent p-3 w-full text-color card-rounded-df mb-2 card-bg-color)  w-full text-sm  cursor-pointer  !hover:bg-[#f8f8f8] !dark:hover:bg-[#151515]";
     .text {
       --at-apply: "transition-none";
     }
@@ -526,6 +522,16 @@ onMounted(() => {
     border-right: 1px solid transparent !important;
   }
 }
+
+// .contact {
+//   --at-apply: "animate-(fade-in duration-300)";
+// }
+// .stop-transition {
+//   .contact {
+//     transition: none !important;
+//     animation: none !important;
+//   }
+// }
 
 :deep(.el-scrollbar__bar) {
   right: 1px;

@@ -538,6 +538,8 @@ export const useChatStore = defineStore(
       delete contactMap.value[roomId];
       // 成员列表删除
       delete roomMapCache.value[roomId];
+      // 重新显示会话
+      isOpenContact.value = true;
     }
     /**
      * 主动删除会话（不影响接收）

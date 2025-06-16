@@ -96,6 +96,7 @@ const isNotExistOrNorFriend = computed(() => {
   const res = chat.theContact.selfExist === isTrue.FALESE;
   if (res) {
     msgInputRef.value?.blur(); // 失去焦点
+    clearInputContent();
   }
   return res;
 }); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === isTrue.FALESE
@@ -1215,7 +1216,7 @@ defineExpose({
             ref="msgInputRef"
             class="rich-editor"
             :class="{ focused: inputFocus }"
-            contenteditable
+            :contenteditable="!isNotExistOrNorFriend"
             spellcheck="false"
             :data-placeholder="!setting.isMobileSize && aiOptions.length ? '输入 / 唤起AI助手' : ''"
             @input="handleInput"
@@ -1326,6 +1327,7 @@ defineExpose({
           发送&nbsp;
         </BtnElButton>
       </div>
+      <!-- 已经不是好友 -->
       <div
         v-show="isNotExistOrNorFriend"
         class="absolute left-0 top-0 h-full w-full flex-row-c-c border-0 border-t-1px tracking-2px shadow backdrop-blur-4px border-default"
