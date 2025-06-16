@@ -395,8 +395,11 @@ async function onSubmit() {
     if (!content)
       return false;
     if (!chat.theContact?.targetUid) {
-      ElMessage.error("房间信息不完整！");
-      return false;
+      if (!chat.theContact.roomId || !chat.theContact.type) {
+        ElMessage.error("房间信息不完整！");
+        return false;
+      }
+      await chat.reloadBaseContact(chat.theContact.roomId, chat.theContact.type);
     }
     await submitToQueue({
       roomId: chat.theRoomId!,
@@ -731,7 +734,7 @@ const mobileTools = computed(() => {
 // 到底部并消费消息
 function setReadAndScrollBottom() {
   if (chat.theRoomId) {
-    chat.setReadList(chat.theRoomId);
+    chat.setReadRoom(chat.theRoomId);
     chat.scrollBottom();
   }
 }

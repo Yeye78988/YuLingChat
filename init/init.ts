@@ -122,7 +122,7 @@ async function resolveUnReadContact(contact: ChatContactExtra | undefined) {
   await mainWin.isMinimized() && await mainWin.unminimize();
   chat.setContact(contact);
   if (contact && chat.theRoomId === contact?.roomId)
-    chat.setReadList(contact?.roomId);
+    chat.setReadRoom(contact?.roomId);
   await nextTick();
   chat.scrollBottom(false);
 }
@@ -325,7 +325,7 @@ async function handleChannelMsg(event: MessageEvent) {
       return;
     chat.setContact(chat.contactMap[data.roomId]);
     if (chat.theRoomId === data.roomId)
-      chat.setReadList(data.roomId);
+      chat.setReadRoom(data.roomId);
     if (mainWin) {
       await navigateTo("/");
       await mainWin?.show();

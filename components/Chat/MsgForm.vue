@@ -511,7 +511,7 @@ const mobileTools = computed(() => {
 // 到底部并消费消息
 function setReadAndScrollBottom() {
   if (chat.theRoomId) {
-    chat.setReadList(chat.theRoomId);
+    chat.setReadRoom(chat.theRoomId);
     chat.scrollBottom();
   }
 }

@@ -32,7 +32,7 @@ export function useMessageList() {
 
   // 防抖函数 - 消息已读上报
   const debounceReadList = useDebounceFn((theRoomId: number) => {
-    chat.setReadList(theRoomId);
+    chat.setReadRoom(theRoomId);
   }, 500);
 
   /**
@@ -239,7 +239,7 @@ export function useMessageList() {
       // 处理新房间
       if (val) {
         // 消息阅读上报
-        chat.setReadList(val);
+        chat.setReadRoom(val);
         // 滚动到底部
         nextTick(() => {
           if (scrollbarRef.value)
@@ -254,7 +254,7 @@ export function useMessageList() {
 
       // 处理旧房间
       if (oldVal) {
-        chat.setReadList(oldVal);
+        chat.setReadRoom(oldVal);
       }
     }, {
       immediate: true,

@@ -155,7 +155,7 @@ export const useChatStore = defineStore(
           }
           // 消息阅读上报（延迟）
           if (msg.message.roomId) {
-            setReadList(msg.message.roomId, true);
+            setReadRoom(msg.message.roomId, true);
           }
           appendMsg(msg); // 保证顺序
         }
@@ -374,6 +374,28 @@ export const useChatStore = defineStore(
         ...vo, // 基础信息
       };
     }
+    async function reloadBaseContact(roomId: number, roomType: RoomType) {
+      if (!roomId) {
+        console.warn("reloadBaseContact error: roomId is undefined");
+        return false;
+      }
+      const res = await getChatContactInfo(roomId, user.getToken, roomType)?.catch(() => {});
+      if (res && res.code === StatusCode.SUCCESS) {
+        // 保存现有消息数据
+        const { msgMap = {}, msgIds = [] } = contactMap.value[roomId] || {};
+
+        contactMap.value[roomId] = {
+          ...contactMap.value[roomId], // 覆盖基础信息
+          ...(res?.data || {}), // 请求
+          msgMap,
+          msgIds,
+          unreadMsgList: contactMap.value?.[roomId]?.unreadMsgList || [],
+          isReload: contactMap.value?.[roomId]?.isReload || false,
+          isLoading: contactMap.value?.[roomId]?.isLoading || false,
+          pageInfo: contactMap.value?.[roomId]?.pageInfo || { cursor: undefined, isLast: false, size: 20 } as PageInfo,
+        };
+      }
+    }
     // 改变会话
     async function setContact(vo?: ChatContactVO) {
       if (!vo || !vo.roomId) {
@@ -382,6 +404,7 @@ export const useChatStore = defineStore(
       }
       // vo.unreadCount = 0;
       contactMap.value[vo.roomId] = {
+        ...contactMap.value[vo.roomId], // 覆盖基础信息
         ...(vo || {}),
         // 消息列表
         msgMap: contactMap.value?.[vo.roomId]?.msgMap || {},
@@ -403,14 +426,14 @@ export const useChatStore = defineStore(
         const { msgMap = {}, msgIds = [] } = contactMap.value[vo.roomId] || {};
 
         contactMap.value[vo.roomId] = {
-          ...(res?.data || {}),
+          ...contactMap.value[vo.roomId], // 覆盖基础信息
+          ...(res?.data || {}), // 请求
           msgMap,
           msgIds,
           unreadMsgList: contactMap.value?.[vo.roomId]?.unreadMsgList || [],
           isReload: contactMap.value?.[vo.roomId]?.isReload || false,
           isLoading: contactMap.value?.[vo.roomId]?.isLoading || false,
           pageInfo: contactMap.value?.[vo.roomId]?.pageInfo || { cursor: undefined, isLast: false, size: 20 } as PageInfo,
-          saveTime: Date.now(),
         };
       }
     }
@@ -623,7 +646,7 @@ export const useChatStore = defineStore(
     /**
      * 设置消息已读
      */
-    async function setReadList(roomId: number, isSender = false) {
+    async function setReadRoom(roomId: number, isSender = false) {
       if (!roomId)
         return false;
       if (!await isActiveWindow()) // 窗口未激活
@@ -1051,6 +1074,7 @@ export const useChatStore = defineStore(
       // 方法
       inviteMemberFormReset,
       refreshContact,
+      reloadBaseContact,
       setContact,
       updateContact,
       reloadContact,
@@ -1060,7 +1084,7 @@ export const useChatStore = defineStore(
       toContactSendMsg,
       deleteContactConfirm,
       exitGroupConfirm,
-      setReadList,
+      setReadRoom,
       clearAllUnread,
       setAtUid,
       removeAtByUsername,

@@ -77,7 +77,7 @@ async function resolveNewMsg(msg: ChatMessageVO) {
     ws.wsMsgList.newMsg.splice(0);
   }
   else if (isCurrentRoom) { // 阅读消息
-    chat.setReadList(targetCtx.roomId);
+    chat.setReadRoom(targetCtx.roomId);
   }
   // 3）本房间追加消息
   if (targetCtx.pageInfo.size && targetCtx.msgIds.length) { // 存在消息列表 才追加 （避免再次加载导致消息显示重复）
