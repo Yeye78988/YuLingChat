@@ -20,6 +20,7 @@ export function useMessageList() {
   const pageInfo = computed(() => chat?.theContact?.pageInfo);
   const isLoading = computed(() => !!chat?.theContact?.isLoading);
   const isReload = computed(() => !!chat?.theContact?.isReload);
+  const isSyncing = computed(() => !!chat?.theContact?.isSyncing);
   const offset = computed(() => setting.isMobileSize ? -730 : -678);
 
   // 将msgMap和msgIds转换为有序的消息数组，供组件使用
@@ -60,26 +61,21 @@ export function useMessageList() {
     if (!isValidRoom(roomId))
       return;
 
-    const theContact = chat?.contactMap?.[roomId];
-    if (!theContact)
-      return;
-    const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
-    // 检查是否应该加载数据
-    if (theContact.isLoading || theContact.isReload || theContact.isSyncing || thePageInfo.isLast) {
+    if (!chat.contactMap[roomId] || chat.contactMap[roomId]!.isLoading || chat.contactMap[roomId]!.isReload || chat.contactMap[roomId]!.isSyncing || chat.contactMap[roomId]!.pageInfo.isLast) {
       return;
     }
-    if (!theContact.pageInfo) {
-      theContact.pageInfo = {
+    if (!chat.contactMap[roomId]!.pageInfo) {
+      chat.contactMap[roomId]!.pageInfo = {
         cursor: undefined as undefined | string,
         isLast: false,
         size: PAGINATION_SIZE,
       };
     }
     // 设置加载状态
-    theContact.isLoading = true;
+    chat.contactMap[roomId]!.isLoading = true;
 
     try {
-      const { data, code } = await getChatMessagePage(roomId, thePageInfo.size || PAGINATION_SIZE, thePageInfo.cursor, user.getToken);
+      const { data, code } = await getChatMessagePage(roomId, chat.contactMap[roomId]?.pageInfo.size || PAGINATION_SIZE, chat.contactMap[roomId]?.pageInfo.cursor, user.getToken);
       if (code !== StatusCode.SUCCESS) {
         console.warn("加载消息失败");
         return;
@@ -92,44 +88,44 @@ export function useMessageList() {
         for (let i = 0; i < data.list.length; i++) {
           const msg = data.list[i] as ChatMessageVO;
           const msgId = msg.message.id;
-          if (!theContact.msgMap[msgId]) {
+          if (!chat.contactMap[roomId]!.msgMap[msgId]) {
             newMsgIds.push(msgId);
           }
-          theContact.msgMap[msgId] = msg;
+          chat.contactMap[roomId]!.msgMap[msgId] = msg;
         }
-        theContact.msgIds.unshift(...newMsgIds);
+        chat.contactMap[roomId]!.msgIds.unshift(...newMsgIds);
       }
 
-      const oldSize = theContact.scrollTopSize || 0;
+      const oldSize = chat.contactMap[roomId]!.scrollTopSize || 0;
       // 更新页面信息
-      thePageInfo.isLast = data.isLast;
-      thePageInfo.cursor = data.cursor || undefined;
+      chat.contactMap[roomId]!.pageInfo.isLast = data.isLast;
+      chat.contactMap[roomId]!.pageInfo.cursor = data.cursor || undefined;
 
       await nextTick();
       chat.saveScrollTop && chat.saveScrollTop();
       call && call(msgList.value);
-      if (thePageInfo.cursor === null && !theContact.msgIds?.length) {
+      if (chat.contactMap[roomId]!.pageInfo.cursor === null && !chat.contactMap[roomId]!.msgIds?.length) {
         // 第一次加载默认没有动画
         scrollBottom(false);
       }
       else {
         // 计算并更新滚动位置
-        const newSize = theContact.scrollTopSize || 0;
+        const newSize = chat.contactMap[roomId]!.scrollTopSize || 0;
         const msgRangeSize = newSize - oldSize;
         if (msgRangeSize > 0) {
           scrollTop(msgRangeSize);
         }
       }
       // 重置加载状态
-      theContact.isLoading = false;
+      chat.contactMap[roomId]!.isLoading = false;
     }
     catch (error) {
       console.error("加载消息出错:", error);
-      if (theContact) {
-        theContact.isLoading = false;
-        if (thePageInfo) {
-          thePageInfo.isLast = false;
-          thePageInfo.cursor = undefined;
+      if (chat.contactMap[roomId]!) {
+        chat.contactMap[roomId]!.isLoading = false;
+        if (chat.contactMap[roomId]!.pageInfo) {
+          chat.contactMap[roomId]!.pageInfo.isLast = false;
+          chat.contactMap[roomId]!.pageInfo.cursor = undefined;
         }
       }
     }
@@ -182,6 +178,8 @@ export function useMessageList() {
         await nextTick();
         scrollBottom(false);
         chat.saveScrollTop && chat.saveScrollTop();
+        chat.contactMap[roomId]!.isLoading = false;
+        chat.contactMap[roomId]!.isReload = false;
       }
     }
     catch (error) {
@@ -189,8 +187,6 @@ export function useMessageList() {
       await nextTick();
       scrollBottom(false);
       chat.saveScrollTop && chat.saveScrollTop();
-    }
-    finally {
       chat.contactMap[roomId]!.isLoading = false;
       chat.contactMap[roomId]!.isReload = false;
     }
@@ -332,9 +328,10 @@ export function useMessageList() {
    */
   function scrollTop(size: number, animated = false) {
     // 执行滚动
-    scrollbarRef.value?.wrapRef?.scrollTo({
+    scrollbarRef?.value?.scrollTo({
       top: size,
-      behavior: animated ? "smooth" : undefined,
+      left: 0,
+      behavior: animated ? "smooth" : "auto",
     });
   }
 
@@ -398,7 +395,10 @@ export function useMessageList() {
    */
   function init() {
     setupRoomWatcher();
-    setupEventListeners();
+
+    onMounted(() => {
+      setupEventListeners();
+    });
 
     // 组件卸载时清理
     onBeforeUnmount(() => {
@@ -411,6 +411,7 @@ export function useMessageList() {
     pageInfo,
     isLoading,
     isReload,
+    isSyncing,
     msgList,
     scrollbarRef,
     timer,

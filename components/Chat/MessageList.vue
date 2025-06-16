@@ -6,6 +6,7 @@ const {
   pageInfo,
   isLoading,
   isReload,
+  isSyncing,
   msgList,
   scrollbarRef,
   syncMessages,
@@ -17,15 +18,11 @@ const {
 
 // 初始化
 init();
-
-// 消息同步状态
-const isSyncing = ref(false);
-
 // 监听
 watch(() => setting.isMobileSize, (val, oldVal) => {
-  if (val !== oldVal) {
+  nextTick(() => {
     chat.scrollBottom(false);
-  }
+  });
 });
 
 onMounted(() => {
