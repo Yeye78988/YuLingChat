@@ -320,7 +320,7 @@ async function handleImageSubmit(files: File[]) {
   }
   catch (error) {
     console.error("发送图片失败:", error);
-    ElMessage.error("发送图片失败");
+    ElMessage.error("发送图片失败，请稍后再试！");
   }
   finally {
     isSending.value = false;
@@ -418,6 +418,117 @@ async function onSubmit() {
 }
 
 /**
+ * 消息发送配置接口
+ */
+interface MessageSubmitConfig extends ChatMessageDTO {
+  skipReset?: boolean;
+  validateFn?: () => boolean | string;
+  prepareData?: () => Partial<ChatMessageDTO>;
+}
+
+/**
+ * 统一的消息提交方法
+ */
+async function submitMessage(
+  config: MessageSubmitConfig | ChatMessageDTO,
+  callback?: (msg: ChatMessageVO) => void,
+) {
+  const roomId = chat.theRoomId!;
+
+  // 如果传入的是ChatMessageDTO，直接使用
+  let formData: ChatMessageDTO;
+  if ("msgType" in config && typeof config.msgType === "number") {
+    formData = config as ChatMessageDTO;
+  }
+  else {
+    const msgConfig = config as MessageSubmitConfig;
+
+    // 执行验证
+    if (msgConfig.validateFn) {
+      const validation = msgConfig.validateFn();
+      if (typeof validation === "string") {
+        ElMessage.error(validation);
+        return;
+      }
+      if (!validation)
+        return;
+    }
+
+    // 准备数据
+    const preparedData = msgConfig.prepareData?.() || {};
+
+    formData = {
+      roomId,
+      msgType: msgConfig.msgType as CanSendMessageType,
+      content: msgConfig.content || "",
+      body: { ...msgConfig.body, ...preparedData.body },
+      ...preparedData,
+    };
+  }
+
+  // 添加到消息队列
+  chat.addToMessageQueue(formData, (msg: ChatMessageVO) => {
+    emit("submit", msg);
+    if (!(config as MessageSubmitConfig).skipReset) {
+      resetForm();
+    }
+    callback?.(msg);
+  });
+
+  if (!(config as MessageSubmitConfig).skipReset) {
+    resetForm();
+  }
+  isSending.value = false;
+}
+
+/**
+ * 批量发送图片消息
+ */
+async function multiSubmitImg() {
+  isSending.value = true;
+  const formTemp = JSON.parse(JSON.stringify(chat.msgForm));
+  const uploadedFiles = new Set();
+
+  // 批量发送图片
+  for (const file of imgList.value) {
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.IMG,
+      content: "",
+      body: {
+        url: file.key!,
+        width: file.width || 0,
+        height: file.height || 0,
+        size: file?.file?.size || 0,
+      },
+      skipReset: true,
+    });
+    uploadedFiles.add(file.key);
+  }
+
+  // 清理已上传的图片
+  imgList.value = imgList.value.filter(file => !uploadedFiles.has(file.key));
+
+  // 发送文本消息
+  if (formTemp.content) {
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.TEXT,
+      content: formTemp.content,
+      body: {
+        ...formTemp.body,
+        url: undefined,
+        size: undefined,
+      },
+      skipReset: true,
+    });
+  }
+
+  resetForm();
+  isSending.value = false;
+}
+
+/**
  * 将消息提交到队列
  */
 async function submitToQueue(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: ChatMessageVO) => void) {
@@ -438,74 +549,27 @@ async function submitToQueue(formData: ChatMessageDTO = chat.msgForm, callback?:
   resetForm();
   isSending.value = false;
 }
-
-/**
- * 批量发送图片消息
- */
-async function multiSubmitImg() {
-  isSending.value = true;
-  const formTemp = JSON.parse(JSON.stringify(chat.msgForm));
-  // 批量发送图片消息
-  const uploadedFiles = new Set(); // 用来跟踪已经上传的文件
-  for (const file of imgList.value) {
-    chat.msgForm = {
-      roomId: chat.theRoomId!,
-      msgType: MessageType.IMG, // 默认
-      content: "",
-      body: {
-        url: file.key!,
-        width: file.width || 0,
-        height: file.height || 0,
-        size: file?.file?.size || 0,
-      },
-    };
-    await submitToQueue(chat.msgForm); // 提交到队列
-    uploadedFiles.add(file.key); // 标记文件为已上传
-  }
-  // 一次性移除所有已上传的文件
-  imgList.value = imgList.value.filter(file => !uploadedFiles.has(file.key));
-
-  // 发送文本消息
-  if (formTemp.content) {
-    formTemp.body.url = undefined;
-    formTemp.body.size = undefined;
-    formTemp.msgType = MessageType.TEXT; // 默认
-    chat.msgForm = {
-      ...formTemp,
-      roomId: chat.theRoomId!,
-      msgType: MessageType.TEXT, // 默认
-    };
-    await submitToQueue(chat.msgForm);
-  }
-  isSending.value = false;
-}
-
 /**
  * 发送群通知消息
  */
 function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
-  if (!isLord.value) {
-    ElMessage.error("仅群主可发送群通知消息！");
-    return;
-  }
   const replyMsgId = chat.msgForm?.body?.replyMsgId;
-  chat.msgForm = {
-    roomId: chat.theRoomId!,
-    msgType: MessageType.GROUP_NOTICE,
-    content: "",
-    body: {
-    },
-  };
   const body = formData?.body as any;
-  submitToQueue({
+
+  submitMessage({
     roomId: chat.theRoomId!,
     msgType: MessageType.GROUP_NOTICE,
     content: formData.content,
+    validateFn: () => {
+      if (!isLord.value) {
+        return "仅群主可发送群通知消息！";
+      }
+      return true;
+    },
     body: {
-      // TODO: 后期可支持富文本编辑
-      noticeAll: body?.noticeAll, // 是否群发
-      imgList: body?.imgList, // 图片列表
-      replyMsgId: body?.replyMsgId || replyMsgId || undefined, // 回复消息ID
+      noticeAll: body?.noticeAll,
+      imgList: body?.imgList,
+      replyMsgId: body?.replyMsgId || replyMsgId || undefined,
     },
   });
 }
@@ -519,6 +583,7 @@ async function onSubmitSound(callback: (key: string) => void) {
     isSending.value = false;
     return false;
   }
+
   return await useOssUpload(OssFileType.SOUND, theAudioFile.value as OssFile, user.getToken, {
     callback(event, data, file) {
       if (event === "error") {
