@@ -170,9 +170,7 @@ const {
 } = useVirtualList();
 
 // 计算是否有数据
-const hasItems = computed(() => {
-  return items.length > 0;
-});
+const hasItems = computed(() => items.length > 0);
 
 // 处理点击事件
 function handleItemClick(item: any, index: number) {
@@ -267,13 +265,10 @@ defineExpose({
     @scroll="onScroll"
     @end-reached="(direction) => emit('endReached', direction)"
   >
+    <slot name="pre" />
     <!-- 空状态插槽 -->
     <template v-if="!hasItems">
-      <slot name="empty">
-        <div class="flex items-center justify-center py-8 text-gray-500">
-          暂无数据
-        </div>
-      </slot>
+      <slot name="empty" />
     </template>
 
     <!-- 虚拟列表容器 -->

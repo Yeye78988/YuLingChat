@@ -752,17 +752,19 @@ export function useMsgInputForm(
 
   function getInputVaildText(): string {
     try {
-      let content = msgInputRef.value?.textContent || "";
-      inputTextContent.value = content;
-
-      if (content && content.length < 10000) {
-        chat.askAiRobotList.forEach((item) => {
-          if (item.nickName) {
-            content = content.replace(SecurityUtils.sanitizeInput(item.nickName), "");
+      if (isReplyAI.value) { // TODO: AI对话只遍历获取纯文本
+        let content = "";
+        msgInputRef.value?.childNodes.forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            content += node.textContent || "";
           }
         });
+        return content;
       }
 
+      // 默认 （包括 @ ）
+      const content = msgInputRef.value?.textContent || "";
+      inputTextContent.value = content;
       return content.trim();
     }
     catch (error) {
@@ -771,23 +773,29 @@ export function useMsgInputForm(
     }
   }
 
+  /**
+   * 处理键盘事件
+   * @param e 键盘事件对象
+   */
   function handleKeyDown(e: KeyboardEvent) {
     try {
       updateSelectionRange();
 
       // 处理选项导航
-      if ((showAtOptions.value || showAiOptions.value) && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      const isAtVaild = showAtOptions.value && filteredUserAtOptions.value.length > 0;
+      const isAiValid = showAiOptions.value && filteredAiOptions.value.length > 0;
+      if ((isAtVaild || isAiValid) && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
         e.preventDefault();
-        const options = showAtOptions.value ? filteredUserAtOptions.value : filteredAiOptions.value;
-        const currentIndex = showAtOptions.value ? selectedAtItemIndex.value : selectedAiItemIndex.value;
+        const options = isAtVaild ? filteredUserAtOptions.value : filteredAiOptions.value;
+        const currentIndex = isAtVaild ? selectedAtItemIndex.value : selectedAiItemIndex.value;
         const direction = e.key === "ArrowDown" ? 1 : -1;
         const newIndex = Math.max(0, Math.min(currentIndex + direction, options.length - 1));
 
-        if (showAtOptions.value) {
+        if (isAtVaild) {
           selectedAtItemIndex.value = newIndex;
           nextTick(() => scrollToSelectedItem(true, newIndex));
         }
-        else {
+        else if (isAiValid) {
           selectedAiItemIndex.value = newIndex;
           nextTick(() => scrollToSelectedItem(false, newIndex));
         }
@@ -801,14 +809,14 @@ export function useMsgInputForm(
       }
 
       // 确认选择
-      if ((showAtOptions.value || showAiOptions.value) && (e.key === "Enter" || e.key === "Tab")) {
+      if ((isAtVaild || isAiValid) && (e.key === "Enter" || e.key === "Tab")) {
         e.preventDefault();
-        if (showAtOptions.value) {
+        if (isAtVaild) {
           const selectedUser = filteredUserAtOptions.value[selectedAtItemIndex.value];
           if (selectedUser)
             handleSelectAtUser(selectedUser);
         }
-        else if (showAiOptions.value) {
+        else if (isAiValid) {
           const selectedAi = filteredAiOptions.value[selectedAiItemIndex.value];
           if (selectedAi)
             handleSelectAiRobot(selectedAi);
@@ -817,7 +825,7 @@ export function useMsgInputForm(
       }
 
       // 退出选择
-      if ((showAtOptions.value || showAiOptions.value) && e.key === "Escape") {
+      if ((isAtVaild || isAiValid) && e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
         resetOptions();
@@ -835,6 +843,7 @@ export function useMsgInputForm(
     }
   }
 
+  // 滚动到选中的选项
   function scrollToSelectedItem(isAtOptions: boolean, selectedIndex: number) {
     const scrollbar = isAtOptions ? atScrollbar.value : aiScrollbar.value;
     scrollbar?.scrollToItem?.(selectedIndex);

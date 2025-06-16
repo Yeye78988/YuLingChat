@@ -839,8 +839,7 @@ watch(() => chat.replyMsg?.message?.id, (val) => {
     replyMsgId: val,
   };
   nextTick(() => {
-    selectionManager.focusAtEnd()
-    ;
+    selectionManager.focusAtEnd();
   });
 });
 

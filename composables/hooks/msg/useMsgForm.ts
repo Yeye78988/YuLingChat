@@ -691,7 +691,6 @@ export function useLoadAtUserList() {
   const user = useUserStore();
   const userOptions = ref<AtChatMemberOption[]>([]);
   const userAtOptions = computed(() => chat.theContact.type === RoomType.GROUP ? userOptions.value.filter(u => !chat.atUserList.find(a => a.userId === u.userId)) : []); // 过滤已存在的用户
-  const userRoomMap = ref<Record<number, { time: number, list: AtChatMemberOption[] }>>({});
 
   /**
    * 加载@用户列表
@@ -701,12 +700,11 @@ export function useLoadAtUserList() {
       return;
 
     const roomId = chat.theRoomId!;
-    const cache = userRoomMap.value[roomId];
+    const cache = chat.atMemberRoomMap[roomId];
 
     // 如果缓存存在且未过期,直接使用缓存
     if (cache && (Date.now() - cache.time < CACHE_TIME)) {
-      userOptions.value = cache.list;
-      // console.log("use cache user list");
+      userOptions.value = (cache.uidList.map(uid => cache.userMap[uid] || { label: uid, value: uid }) || []) as AtChatMemberOption[];
       return;
     }
 
@@ -722,10 +720,21 @@ export function useLoadAtUserList() {
       })).filter((u: AtChatMemberOption) => u.userId !== user.userInfo.id);
 
       userOptions.value = list;
+
+      // 构建 userMap 和 uidList
+      const userMap: Record<string, AtChatMemberOption> = {};
+      const uidList: string[] = [];
+
+      list.forEach((user) => {
+        userMap[user.userId] = user;
+        uidList.push(user.userId);
+      });
+
       // 更新缓存
-      userRoomMap.value[roomId] = {
+      chat.atMemberRoomMap[roomId] = {
         time: Date.now(),
-        list,
+        uidList,
+        userMap,
       };
     }
   }
@@ -737,8 +746,8 @@ export function useLoadAtUserList() {
       return;
     // 清除对应缓存
     const roomId = chat.theRoomId!;
-    if (userRoomMap.value[roomId]) {
-      delete userRoomMap.value[roomId];
+    if (chat.atMemberRoomMap[roomId]) {
+      delete chat.atMemberRoomMap[roomId];
     }
     loadUser();
   }, {

@@ -20,6 +20,7 @@ const pageInfo = ref({
 });
 const historyContactId = useLocalStorage<number | undefined>(`${user.userId}-history-contact-id`, undefined);
 const isLoadRoomMap: Record<number, boolean> = {};
+const currentRoomIndex = computed(() => chat.getContactList.findIndex(room => room.roomId === chat.theRoomId));
 // 滚动顶部触发
 const scrollbarRef = useTemplateRef("scrollbarRef");
 const isScrollTop = ref(true);
@@ -270,7 +271,7 @@ watch(() => chat.theRoomId, (newRoomId) => {
         // 如果元素不在视图中，则滚动到可见位置
         if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
           selectedElement.scrollIntoView({
-            behavior: "smooth",
+            // behavior: "smooth",
             block: "nearest",
           });
         }
@@ -378,13 +379,7 @@ onMounted(() => {
         {{ showWsStatusTxt }}
       </div>
     </div>
-
     <!-- 会话列表 -->
-    <!-- 添加骨架屏 -->
-    <div v-if="isReload" key="skeleton" class="main-bg-color absolute z-2 h-full w-full overflow-y-auto">
-      <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
-    </div>
-
     <ListVirtualScrollList
       ref="scrollbarRef"
       :overscan="20"
@@ -395,11 +390,17 @@ onMounted(() => {
       :class-name="['contact-list', isAnimateDelay ? 'stop-transition' : '']"
       item-class="contact-item"
       :get-item-key="(room) => room.roomId"
-      :selected-index="chat.getContactList.findIndex(room => room.roomId === chat.theRoomId)"
+      :selected-index="currentRoomIndex"
       @scroll="onScroll"
       @end-reached="handleEndReached"
       @item-click="onClickContact"
     >
+      <!-- 添加骨架屏 -->
+      <template #pre>
+        <div v-if="isReload" key="skeleton" class="main-bg-color absolute left-0 top-0 z-2 h-full w-full flex-1 overflow-y-hidden">
+          <ChatContactSkeleton v-for="i in 10" :key="i" class="contact" />
+        </div>
+      </template>
       <template #default="{ item: room }">
         <div
           :id="`contact-${room.roomId}`"
@@ -450,7 +451,7 @@ onMounted(() => {
       </template>
 
       <template #empty>
-        <div data-fades class="flex-row-c-c flex-col py-10vh text-small">
+        <div v-if="!isReload || !isLoading" data-fades class="flex-row-c-c flex-col py-10vh text-small">
           <i class="i-solar:chat-round-bold-duotone mb-4 p-5" />
           <span>快去找人聊天吧！</span>
         </div>
