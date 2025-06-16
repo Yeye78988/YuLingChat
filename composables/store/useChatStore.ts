@@ -187,6 +187,7 @@ export const useChatStore = defineStore(
     };
 
     /* ------------------------------------------- 群聊成员操作 ------------------------------------------- */
+    const atMemberRoomMap = ref<Record<number, { time: number, uidList: string[], userMap: Record<string, AtChatMemberOption> }>>({}); // 房间号: {}
     const roomMapCache = ref<Record<string, RoomChacheData>>({}); // 缓存当前房间的成员列表
     const currentRoomCache = computed(() => {
       if (theRoomId.value !== undefined) {
@@ -1018,6 +1019,7 @@ export const useChatStore = defineStore(
     return {
       // state
       msgForm,
+      atMemberRoomMap,
       rtcCallType,
       showRtcCall,
       showExtension,
