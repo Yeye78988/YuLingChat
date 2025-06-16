@@ -1,6 +1,6 @@
 <div align=center>
  <div align=center margin="10em" style="margin:4em 0 0 0;font-size: 30px;letter-spacing:0.3em;">
-<img src="./.doc/jiwuchat-tauri.png" width="140px" height="140px" alt="Image Name" align=center />
+<img src="./jiwuchat-tauri.png" width="140px" height="140px" alt="Image Name" align=center />
  </div>
  <h2 align=center style="margin: 2em 0;">JiwuChat Tauri APP</h2>
 
@@ -42,17 +42,17 @@
 
 Official Website: [JiwuChat](https://jiwuchat.kiwi233.top/)
 <br>
-Language : [简体中文](./README.md) | English
+Language : [简体中文](../README.md) | **English** | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Français](./README.fr.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Português](./README.pt.md) | [Русский](./README.ru.md)
 
 </div>
 
 ## Introduction
 
-JiwuChat is a lightweight `(~10MB)` multi-platform chat application built with Tauri2 and Nuxt3. It supports various real-time messaging features, AI group chat bots (integrated with `iFlytek Spark`, `KimiAI`, etc.), `WebRTC audio/video calls`, screen sharing, and AI-powered shopping. It enables seamless cross-device communication, supporting text, images, files, and voice messages, along with group chats and customizable settings. Light/dark mode is available for efficient social networking. ✨
+JiwuChat is a lightweight `(~8MB)` multi-platform chat application built with Tauri2 and Nuxt3. It supports various real-time messaging features, AI group chat bots (integrated with `iFlytek Spark`, `KimiAI`, etc.), `WebRTC audio/video calls`, screen sharing, and AI-powered shopping. It enables seamless cross-device communication, supporting text, images, files, and voice messages, along with group chats and customizable settings. Light/dark mode is available for efficient social networking. ✨
 
 ## One Codebase, Multiple Platforms
 
-![Multi-platform Support](.doc/previews.png)
+![Multi-platform Support](./previews.png)
 
 ## Default Account
 
@@ -84,68 +84,68 @@ JiwuChat is a lightweight `(~10MB)` multi-platform chat application built with T
 
 - Desktop App: Login / Register  
 
-![Login](./.doc/login.png)  
+![Login](./login.png)  
 
-![Register](./.doc/register.png)  
+![Register](./register.png)  
 
 - Light / Dark Themes  
 
-![Light](./.doc/chat1.png)  
+![Light](./chat1.png)  
 
-![Home](./.doc/chat.png)  
+![Home](./chat.png)  
 
 - AI Chatbots (DeepSeek, iFlytek Spark, Kimi AI) 🤩  
 
-![AI Chatbot](./.doc/group-ai-ds.png)  
+![AI Chatbot](./group-ai-ds.png)  
 
-![AI Chatbot](./.doc/group-ai-2.png)  
+![AI Chatbot](./group-ai-2.png)  
 
-![AI Chatbot](./.doc/group-ai-1.png)  
+![AI Chatbot](./group-ai-1.png)  
 
 - Audio/Video Calls (WebRTC)  
 
-![Audio/Video](./.doc/rtc1.png)  
+![Audio/Video](./rtc1.png)  
 
 - Screen Sharing  
 
-![Screen Sharing](./.doc/rtc3.png)  
+![Screen Sharing](./rtc3.png)  
 
 - Social Chat  
 
-![Dark](./.doc/chat2.png)  
+![Dark](./chat2.png)  
 
 - AI Shopping (Powered by [Jiwu Circle](https://github.com/KiWi233333/jiwu-mall-sites))  
 
-![Dark](./.doc/chat3.png)  
+![Dark](./chat3.png)  
 
-![Dark](./.doc/chat3.2.png)  
+![Dark](./chat3.2.png)  
 
 - Account & Security  
 
-![Account](./.doc/chat4.png)  
+![Account](./chat4.png)  
 
-![Security](./.doc/chat5.png)  
+![Security](./chat5.png)  
 
 - Settings  
 
-![Settings](./.doc/chat6-light.png)  
+![Settings](./chat6-light.png)  
 
 - Mobile Adaptation  
 
 <div>
- <img src="./.doc/chat12.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat14.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat13.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat7.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/rtc2.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/rtc_remove_desktop.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat8.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat10.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat15.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat11.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat17.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat16.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
- <img src="./.doc/chat9.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat12.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat14.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat13.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat7.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./rtc2.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./rtc_remove_desktop.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat8.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat10.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat15.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat11.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat17.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat16.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
+ <img src="./chat9.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
 </div>  
 
 ## ⏳ Getting Started  
@@ -236,4 +236,4 @@ pnpm config set registry https://registry.npmjs.org
 
 - Email: [kiwi2333@qq.com](mailto:kiwi2333@qq.com)  
 - QQ: [1329634286](https://wpa.qq.com/msgrd?v=3&uin=1329634286&site=qqq&menu=yes)  
-- QQ Group: [939204073](https://qm.qq.com/q/iSaETNVdKw)  
+- QQ Group: [939204073](https://qm.qq.com/q/iSaETNVdKw)
