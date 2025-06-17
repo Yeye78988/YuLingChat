@@ -27,7 +27,7 @@ defineProps<{
       </div>
       <small
         v-if="data?.message?.body?.noticeAll"
-        ctx-name="atUidList"
+        ctx-name="mentionList"
         class="flex-ml-a notice-all"
       >
         @所有人

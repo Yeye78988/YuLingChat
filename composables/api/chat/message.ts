@@ -190,7 +190,8 @@ export const msgBodyVOBuilderMap = {
     const body = formData.body as TextBodyDTO;
     return {
       urlContentMap: {},
-      atUidList: body?.atUidList || [],
+      // atUidList: body?.atUidList || [],
+      mentionList: body?.mentionList || [],
       reply: body?.replyMsgId
         ? buildReplyVO(formData.roomId!, Number(body.replyMsgId))
         : undefined,
@@ -347,7 +348,8 @@ export interface MessageBodyMap {
 export interface TextBodyMsgVO {
   // content: string;
   urlContentMap: { [key: string]: UrlInfoDTO };
-  atUidList: string[];
+  // atUidList: string[];
+  mentionList?: MentionInfo[];
   reply?: ReplyMsgVO;
   // [property: string]: any;
 }
@@ -496,7 +498,8 @@ export interface AiChatBodyMsgVO {
 export interface AiChatReplyBodyMsgVO {
   content?: string;
   urlContentMap?: { [key: string]: UrlInfoDTO };
-  atUidList?: string[];
+  // atUidList?: string[];
+  mentionList?: MentionInfo[];
   reply?: {
     id: number;
     uid: string;
@@ -586,7 +589,13 @@ interface MessageBodyDTOMap {
 }
 export interface TextBodyDTO {
   replyMsgId?: string;
-  atUidList?: string[];
+  // atUidList?: string[];
+  mentionList?: MentionInfo[];
+}
+
+export interface MentionInfo {
+  uid: string;
+  displayName: string;
 }
 export interface ImgBodyDTO {
   url: string;

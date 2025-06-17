@@ -60,6 +60,19 @@
   .flex-mr-a {
     margin-left: auto;
   }
+
+  // 子元素 @ 和 url
+  :deep(.at-user) {
+    --at-apply: "text-theme-info font-500 op-80 hover:op-100 transition-opacity cursor-pointer";
+  }
+  :deep(.msg-link) {
+    --at-apply: "inline underline text-theme-info text-shadow transition-colors";
+
+    &::before {
+      content: "";
+      --at-apply: "rounded-4 mr-1 p-2 cursor-pointer i-solar:link-line-duotone";
+    }
+  }
 }
 // 系统
 .notice {
@@ -124,5 +137,13 @@
   }
   .flex-col {
     justify-content: right;
+  }
+
+  // 子元素 @ 和 url
+  :deep(.at-user) {
+    --at-apply: "text-white font-500 text-shadow op-80 hover:op-100 transition-opacity cursor-pointer";
+  }
+  :deep(.msg-link) {
+    --at-apply: "underline text-white text-shadow transition-colors";
   }
 }

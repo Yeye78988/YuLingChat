@@ -7,7 +7,7 @@ class SecurityUtils {
   static sanitizeInput(input: string): string {
     if (typeof input !== "string")
       return "";
-    return input.replace(/[<>'"&]/g, "").trim();
+    return input.replace(/[<>'"&]/g, "");
   }
 
   static createSafeElement(tagName: string, className: string, attributes: Record<string, string> = {}): HTMLElement {
@@ -578,6 +578,7 @@ export function useMsgInputForm(
       if (range && msgInputRef.value) {
         const beforeText = InputDetector.getBeforeText(range, msgInputRef.value);
         const detection = InputDetector.detectType(beforeText);
+        console.log(beforeText);
 
         if (detection.type === "at" && userAtOptions.value.length > 0 && !isReplyAI.value) {
           atFilterKeyword.value = detection.keyword;
@@ -615,7 +616,6 @@ export function useMsgInputForm(
     resolveContentAtUsers();
     resolveContentAiAsk();
   }
-
   function resolveContentAtUsers() {
     const users = tagManager.parseFromDom(".at-user-tag", (tag) => {
       const uid = tag.getAttribute("data-uid");

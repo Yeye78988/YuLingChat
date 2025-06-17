@@ -117,13 +117,14 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       {
         label: "打开链接",
-        hidden: !txt || !txt?.match(/https?:\/\/\S+/g)?.length,
+        hidden: !Object.keys(data.message.body?.urlContentMap || {}).length,
         customClass: "group",
         icon: "i-solar:link-line-duotone group-hover:(scale-110 i-solar:link-bold-duotone) group-btn-info",
         onClick: () => {
           if (!txt)
             return;
-          const urls = txt?.match(/https?:\/\/\S+/g);
+          const urlMap = data.message.body?.urlContentMap || {};
+          const urls = Object.keys(urlMap);
           if (!urls?.length) {
             return ElMessage.error("抱歉找不到链接！");
           }
@@ -561,185 +562,209 @@ export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSi
 
 export function useRenderMsg(msg: ChatMessageVO) {
   const chat = useChatStore();
+  const body = msg?.message?.body as TextBodyMsgVO;
+  const urlContentMap = body.urlContentMap || {};
+  const mentionList = body.mentionList || [];
+
   const parsedContent = computed(() => {
     const content = msg.message.content || "";
     if (!content)
       return [];
-    return parseMessageContent(content);
+
+    return parseMessageContentWithMentionsAndUrls(content, mentionList, urlContentMap);
   });
 
+type Token
+  = | {
+    type: "text";
+    content: string;
+    startIndex: number;
+    endIndex: number;
+  }
+  | {
+    type: "mention";
+    content: string;
+    data: MentionInfo;
+    startIndex: number;
+    endIndex: number;
+  }
+  | {
+    type: "url";
+    content: string;
+    data: {
+      url: string;
+      title?: string;
+      description?: string;
+    };
+    startIndex: number;
+    endIndex: number;
+  };
+/**
+ * 解析消息内容，替换@提及和链接
+ */
+function parseMessageContentWithMentionsAndUrls(
+  content: string,
+  mentions: MentionInfo[],
+  urlMap: { [key: string]: UrlInfoDTO },
+) {
+  const tokens: Token[] = [];
 
-  // 获取当前房间被@的用户列表（基于atUidList）
-  const currentRoomAtUsers = computed(() => {
-    const roomId = msg.message.roomId;
-    const atUidList = msg.message.body?.atUidList || [];
+  // 收集所有需要替换的位置信息
+  const replacements: Array<{
+    start: number;
+    end: number;
+    type: "mention" | "url";
+    data: any;
+    displayText: string;
+  }> = [];
 
-    if (!roomId || !atUidList.length)
-      return [];
+  // 创建副本以避免修改原始数据
+  const remainingMentions = [...mentions];
+  const remainingUrlMap = { ...urlMap };
 
-    // 基于atUidList获取用户信息列表
-    const atUsers: AtChatMemberOption[] = [];
-    atUidList.forEach((uid: string) => {
-      const userInfo = chat.atMemberRoomMap[roomId]?.userMap[uid];
-      if (userInfo && userInfo.nickName) {
-        atUsers.push(userInfo);
-      }
-    });
-
-    return atUsers;
-  });
-
-  // 基于atUidList进行内容解析，每个用户只匹配一次
-  function parseMessageContent(content: string) {
-    const tokens: Array<{ type: "text" | "at" | "link", content: string, data?: any }> = [];
-
-    // 创建可用的@用户列表副本，匹配后移除
-    const availableAtUsers = [...currentRoomAtUsers.value];
-
-    let remainingContent = content;
-
-    while (remainingContent.length > 0) {
-      let foundMatch = false;
-      let earliestMatch: { index: number, length: number, type: "at" | "link", data?: any } | null = null;
-
-      // 查找最早的@用户匹配
-      availableAtUsers.forEach((userInfo, userIndex) => {
-        const atPattern = `@${userInfo.nickName} `;
-        const atIndex = remainingContent.indexOf(atPattern);
-
-        if (atIndex !== -1) {
-          if (!earliestMatch || atIndex < earliestMatch.index) {
-            earliestMatch = {
-              index: atIndex,
-              length: atPattern.length,
-              type: "at",
-              data: {
-                nickname: userInfo.nickName,
-                userId: userInfo.userId,
-                userInfo,
-                userIndex, // 记录用户在数组中的索引，用于后续移除
-              },
-            };
-          }
-        }
+  // 处理@提及
+  remainingMentions.forEach((mention, mentionIndex) => {
+    // 查找@mention的位置，支持多种格式：@username、@[username]等
+    const index = content.indexOf(mention.displayName);
+    if (index !== -1) {
+      replacements.push({
+        start: index,
+        end: index + mention.displayName.length,
+        type: "mention",
+        data: mention,
+        displayText: mention.displayName,
       });
+      // 移除已匹配的mention，防止重复匹配
+      remainingMentions.splice(mentionIndex, 1);
+    }
+  });
 
-      // 查找最早的链接匹配
-      const linkRegex = /https?:\/\/[^\s<>"{}|\\^`[\]]+/;
-      const linkMatch = linkRegex.exec(remainingContent);
-      if (linkMatch && linkMatch.index !== undefined) {
-        if (!earliestMatch || linkMatch.index < (earliestMatch as any).index) {
-          earliestMatch = {
-            index: linkMatch.index,
-            length: linkMatch[0].length,
-            type: "link",
-            data: { url: linkMatch[0] },
-          };
-        }
-      }
+  // 处理URL链接
+  Object.entries(remainingUrlMap).forEach(([originalUrl, urlInfo]) => {
+    const index = content.indexOf(originalUrl);
+    if (index !== -1) {
+      replacements.push({
+        start: index,
+        end: index + originalUrl.length,
+        type: "url",
+        data: {
+          ...urlInfo,
+          url: originalUrl, // 确保URL信息包含原始链接
+        },
+        displayText: `${urlInfo.title} (${originalUrl})`,
+      });
+      // 移除已匹配的URL，防止重复匹配
+      delete remainingUrlMap[originalUrl];
+    }
+  });
 
-      if (earliestMatch) {
-        foundMatch = true;
+  // 按位置排序，避免重叠
+  replacements.sort((a, b) => a.start - b.start);
 
-        // 添加匹配前的文本
-        if (earliestMatch.index > 0) {
-          const textContent = remainingContent.slice(0, earliestMatch.index);
-          tokens.push({
-            type: "text",
-            content: textContent,
-          });
-        }
+  // 去除重叠的替换项
+  const filteredReplacements = replacements.filter((current, index) => {
+    if (index === 0)
+      return true;
+    const previous = replacements[index - 1];
+    return current.start >= (previous?.end || 0);
+  });
 
-        // 添加匹配的内容
-        if (earliestMatch.type === "at") {
-          tokens.push({
-            type: "at",
-            content: remainingContent.slice(earliestMatch.index, earliestMatch.index + earliestMatch.length),
-            data: {
-              nickname: earliestMatch.data?.nickname,
-              userId: earliestMatch.data?.userId,
-              userInfo: earliestMatch.data?.userInfo,
-            },
-          });
+  // 构建token列表
+  let currentIndex = 0;
 
-          // 从可用用户列表中移除已匹配的用户
-          if (earliestMatch.data?.userIndex !== undefined) {
-            availableAtUsers.splice(earliestMatch.data.userIndex, 1);
-          }
-        }
-        else if (earliestMatch.type === "link") {
-          tokens.push({
-            type: "link",
-            content: remainingContent.slice(earliestMatch.index, earliestMatch.index + earliestMatch.length),
-            data: earliestMatch.data,
-          });
-        }
-
-        // 更新剩余内容
-        remainingContent = remainingContent.slice(earliestMatch.index + earliestMatch.length);
-      }
-
-      if (!foundMatch) {
-      // 没有找到任何匹配，将剩余内容作为文本处理
-        if (remainingContent) {
-          tokens.push({
-            type: "text",
-            content: remainingContent,
-          });
-        }
-        break;
+  filteredReplacements.forEach((replacement) => {
+    // 添加替换前的文本
+    if (currentIndex < replacement.start) {
+      const textContent = content.slice(currentIndex, replacement.start);
+      if (textContent) {
+        tokens.push({
+          type: "text",
+          content: textContent,
+          startIndex: currentIndex,
+          endIndex: replacement.start,
+        });
       }
     }
 
-    return tokens;
-  }
-  // @unocss-include
-  // 优化渲染函数，使用更高效的VNode创建
-  function renderMessageContent() {
-    return parsedContent.value.map((token, index) => {
-      switch (token.type) {
-        case "at":
-          return h("span", {
-            "key": `at-${index}`,
-            "title": "前往用户主页",
-            "class": "at-user text-theme-info font-500 op-80 hover:op-100 transition-opacity cursor-pointer",
-            "data-nickname": token.data?.nickname,
-            "data-user-id": token.data?.userId,
-            "onClick": () => handleAtClick(token.data?.userInfo),
-          }, token.content);
-
-        case "link":
-          return h("a", {
-            key: `link-${index}`,
-            href: token.data?.url,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            class: "msg-link underline text-theme-info font-500",
-          }, token.content);
-
-        default:
-          return h("span", {
-            key: `text-${index}`,
-          }, token.content);
-      }
+    // 添加替换项
+    tokens.push({
+      type: replacement.type,
+      content: replacement.displayText,
+      data: replacement.data,
+      startIndex: replacement.start,
+      endIndex: replacement.end,
     });
+
+    currentIndex = replacement.end;
+  });
+
+  // 添加剩余的文本
+  if (currentIndex < content.length) {
+    const remainingText = content.slice(currentIndex);
+    if (remainingText) {
+      tokens.push({
+        type: "text",
+        content: remainingText,
+        startIndex: currentIndex,
+        endIndex: content.length,
+      });
+    }
   }
 
-  // 添加点击处理函数
-  function handleAtClick(userInfo?: AtChatMemberOption) {
-    if (!userInfo)
-      return;
+  return tokens;
+}
 
-    // 跳转到用户详情页面
-    navigateTo({
-      path: "/user",
-      query: {
-        id: userInfo.userId,
-      },
-    });
-  }
+// @unocss-include
+// 优化渲染函数，使用更高效的VNode创建
+function renderMessageContent() {
+  return parsedContent.value.map((token, index) => {
+    switch (token.type) {
+      case "mention":
+        return h("span", {
+          "key": `mention-${index}`,
+          "title": `前往 ${token.data?.displayName} 的主页`,
+          "class": "at-user",
+          "data-display-name": token.data?.displayName,
+          "data-user-id": token.data?.uid,
+          "ctx-name": "content",
+          "onClick": () => handleMentionClick(token.data),
+        }, token.content);
 
-  return {
-    renderMessageContent,
-  };
+      case "url":
+        return h("a", {
+          "key": `url-${index}`,
+          "href": token.data?.url,
+          "ctx-name": "content",
+          "target": "_blank",
+          "rel": "noopener noreferrer",
+          "class": "msg-link",
+          "title": token.data?.description || token.data?.url || token.content,
+        }, token.content);
+
+      default:
+        return h("span", {
+          "ctx-name": "content",
+          "key": `text-${index}`,
+        }, token.content);
+    }
+  });
+}
+
+// 处理@提及点击
+function handleMentionClick(mentionItem?: MentionInfo) {
+  if (!mentionItem)
+    return;
+
+  // 跳转到用户详情页面
+  navigateTo({
+    path: "/user",
+    query: {
+      id: mentionItem.uid,
+    },
+  });
+}
+
+return {
+  renderMessageContent,
+};
 }

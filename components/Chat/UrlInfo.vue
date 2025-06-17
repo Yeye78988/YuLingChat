@@ -18,17 +18,16 @@ function handleContextMenu() {
 
 <template>
   <a class="flex flex-col" target="_blank" :href="url" title="点击查看详情" rel="noopener noreferrer">
-    <p v-if="data.title" class="text-overflow-2 text-0.8em" :title="data.title">
-      {{ data.title }}
+    <p class="text-overflow-2 text-0.8em" :title="data.title">
+      {{ data.title || "网站名称不可访问" }}
     </p>
     <div class="mt-1 flex justify-between">
-      <small v-if="data.description" class="text-overflow-3 max-w-12em flex-1 text-mini">
-        {{ data.description }}
+      <small class="text-overflow-3 mr-2 max-w-12em flex-1 text-mini">
+        {{ data.description || "暂无网站具体描述，可能是站内资源" }}
       </small>
       <CardElImage
-        v-if="data.image"
         :src="data.image"
-        :alt="data.title || '图片'"
+        alt="查看大图"
         class="h-10 w-10 shrink-0 card-rounded-df object-cover bg-color-2"
         @click.stop.prevent.capture="handleContextMenu"
       />

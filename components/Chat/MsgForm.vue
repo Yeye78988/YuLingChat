@@ -115,19 +115,18 @@ async function handleSubmit() {
 async function onSubmit() {
   const formDataTemp = JSON.parse(JSON.stringify(chat.msgForm));
   if (chat.msgForm.content) {
-    if (document.querySelector(".at-select")) // enter冲突at选择框
-      return;
-
-    if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
-      const { atUidList } = resolveAtUsers(formDataTemp.content, userOptions.value);
-      if (atUidList?.length) {
-        chat.atUserList = [...atUidList];
-        formDataTemp.body.atUidList = [...new Set(atUidList)];
+    if (document.querySelector(".at-select")) { // enter冲突at选择框      return;
+      if (chat.theContact.type === RoomType.GROUP) { // 处理 @用户
+        const { mentionList } = resolveAtUsers(formDataTemp.content, userOptions.value);
+        if (mentionList?.length) {
+          chat.atUserList = [...mentionList.map(m => ({ userId: m.uid, nickName: m.displayName }))];
+          formDataTemp.body.mentionList = [...mentionList];
+        }
       }
     }
 
     // 处理 AI机器人 TODO: 可改为全体呼叫
-    const { replaceText, aiRobitUidList } = resolteAiReply(formDataTemp.content, aiOptions.value, chat.askAiRobotList);
+    const { replaceText, aiRobitUidList } = resolveAiReply(formDataTemp.content, aiOptions.value, chat.askAiRobotList);
     if (aiRobitUidList.length > 0) {
       if (!replaceText)
         return false;
@@ -333,7 +332,7 @@ function resetForm() {
     msgType: MessageType.TEXT, // 默认
     content: "",
     body: {
-      atUidList: [],
+      mentionList: [],
     },
   };
   imgList.value = [];

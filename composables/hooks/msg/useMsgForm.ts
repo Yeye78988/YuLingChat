@@ -344,7 +344,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
         msgType: MessageType.FILE,
         content: chat.msgForm.content,
         body: {
-          atUidList: chat.msgForm?.body?.atUidList,
+          mentionList: chat.msgForm?.body?.mentionList,
           url: key,
           fileName: file?.file?.name,
           size: file?.file?.size,
@@ -646,25 +646,28 @@ interface RefDoms {
  * @param text 文本内容
  * @param userOptions 所有用户列表
  * @returns
- *  uidList: 识别到的@用户的uid列表
- *  atUidList: 识别到的@用户的{userId, nickName}列表
+ *  mentionList: 识别到的@用户的{uid, nickName}列表
  */
-export function resolveAtUsers(text: string, userOptions: AtChatMemberOption[], configs: AtConfigs = { regExp: /@\S+\(#(\S+)\)\s/g }): { atUidList: AtChatMemberOption[] } {
+export function resolveAtUsers(text: string, userOptions: AtChatMemberOption[], configs: AtConfigs = { regExp: /@\S+\(#(\S+)\)\s/g }): { mentionList: MentionInfo[] } {
   const { regExp } = configs;
   if (!regExp || !text)
     throw new Error("regExp is required");
-  const atUidList: AtChatMemberOption[] = [];
+  const mentionList: MentionInfo[] = [];
   const matches = text.matchAll(regExp);
   for (const match of matches) {
     // 识别@和括号直接的昵称
     if (match[1]) {
       const atUser = userOptions.find(u => u.username === match[1]);
-      if (atUser)
-        atUidList.push(atUser);
+      if (atUser) {
+        mentionList.push({
+          uid: atUser.userId,
+          displayName: `@${atUser.nickName}`,
+        });
+      }
     }
   }
   return {
-    atUidList: JSON.parse(JSON.stringify(atUidList)),
+    mentionList: JSON.parse(JSON.stringify(mentionList)),
   };
 }
 
@@ -886,7 +889,7 @@ export function checkAiReplyWhole(context: string | undefined | null, pattern: s
  * @returns
  *  aiReply: 识别到的/AI回复
  */
-export function resolteAiReply(
+export function resolveAiReply(
   text: string,
   aiOptions: AskAiRobotOption[],
   selectedOptions: AskAiRobotOption[] = [],

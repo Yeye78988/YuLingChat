@@ -330,7 +330,7 @@ async function handleImageSubmit(files: File[]) {
 
 async function onSubmit() {
   const formDataTemp = JSON.parse(JSON.stringify(chat.msgForm));
-  // 纯文本类
+  // 文本类
   if (chat.msgForm.content) {
     if (document.querySelector(".at-select")) // enter冲突at选择框
       return;
@@ -339,12 +339,16 @@ async function onSubmit() {
       const atUidList = resolveContentAtUsers();
       if (atUidList?.length) {
         chat.atUserList = atUidList;
-        formDataTemp.body.atUidList = atUidList.map(item => item.userId);
+        // 将 atUidList 转换为 mentionList 格式
+        formDataTemp.body.mentionList = atUidList.map(item => ({
+          uid: item.userId,
+          displayName: `@${item.nickName}`,
+        }));
       }
     }
 
     // 处理 AI机器人 TODO: 可改为全体呼叫
-    const { replaceText, aiRobitUidList } = resolteAiReply(formDataTemp.content, aiOptions.value, chat.askAiRobotList);
+    const { replaceText, aiRobitUidList } = resolveAiReply(formDataTemp.content, aiOptions.value, chat.askAiRobotList);
     if (aiRobitUidList.length > 0) {
       if (!replaceText)
         return false;
@@ -365,7 +369,7 @@ async function onSubmit() {
       return false;
     }
     if (imgList.value.length > 1) {
-      return await multiSubmitImg();
+      return await multiSubmitImg(formDataTemp);
     }
   }
   // 文件
@@ -422,7 +426,7 @@ async function onSubmit() {
  * 消息发送配置接口
  */
 interface MessageSubmitConfig extends ChatMessageDTO {
-  skipReset?: boolean;
+  _skipReset?: boolean;
   validateFn?: () => boolean | string;
   prepareData?: () => Partial<ChatMessageDTO>;
 }
@@ -470,13 +474,13 @@ async function submitMessage(
   // 添加到消息队列
   chat.addToMessageQueue(formData, (msg: ChatMessageVO) => {
     emit("submit", msg);
-    if (!(config as MessageSubmitConfig).skipReset) {
+    if (!(config as MessageSubmitConfig)._skipReset) {
       resetForm();
     }
     callback?.(msg);
   });
 
-  if (!(config as MessageSubmitConfig).skipReset) {
+  if (!(config as MessageSubmitConfig)._skipReset) {
     resetForm();
   }
   isSending.value = false;
@@ -485,9 +489,8 @@ async function submitMessage(
 /**
  * 批量发送图片消息
  */
-async function multiSubmitImg() {
+async function multiSubmitImg(rawMsgFormData: ChatMessageDTO) {
   isSending.value = true;
-  const formTemp = JSON.parse(JSON.stringify(chat.msgForm));
   const uploadedFiles = new Set();
 
   // 批量发送图片
@@ -502,7 +505,7 @@ async function multiSubmitImg() {
         height: file.height || 0,
         size: file?.file?.size || 0,
       },
-      skipReset: true,
+      _skipReset: true,
     });
     uploadedFiles.add(file.key);
   }
@@ -511,17 +514,19 @@ async function multiSubmitImg() {
   imgList.value = imgList.value.filter(file => !uploadedFiles.has(file.key));
 
   // 发送文本消息
-  if (formTemp.content) {
+  if (rawMsgFormData.content) {
     await submitMessage({
       roomId: chat.theRoomId!,
       msgType: MessageType.TEXT,
-      content: formTemp.content,
+      content: rawMsgFormData.content,
       body: {
-        ...formTemp.body,
+        ...rawMsgFormData.body,
         url: undefined,
+        width: undefined,
+        height: undefined,
         size: undefined,
       },
-      skipReset: true,
+      _skipReset: true,
     });
   }
 
@@ -605,7 +610,7 @@ function resetForm() {
     msgType: MessageType.TEXT, // 默认
     content: "",
     body: {
-      atUidList: [],
+      mentionList: [],
     },
   };
   clearInputContent();
@@ -1417,7 +1422,7 @@ defineExpose({
 
     &:empty:before {
       content: attr(data-placeholder);
-      --at-apply: "text-small";
+      --at-apply: "text-mini line-height-none";
       pointer-events: none;
     }
 
