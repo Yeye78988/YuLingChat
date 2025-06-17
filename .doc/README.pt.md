@@ -40,7 +40,7 @@
       </a>
     </div>
 
-Site Oficial: [JiwuChat](https://jiwuchat.kiwi233.top/)
+Site Oficial: [JiwuChat](https://blog.jiwuchat.top/)
 <br>
 Idioma : [简体中文](../README.md) | [English](./README.en.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Français](./README.fr.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | **Português** | [Русский](./README.ru.md)
 

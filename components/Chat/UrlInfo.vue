@@ -22,7 +22,7 @@ function handleContextMenu() {
       {{ data.title || "网站名称不可访问" }}
     </p>
     <div class="mt-1 flex justify-between">
-      <small class="text-overflow-3 mr-2 max-w-12em flex-1 text-mini">
+      <small class="text-overflow-3 mr-2 flex-1 text-mini">
         {{ data.description || "暂无网站具体描述，可能是站内资源" }}
       </small>
       <CardElImage

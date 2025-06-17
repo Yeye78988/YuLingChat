@@ -41,7 +41,7 @@
   </a>
     </div>
 
-Официальный сайт：[JiwuChat](https://jiwuchat.kiwi233.top/)
+Официальный сайт：[JiwuChat](https://blog.jiwuchat.top/)
 <br>
 Языки : [简体中文](./README.zh-CN.md) | [English](./README.en.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Français](./README.fr.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Português](./README.pt.md) | **Русский**
 

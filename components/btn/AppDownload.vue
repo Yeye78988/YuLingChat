@@ -43,7 +43,7 @@ onMounted(async () => {
   <template v-if="setting.isWeb">
     <el-tooltip content="JiwuChat 官网" placement="bottom">
       <a
-        href="https://jiwuchat.kiwi233.top/" target="_blank"
+        href="https://blog.jiwuchat.top/" target="_blank"
         title="JiwuChat 官网"
         class="h-2rem w-2rem flex-row-c-c cursor-pointer rounded-full shadow-sm sm:(h-1.8rem w-1.8rem) border-default card-default"
         v-bind="$attrs"

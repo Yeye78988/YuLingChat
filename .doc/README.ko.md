@@ -40,7 +40,7 @@
       </a>
     </div>
 
-공식 웹사이트: [JiwuChat](https://jiwuchat.kiwi233.top/)
+공식 웹사이트: [JiwuChat](https://blog.jiwuchat.top/)
 <br>
 언어 : [简体中文](../README.md) | [English](./README.en.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Français](./README.fr.md) | [日本語](./README.ja.md) | **한국어** | [Português](./README.pt.md) | [Русский](./README.ru.md)
 
