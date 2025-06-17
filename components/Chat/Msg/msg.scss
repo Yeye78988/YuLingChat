@@ -53,6 +53,10 @@
   .at-list {
     --at-apply: "max-w-full text-0.75rem w-fit  truncate flex-ml-a w-fit cursor-pointer truncate px-2 text-color-info card-default";
   }
+  // url解析
+  .url-info {
+    --at-apply: "";
+  }
   .flex-mr-a {
     margin-left: auto;
   }

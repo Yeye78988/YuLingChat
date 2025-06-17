@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { useRenderMsg } from ".";
+
 // import { dayjs } from "element-plus";
 
 /**
@@ -10,7 +12,7 @@ const { data } = defineProps<{
   prevMsg?: Partial<ChatMessageVO<TextBodyMsgVO>>
   index: number
 }>();
-defineEmits(["clickAvatar"]);
+const emit = defineEmits(["clickAvatar"]);
 
 const chat = useChatStore();
 const user = useUserStore();
@@ -40,14 +42,20 @@ const sendStatus = computed(() => {
 // 计算是否需要显示回复
 const showReply = computed(() => !!body.value?.reply);
 
+const urlContentMap = body.value?.urlContentMap || {};
 // 计算是否需要显示@提醒
-const showAtMe = computed(() =>
-  !!body.value?.atUidList?.length
-  && body.value.atUidList.includes(user?.userInfo?.id),
-);
+const atUidList = body.value?.atUidList || [];
+const showAtMe = computed(() => {
+  if (atUidList.length) {
+    return atUidList.includes(user.userInfo?.id);
+  }
+});
 
 // 计算是否需要显示翻译
 const showTranslation = computed(() => !!body.value?._textTranslation);
+
+// 渲染消息
+const { renderMessageContent } = useRenderMsg(data);
 </script>
 
 <template>
@@ -62,7 +70,7 @@ const showTranslation = computed(() => !!body.value?._textTranslation);
       class="avatar h-2.4rem w-2.4rem flex-shrink-0 cursor-pointer rounded-1/2 object-cover border-default"
       @click="$emit('clickAvatar', data.fromUser.userId)"
     />
-    <!-- 消息体 - 合并了一些嵌套结构 -->
+    <!-- 消息体 -->
     <div class="body">
       <!-- 昵称和插槽区域 -->
       <div class="flex-res">
@@ -71,10 +79,11 @@ const showTranslation = computed(() => !!body.value?._textTranslation);
         <!-- 发送状态 -->
         <ChatMsgSendStatus v-if="sendStatus" :status="sendStatus" :msg-id="data.message.id" />
       </div>
-      <!-- 内容 - 使用插槽 -->
+
+      <!-- 内容 - 使用渲染函数 -->
       <slot name="body" :send-status="sendStatus">
-        <p class="msg-popper msg-wrap" ctx-name="content">
-          {{ data.message.content }}
+        <p class="msg-popper msg-wrap whitespace-pre-wrap break-words" ctx-name="content">
+          <component :is="() => renderMessageContent()" />
         </p>
       </slot>
 
@@ -90,6 +99,19 @@ const showTranslation = computed(() => !!body.value?._textTranslation);
         {{ `${body?.reply?.nickName} : ${body?.reply?.body?.substring(0, 50) || ''}` }}
       </small>
 
+      <!-- AT @ - 使用v-if减少DOM -->
+      <p
+        v-if="urlContentMap"
+        ctx-name="urlContentMap"
+      >
+        <ChatUrlInfo
+          v-for="(urlInfo, key) in urlContentMap"
+          :key="key"
+          :url="String(key)"
+          :data="urlInfo"
+          class="url-info max-w-16rem min-w-12rem card-rounded-df p-2 shadow-sm transition-200 bg-color-br sm:p-4 hover:(shadow)"
+        />
+      </p>
       <!-- AT @ - 使用v-if减少DOM -->
       <small
         v-if="showAtMe"
