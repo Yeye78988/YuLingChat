@@ -98,20 +98,27 @@ async function fetchContacts() {
     return;
   isLoading.value = true;
   isSyncing.value = true;
-  const { data } = await getChatContactPage({
-    pageSize: chat.getContactList.length,
-    cursor: null,
-  }, user.getToken);
-  if (!data) {
-    return;
-  }
-  if (data && data.list) {
-    for (const item of data.list) {
-      chat.refreshContact(item);
+  try {
+    const { data } = await getChatContactPage({
+      pageSize: chat.getContactList.length,
+      cursor: null,
+    }, user.getToken);
+    if (!data) {
+      return;
     }
+    if (data && data.list) {
+      for (const item of data.list) {
+        chat.refreshContact(item);
+      }
+    }
+    isLoading.value = false;
+    isSyncing.value = false;
   }
-  isLoading.value = false;
-  isSyncing.value = false;
+  catch (error) {
+    console.log(error);
+    isLoading.value = false;
+    isSyncing.value = false;
+  }
 }
 
 // 刷新某一房间
@@ -314,15 +321,7 @@ onMounted(() => {
   mitter.on(MittEventType.WS_SYNC, ({ lastDisconnectTime, reconnectTime }) => {
     // 重连
     console.log(`会话同步，时延：${reconnectTime - lastDisconnectTime}ms`);
-    try {
-      fetchContacts();
-    }
-    catch (error) {
-      console.log(error);
-      setTimeout(() => {
-        fetchContacts();
-      }, 300);
-    }
+    fetchContacts();
   });
   setTimeout(() => {
     isAnimateDelay.value = false;

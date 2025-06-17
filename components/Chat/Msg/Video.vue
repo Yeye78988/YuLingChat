@@ -48,7 +48,7 @@ const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
     :data="data"
     v-bind="$attrs"
   >
-    <template #body>
+    <template #body-pre>
       <div
         class="relative max-h-50vh max-w-76vw flex-row-c-c cursor-pointer shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) border-default-2 card-default hover:shadow"
         title="点击播放[视频]"
@@ -74,10 +74,6 @@ const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
           {{ formattedDuration }}
         </div>
       </div>
-      <!-- 内容 -->
-      <p v-if="data.message?.content?.trim()" ctx-name="content" class="msg-popper msg-wrap">
-        {{ data.message.content }}
-      </p>
     </template>
   </ChatMsgTemplate>
 </template>
