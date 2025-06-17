@@ -578,7 +578,6 @@ export function useMsgInputForm(
       if (range && msgInputRef.value) {
         const beforeText = InputDetector.getBeforeText(range, msgInputRef.value);
         const detection = InputDetector.detectType(beforeText);
-        console.log(beforeText);
 
         if (detection.type === "at" && userAtOptions.value.length > 0 && !isReplyAI.value) {
           atFilterKeyword.value = detection.keyword;
@@ -819,21 +818,22 @@ export function useMsgInputForm(
 
       // 确认选择
       if ((showAtOptions.value || showAiOptions.value) && (e.key === "Enter" || e.key === "Tab")) {
-        if (showAtOptions.value) {
+        if (showAtOptions.value && filteredUserAtOptions.value.length) {
           const selectedUser = filteredUserAtOptions.value[selectedAtItemIndex.value];
           if (selectedUser) {
             handleSelectAtUser(selectedUser);
             e.preventDefault();
+            return;
           }
         }
-        else if (showAiOptions.value) {
+        else if (showAiOptions.value && filteredAiOptions.value.length) {
           const selectedAi = filteredAiOptions.value[selectedAiItemIndex.value];
           if (selectedAi) {
             handleSelectAiRobot(selectedAi);
             e.preventDefault();
+            return;
           }
         }
-        return;
       }
 
       // 退出选择

@@ -577,7 +577,11 @@ export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSi
   };
 }
 
-
+/**
+ * 渲染消息体
+ * @param {ChatMessageVO} msg - 消息对象
+ * @returns {string} 消息内容
+ */
 export function useRenderMsg(msg: ChatMessageVO) {
   const chat = useChatStore();
   const body = msg?.message?.body as TextBodyMsgVO;
@@ -610,9 +614,11 @@ type Token
     type: "url";
     content: string;
     data: {
-      url: string;
       title?: string;
       description?: string;
+
+      url: string;
+      altTitle?: string;
     };
     startIndex: number;
     endIndex: number;
@@ -668,8 +674,9 @@ function parseMessageContentWithMentionsAndUrls(
         data: {
           ...urlInfo,
           url: originalUrl, // 确保URL信息包含原始链接
+          altTitle: `${urlInfo.title?.replace(/^(\S{8})\S+(\S{4})$/, "$1...$2") || "未知网站"} (${originalUrl})`,
         },
-        displayText: `${urlInfo.title} (${originalUrl})`,
+        displayText: originalUrl,
       });
       // 移除已匹配的URL，防止重复匹配
       delete remainingUrlMap[originalUrl];
@@ -756,7 +763,7 @@ function renderMessageContent() {
           "target": "_blank",
           "rel": "noopener noreferrer",
           "class": "msg-link",
-          "title": token.data?.description || token.data?.url || token.content,
+          "title": token.data?.altTitle || token.data?.url,
         }, token.content);
 
       default:
