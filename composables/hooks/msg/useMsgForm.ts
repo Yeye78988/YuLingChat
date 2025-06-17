@@ -504,8 +504,6 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
       });
       chat.msgForm.msgType = MessageType.IMG; // 图片
     }
-    return done;
-
     // else if (type === "audio") {
     //   inputOssImgUploadRef.value?.resetInput?.();
     //   inputOssFileUploadRef.value?.resetInput?.();
@@ -518,6 +516,7 @@ export function useFileUpload(refsDom: RefDoms = { img: "inputOssImgUploadRef", 
     //   });
     //   chat.msgForm.msgType = MessageType.SOUND; // 语音
     // }
+    return done;
   }
 
   // 监听拖拽上传

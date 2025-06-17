@@ -53,7 +53,7 @@ const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
         class="relative max-h-50vh max-w-76vw flex-row-c-c cursor-pointer shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) border-default-2 card-default hover:shadow"
         title="点击播放[视频]"
         ctx-name="video"
-        :style="{ width: width ? `${width}px` : 'auto', height: height ? `${height}px` : 'auto' }"
+        :style="{ width, height }"
         @click.stop="showVideoDetail($event)"
       >
         <template

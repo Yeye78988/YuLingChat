@@ -51,7 +51,7 @@ function handleImagePreview() {
     :data="data"
     v-bind="$attrs"
   >
-    <template #body>
+    <template #body-pre>
       <!-- 内容 -->
       <div
         v-if="body?.url"
@@ -70,10 +70,6 @@ function handleImagePreview() {
           :preview="false"
         />
       </div>
-      <!-- 内容 -->
-      <p v-if="data.message?.content?.trim()" ctx-name="content" class="msg-popper msg-wrap">
-        {{ data.message.content }}
-      </p>
     </template>
   </ChatMsgTemplate>
 </template>

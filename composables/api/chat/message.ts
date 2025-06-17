@@ -347,8 +347,8 @@ export interface MessageBodyMap {
  */
 export interface TextBodyMsgVO {
   // content: string;
-  urlContentMap: { [key: string]: UrlInfoDTO };
   // atUidList: string[];
+  urlContentMap: { [key: string]: UrlInfoDTO };
   mentionList?: MentionInfo[];
   reply?: ReplyMsgVO;
   // [property: string]: any;
@@ -445,6 +445,9 @@ export interface FileBodyMsgVO {
   fileName: string;
   mimeType?: string;
   fileType?: FileBodyMsgTypeEnum;
+  // 其他消息
+  urlContentMap: { [key: string]: UrlInfoDTO };
+  mentionList?: MentionInfo[];
   reply?: ReplyMsgVO;
 }
 

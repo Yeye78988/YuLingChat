@@ -173,11 +173,21 @@ async function resolveFileUpload(fileType: OssConstantItemType, file: File) {
     imageManager.insert(file);
     return;
   }
+  // 文件 | 视频
   const done = await uploadFile(fileType, file);
   if (!done) {
     return;
   }
-  await onSubmit();
+  if (setting.isMobileSize) {
+    const res = await ElMessageBox.confirm("文件上传成功，是否发送？", "提示", {
+      confirmButtonText: "发送",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+    if (res === "confirm") {
+      await onSubmit();
+    }
+  }
 }
 
 // 录音

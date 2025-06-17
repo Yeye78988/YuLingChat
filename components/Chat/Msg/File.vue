@@ -53,7 +53,7 @@ const fileItem = computed(() => setting.fileDownloadMap[BaseUrlFile + body.url])
     :data="data"
     v-bind="$attrs"
   >
-    <template #body>
+    <template #body-pre>
       <!-- 文件 -->
       <div
         ctx-name="file"
@@ -74,10 +74,6 @@ const fileItem = computed(() => setting.fileDownloadMap[BaseUrlFile + body.url])
           </small>
         </div>
       </div>
-      <!-- 内容 -->
-      <p v-if="data.message?.content?.trim()" class="msg-popper msg-wrap" ctx-name="content">
-        {{ data.message.content }}
-      </p>
     </template>
   </ChatMsgTemplate>
 </template>
