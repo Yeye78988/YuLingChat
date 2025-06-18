@@ -236,16 +236,14 @@ export function useMessageList() {
       if (val) {
         // 消息阅读上报
         chat.setReadRoom(val);
-        // 滚动到底部
-        nextTick(() => {
-          if (scrollbarRef.value)
-            scrollBottom(false);
-        });
 
         // 检查是否需要同步消息
         const contact = chat?.contactMap?.[val];
         if (contact && (!contact.msgIds.length || contact.lastMsgId !== contact?.lastMsgId))
-          reload(val);
+          await reload(val);
+
+        await nextTick();
+        scrollBottom(false);
       }
 
       // 处理旧房间

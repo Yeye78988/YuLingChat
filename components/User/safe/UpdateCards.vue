@@ -8,12 +8,7 @@ const showMarkPhone = ref(true);
 const isLoading = ref<boolean>(false);
 async function reloadUserInfo() {
   isLoading.value = true;
-  if (await user.loadUserWallet(user.getToken)) {
-    ElMessage.success("刷新成功🎉");
-  }
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 300);
+  user.loadUserInfo(user.token).finally(() => isLoading.value = false);
 }
 // 展示表单
 const form = ref({
@@ -32,11 +27,11 @@ const form = ref({
     <!-- 用户信息 -->
     <div
       v-loading="isLoading"
-      class="group flex flex-col p-4 card-default border-default-hover"
+      class="group flex flex-col border-default-hover card-default p-4"
       flex flex-1 flex-col
     >
       <div class="flex items-center">
-        <CardAvatar class="h-12 w-12 rounded-1/2 border-default-2 card-default" :src="BaseUrlImg + user.userInfo.avatar" />
+        <CardAvatar class="h-12 w-12 border-default-2 card-default rounded-1/2" :src="BaseUrlImg + user.userInfo.avatar" />
         <strong class="ml-3 block">{{ user.userInfo.username }}</strong>
         <i
           opacity-0

@@ -2,7 +2,6 @@ import type { UserInfoVO, UserWallet } from "../api/user/info";
 import { acceptHMRUpdate, defineStore } from "pinia";
 import { toLogout } from "../api/user";
 import { getUserInfo } from "../api/user/info";
-import { getUserWallet } from "../api/user/wallet";
 
 // @unocss-include
 // https://pinia.web3doc.top/ssr/nuxt.html#%E5%AE%89%E8%A3%85
@@ -16,7 +15,7 @@ export const useUserStore = defineStore(
     // 是否打开登录
     const showLoginPageType = ref<"login" | "register" | "env-config" | "">("");
     const showUpdatePwd = ref<boolean>(false);
-    // 钱包信息
+    // 钱包信息 TODO: 暂不使用
     const userWallet = ref<UserWallet>({
       userId: "",
       balance: 0,
@@ -67,20 +66,6 @@ export const useUserStore = defineStore(
     function getTokenFn() {
       return token.value?.trim();
     }
-    /**
-     * 加载用户钱包信息
-     * @param token 用户token
-     */
-    const loadUserWallet = async (token: string): Promise<boolean> => {
-      const wallet = await getUserWallet(token);
-      if (wallet.code === StatusCode.SUCCESS) {
-        userWallet.value = wallet.data as UserWallet;
-        return true;
-      }
-      else {
-        return false;
-      }
-    };
 
     /**
      * 用户登录
@@ -215,7 +200,6 @@ export const useUserStore = defineStore(
       callbackUserExit,
       exitLogin,
       clearUserStore,
-      loadUserWallet,
       loadUserInfo,
       // getter
       getToken,
