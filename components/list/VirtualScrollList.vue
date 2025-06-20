@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ScrollbarDirection } from "element-plus";
+import { createReusableTemplate } from "@vueuse/core";
 
 // 接口定义
 interface Props {
@@ -439,6 +440,51 @@ const [DefineVirtualListContent, ReuseVirtualListContent] = createReusableTempla
 </script>
 
 <template>
+  <!-- 定义可重用的虚拟列表内容模板 -->
+  <DefineVirtualListContent>
+    <slot name="pre" />
+    <!-- 空状态插槽 -->
+    <template v-if="!hasItems">
+      <slot name="empty" />
+    </template>
+
+    <!-- 虚拟列表容器 -->
+    <div
+      v-else
+      :style="{
+        height: `${totalHeight}px`,
+        position: 'relative',
+      }"
+    >
+      <!-- 可见项目 -->
+      <div
+        v-for="item in visibleItems"
+        :key="getItemKey(item.data, item.index)"
+        :data-index="item.index" :style="{
+          position: 'absolute',
+          top: `${item.top}px`,
+          left: 0,
+          right: 0,
+          height: `${parsedItemHeight}px`,
+        }"
+        :class="[
+          itemClass,
+          { [activeClass]: item.index === selectedIndex },
+        ]"
+        @click="handleItemClick(item.data, item.index)"
+        @mouseover="handleItemHover(item.data, item.index)"
+      >
+        <!-- 默认插槽 -->
+        <slot
+          name="default"
+          :item="item.data"
+          :index="item.index"
+          :is-active="item.index === selectedIndex"
+        />
+      </div>
+    </div>
+  </DefineVirtualListContent>
+
   <el-scrollbar
     ref="scrollbarRef"
     :max-height="maxHeight"
@@ -485,93 +531,12 @@ const [DefineVirtualListContent, ReuseVirtualListContent] = createReusableTempla
         </slot>
       </div>
 
-      <slot name="pre" />
-      <!-- 空状态插槽 -->
-      <template v-if="!hasItems">
-        <slot name="empty" />
-      </template>
-
-      <!-- 虚拟列表容器 -->
-      <div
-        v-else
-        :style="{
-          height: `${totalHeight}px`,
-          position: 'relative',
-        }"
-      >
-        <!-- 可见项目 -->
-        <div
-          v-for="item in visibleItems"
-          :key="getItemKey(item.data, item.index)"
-          :data-index="item.index" :style="{
-            position: 'absolute',
-            top: `${item.top}px`,
-            left: 0,
-            right: 0,
-            height: `${parsedItemHeight}px`,
-          }"
-          :class="[
-            itemClass,
-            { [activeClass]: item.index === selectedIndex },
-          ]"
-          @click="handleItemClick(item.data, item.index)"
-          @mouseover="handleItemHover(item.data, item.index)"
-        >
-          <!-- 默认插槽 -->
-          <slot
-            name="default"
-            :item="item.data"
-            :index="item.index"
-            :is-active="item.index === selectedIndex"
-          />
-        </div>
-      </div>
+      <!-- 重用虚拟列表内容 -->
+      <ReuseVirtualListContent />
     </div>
 
-    <!-- 不启用下拉刷新时的原始内容 -->
-    <template v-else>
-      <slot name="pre" />
-      <!-- 空状态插槽 -->
-      <template v-if="!hasItems">
-        <slot name="empty" />
-      </template>
-
-      <!-- 虚拟列表容器 -->
-      <div
-        v-else
-        :style="{
-          height: `${totalHeight}px`,
-          position: 'relative',
-        }"
-      >
-        <!-- 可见项目 -->
-        <div
-          v-for="item in visibleItems"
-          :key="getItemKey(item.data, item.index)"
-          :data-index="item.index" :style="{
-            position: 'absolute',
-            top: `${item.top}px`,
-            left: 0,
-            right: 0,
-            height: `${parsedItemHeight}px`,
-          }"
-          :class="[
-            itemClass,
-            { [activeClass]: item.index === selectedIndex },
-          ]"
-          @click="handleItemClick(item.data, item.index)"
-          @mouseover="handleItemHover(item.data, item.index)"
-        >
-          <!-- 默认插槽 -->
-          <slot
-            name="default"
-            :item="item.data"
-            :index="item.index"
-            :is-active="item.index === selectedIndex"
-          />
-        </div>
-      </div>
-    </template>
+    <!-- 不启用下拉刷新时重用虚拟列表内容 -->
+    <ReuseVirtualListContent v-else />
   </el-scrollbar>
 </template>
 
