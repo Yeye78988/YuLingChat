@@ -390,6 +390,9 @@ onMounted(() => {
       item-class="contact-item"
       :get-item-key="(room) => room.roomId"
       :selected-index="currentRoomIndex"
+      enable-pull-to-refresh
+      :is-scroll-top="isScrollTop"
+      @refresh="reload"
       @scroll="onScroll"
       @end-reached="handleEndReached"
       @item-click="onClickContact"
