@@ -108,7 +108,7 @@ async function getLoginCode(type: LoginType) {
       }
       isLoading.value = true;
       data = await getLoginCodeByType(userForm.value.phone, DeviceType.PHONE);
-      if (data.code === 20000) {
+      if (data.code === StatusCode.SUCCESS) {
       // 开启定时器
         useInterval(phoneTimer, phoneCodeStorage, 60, -1);
         ElMessage.success({
@@ -193,7 +193,7 @@ async function onLogin(formEl: any | undefined) {
       return;
     isLoading.value = true;
     user.isOnLogining = true;
-    let res = { code: 20001, data: "", message: "登录失败！" };
+    let res = { code: StatusCode.DEFAULT_ERR, data: "", message: "登录失败！" };
     try {
       switch (loginType.value) {
         case LoginType.PWD:
@@ -208,9 +208,10 @@ async function onLogin(formEl: any | undefined) {
       }
     }
     catch (error) {
+      res = { code: StatusCode.DEFAULT_ERR, data: "", message: "连接失败，请稍后重试！" };
       done();
     }
-    if (res.code === 20000) {
+    if (res.code === StatusCode.SUCCESS) {
       // 登录成功
       if (res.data) {
         await store.onUserLogin(res.data, autoLogin.value, "/", (info) => {
@@ -248,6 +249,7 @@ async function onLogin(formEl: any | undefined) {
       }
     }
     else {
+      ElMessage.error(res.message);
       done();
     }
   });
@@ -404,7 +406,7 @@ function forgetPassword() {
               <span class="block max-w-14em truncate">{{ item.account }}</span>
               <i
                 title="删除"
-                class="i-carbon:close ml-a h-0 w-0 flex-shrink-0 overflow-hidden transition-all group-hover:(h-1.5em w-1.5em) btn-danger"
+                class="i-carbon:close ml-a h-0 w-0 flex-shrink-0 btn-danger overflow-hidden transition-all group-hover:(h-1.5em w-1.5em)"
                 @click.stop.capture="removeHistoryAccount(item.account)"
               />
               <span v-if="item.userInfo && item.userInfo.isAdmin" class="ml-2 flex-shrink-0 rounded-4px bg-theme-primary px-1 py-1px text-xs text-white">管理员</span>
@@ -466,7 +468,7 @@ function forgetPassword() {
     </template>
     <template v-else>
       <div class="mt-16 flex-row-c-c flex-col gap-8">
-        <CardElImage :src="BaseUrlImg + user.userInfo.avatar" class="h-6rem w-6rem sm:(h-8rem w-8rem) border-default card-default" />
+        <CardElImage :src="BaseUrlImg + user.userInfo.avatar" class="h-6rem w-6rem border-default card-default sm:(h-8rem w-8rem)" />
         <div text-center>
           <span>
             {{ user.userInfo.username || "未登录" }}

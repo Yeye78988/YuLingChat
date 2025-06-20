@@ -150,8 +150,9 @@ export function useMessageList() {
     };
     const thePageInfo = chat.contactMap[roomId]!.pageInfo as PageInfo;
     // 清空现有消息
-    // chat.contactMap[roomId]!.msgMap = {};
-    // chat.contactMap[roomId]!.msgIds = [];
+    chat.contactMap[roomId]!.msgMap = {};
+    chat.contactMap[roomId]!.msgIds = [];
+
     chat.contactMap[roomId]!.isReload = true;
     chat.contactMap[roomId]!.isLoading = true;
 
@@ -177,9 +178,6 @@ export function useMessageList() {
         // 滚动到底部
         await nextTick();
         scrollBottom(false);
-        chat.saveScrollTop && chat.saveScrollTop();
-        chat.contactMap[roomId]!.isLoading = false;
-        chat.contactMap[roomId]!.isReload = false;
       }
     }
     catch (error) {
@@ -187,6 +185,8 @@ export function useMessageList() {
       await nextTick();
       scrollBottom(false);
       chat.saveScrollTop && chat.saveScrollTop();
+    }
+    finally {
       chat.contactMap[roomId]!.isLoading = false;
       chat.contactMap[roomId]!.isReload = false;
     }
@@ -225,34 +225,6 @@ export function useMessageList() {
         chat.contactMap[roomId]!.isSyncing = false;
       }
     }
-  }
-
-  /**
-   * 监听房间变化
-   */
-  function setupRoomWatcher() {
-    watch(() => chat.theRoomId, async (val, oldVal) => {
-      // 处理新房间
-      if (val) {
-        // 消息阅读上报
-        chat.setReadRoom(val);
-
-        // 检查是否需要同步消息
-        const contact = chat?.contactMap?.[val];
-        if (contact && (!contact.msgIds.length || contact.lastMsgId !== contact?.lastMsgId))
-          await reload(val);
-
-        await nextTick();
-        scrollBottom(false);
-      }
-
-      // 处理旧房间
-      if (oldVal) {
-        chat.setReadRoom(oldVal);
-      }
-    }, {
-      immediate: true,
-    });
   }
 
   /**
@@ -392,7 +364,25 @@ export function useMessageList() {
    * 初始化
    */
   function init() {
-    setupRoomWatcher();
+    watch(() => chat.theRoomId, async (val, oldVal) => {
+      // 处理新房间
+      if (val) {
+        // 消息阅读上报
+        chat.setReadRoom(val);
+
+        // 检查是否需要同步消息
+        const contact = chat?.contactMap?.[val];
+        if (contact && (!contact.msgIds.length || contact.lastMsgId !== contact?.lastMsgId))
+          reload(val);
+      }
+
+      // 处理旧房间
+      if (oldVal) {
+        chat.setReadRoom(oldVal);
+      }
+    }, {
+      immediate: false,
+    });
 
     onMounted(() => {
       setupEventListeners();

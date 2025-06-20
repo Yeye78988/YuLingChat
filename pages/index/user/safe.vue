@@ -21,7 +21,7 @@ watch(activeName, () => {
 </script>
 
 <template>
-  <main class="w-full flex flex-1 flex-col p-4 pt-12 card-bg-color-2 sm:(p-6 pt-10)">
+  <main class="w-full flex flex-1 flex-col card-bg-color-2 p-4 pt-12 sm:(p-6 pt-10)">
     <h3 flex items-center>
       账户与安全
       <i i-solar:devices-bold-duotone ml-2 inline-block p0.6em opacity-60 />
@@ -29,9 +29,9 @@ watch(activeName, () => {
     <el-tabs
       v-model="activeName"
       tab-position="top"
-      class="mt-6 flex-1 overflow-hidden rounded-2 bg-transparent"
+      class="tabs mt-6 flex-1 overflow-hidden rounded-2 bg-transparent"
     >
-      <el-tab-pane name="security" style="max-height: 100%;height: 100%;" label="账号" lazy>
+      <el-tab-pane name="security" label="账号" lazy>
         <UserSafeUpdateCards :data-fade="isAnim" />
       </el-tab-pane>
       <el-tab-pane name="account" label="安全管理" lazy>
@@ -48,7 +48,12 @@ watch(activeName, () => {
 .inputs {
   --at-apply: "transition-200 select-none opacity-80 group-hover:opacity-100";
 }
-
+:deep(.el-tabs.tabs) {
+  .el-tab-pane {
+    height: 100%;
+    max-height: 100%;
+  }
+}
 :deep(.el-radio-group.inputs) {
   border: 1px solid #7c7c7c33;
   border-radius: 1rem;

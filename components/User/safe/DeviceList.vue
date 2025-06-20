@@ -81,20 +81,95 @@ function exitLogin(ua?: string) {
     </div>
     <el-scrollbar
       v-loading="isLoading"
-      class="rounde-4"
-      height="74vh"
+      class="flex-1"
+      max-height="100%"
       :element-loading-spinner="defaultLoadingIcon"
     >
       <!-- 列表 -->
       <div
         ref="autoAnimateRef"
-        height="50%"
         class="relative grid grid-cols-1 h-full items-start gap-2 pb-4rem lg:grid-cols-3 sm:grid-cols-2"
       >
         <UserSafeDeviceCard
           v-for="p in deviceList"
           :key="p.id"
-          class="relative h-fit cursor-pointer hover:(border-[var(--el-color-info)] border-solid shadow) card-default"
+          class="relative h-fit cursor-pointer card-default hover:(border-[var(--el-color-info)] border-solid shadow)"
+          :data="p"
+        >
+          <div />
+          <el-button
+            v-if="!p.isLocal"
+            size="small"
+            type="danger"
+            style="padding: 0 8px"
+            class="absolute bottom-4 right-4"
+            plain
+            @click="exitLogin(p.userAgentString)"
+          >
+            下线
+          </el-button>
+        </UserSafeDeviceCard>
+        <UserSafeDeviceCard
+          v-for="p in deviceList"
+          :key="p.id"
+          class="relative h-fit cursor-pointer card-default hover:(border-[var(--el-color-info)] border-solid shadow)"
+          :data="p"
+        >
+          <div />
+          <el-button
+            v-if="!p.isLocal"
+            size="small"
+            type="danger"
+            style="padding: 0 8px"
+            class="absolute bottom-4 right-4"
+            plain
+            @click="exitLogin(p.userAgentString)"
+          >
+            下线
+          </el-button>
+        </UserSafeDeviceCard>
+        <UserSafeDeviceCard
+          v-for="p in deviceList"
+          :key="p.id"
+          class="relative h-fit cursor-pointer card-default hover:(border-[var(--el-color-info)] border-solid shadow)"
+          :data="p"
+        >
+          <div />
+          <el-button
+            v-if="!p.isLocal"
+            size="small"
+            type="danger"
+            style="padding: 0 8px"
+            class="absolute bottom-4 right-4"
+            plain
+            @click="exitLogin(p.userAgentString)"
+          >
+            下线
+          </el-button>
+        </UserSafeDeviceCard>
+        <UserSafeDeviceCard
+          v-for="p in deviceList"
+          :key="p.id"
+          class="relative h-fit cursor-pointer card-default hover:(border-[var(--el-color-info)] border-solid shadow)"
+          :data="p"
+        >
+          <div />
+          <el-button
+            v-if="!p.isLocal"
+            size="small"
+            type="danger"
+            style="padding: 0 8px"
+            class="absolute bottom-4 right-4"
+            plain
+            @click="exitLogin(p.userAgentString)"
+          >
+            下线
+          </el-button>
+        </UserSafeDeviceCard>
+        <UserSafeDeviceCard
+          v-for="p in deviceList"
+          :key="p.id"
+          class="relative h-fit cursor-pointer card-default hover:(border-[var(--el-color-info)] border-solid shadow)"
           :data="p"
         >
           <div />

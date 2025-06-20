@@ -156,7 +156,7 @@ async function getRegCode(type: RegisterType) {
       // 请求验证码
       data = await getRegisterCode(formUser.email, DeviceType.EMAIL);
       // 成功
-      if (data.code === 20000) {
+      if (data.code === StatusCode.SUCCESS) {
         ElMessage.success({
           message: "验证码已发送至您的邮箱，5分钟有效！",
           duration: 5000,
@@ -348,7 +348,7 @@ async function checkUsername() {
   if (formUser.username.trim() === "")
     return Promise.reject();
   const data = await checkUsernameExists(formUser.username);
-  if (data.code === 20000)
+  if (data.code === StatusCode.SUCCESS)
     return Promise.resolve();
 
   return Promise.reject("该用户名已被使用！");
@@ -481,7 +481,7 @@ function toLoginForm() {
         同意并遵守
         <span text-color-info>《用户协议》</span>
       </el-checkbox>
-      <span ml-a cursor-pointer transition-300 btn-info @click="toLoginForm">
+      <span ml-a btn-info cursor-pointer transition-300 @click="toLoginForm">
         返回登录
       </span>
     </div>
@@ -493,11 +493,11 @@ function toLoginForm() {
       destroy-on-close
       content-class="z-1200"
     >
-      <div class="h-100vh w-100vw flex flex-col sm:(card-rounded-df h-500px w-400px border-default shadow-lg) p-4 border-default-2 card-default bg-color">
+      <div class="h-100vh w-100vw flex flex-col border-default-2 card-default bg-color p-4 sm:(h-500px w-400px border-default card-rounded-df shadow-lg)">
         <h3 :data-tauri-drag-region="setting.isDesktop" class="relative mb-4 select-none text-center text-1.2rem">
           用户协议
           <ElButton text size="small" class="absolute right-0 -top-1" style="width: 2rem;height: 1.4rem;" @click="agreeDetail.showDetail = false">
-            <i i-carbon:close p-3 btn-danger title="关闭" />
+            <i i-carbon:close btn-danger p-3 title="关闭" />
           </ElButton>
         </h3>
         <el-scrollbar class="flex-1 px-2">

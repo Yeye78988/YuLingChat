@@ -64,9 +64,7 @@ export function httpRequest<T = unknown>(
       }
       // 客户端报错
       if (msg && document && ElMessage) {
-        setTimeout(() => {
-          ElMessage.error(msg);
-        }, 40);
+        ElMessage.error(msg);
       }
     },
   } as FetchOptions;

@@ -29,7 +29,7 @@ onMounted(async () => {
         // 窗口动画
         invoke("animate_window_resize", {
           windowLabel: LOGIN_WINDOW_LABEL,
-          toWidth: 360,
+          toWidth: 340,
           toHeight: val === "login" ? 450 : val === "register" ? 480 : val === "env-config" ? 480 : 520,
           duration: 160,
           steps: 12,
@@ -44,7 +44,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="main-box relative overflow-hidden shadow bg-color"
+    class="main-box relative overflow-hidden bg-color shadow"
     grid="~ cols-1 md:cols-2" :class="{
       'img-none is-desktop': setting.isDesktop,
       'is-mobile': setting.isMobileSize,
@@ -70,16 +70,16 @@ onMounted(async () => {
     </div>
     <!-- bg -->
     <div
-      class="hidden h-full w-full select-none border-0 border-r-1px shadow-md shadow-inset md:block border-default"
+      class="hidden h-full w-full select-none border-0 border-default border-r-1px shadow-md shadow-inset md:block"
     >
       <ElImage
         src="https://oss.jiwuhub.top/user_bg/login_bg.jpg" fit="cover"
-        class="h-full w-full select-none overflow-hidden rounded-r-0 card-default"
+        class="h-full w-full select-none overflow-hidden card-default rounded-r-0"
       />
     </div>
     <!-- 表单 -->
     <div
-      class="flex flex-row-c-c flex-col select-none rounded-t-8 shadow-lg sm:(mt-0 h-full animate-none border-0 rounded-t-0 shadow-none) bg-color"
+      class="flex flex-row-c-c flex-col select-none rounded-t-8 bg-color shadow-lg sm:(mt-0 h-full animate-none border-0 rounded-t-0 shadow-none)"
       :class="setting.isDesktop ? 'w-full h-full !rounded-0 animate-none pt-4' : 'h-fit pt-16 pb-10 min-h-7/10 sm:static absolute bottom-0 left-0 w-full   shadow-lg border-default-t'"
       data-fade
     >
