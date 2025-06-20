@@ -295,7 +295,7 @@ defineExpose({
     <!-- 下拉提示区域 -->
     <div
       v-show="isPulling || isRefreshing"
-      class="absolute left-0 top-0 w-full flex-row-c-c transform py-2 text-center -translate-y-full text-mini"
+      class="absolute left-0 top-0 w-full flex-row-c-c transform py-2 text-center text-mini -translate-y-full"
       :style="{
         opacity: Math.min(1, _pullDistance / pullTriggerDistance),
         transform: `translateY(-${_pullDistance / 1.5}px) scale(${Math.min(1, pullDistanceMax / pullTriggerDistance + 0.2)})`,

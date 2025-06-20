@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ChatRoomSelfPopup } from "#components";
-import { ChatRoomGroupPopup } from "#components";
+import { ChatRoomGroupPopup, ChatRoomSelfPopup } from "#components";
+
 
 defineProps<{
   roomId?: string
@@ -20,7 +20,7 @@ watch(
   <div id="chat-content" class="content flex-1">
     <div class="relative h-full flex flex-1 flex-col transition-200" :class="{ 'scale-94 op-50 transform-origin-lc': setting.isOpenGroupMember && setting.isMobileSize }">
       <!-- 房间信息 -->
-      <ChatRoomInfo class="relative z-10 shadow-sm border-default-3-b" />
+      <ChatRoomInfo class="relative z-10 border-default-3-b shadow-sm" />
       <!-- 消息列表 -->
       <ChatMessageList @click="msgFormRef?.onClickOutside()" />
       <!-- 发送 -->
@@ -47,7 +47,7 @@ watch(
       --at-apply: "absolute top-0 h-full w-full";
     }
     .member {
-      --at-apply: "ml-a h-full  max-w-full flex flex-1 flex-col gap-2 border-l-0 p-4 shadow-lg sm:(max-w-17rem shadow-none) !sm:border-default-2-l bg-color";
+      --at-apply: "ml-a h-full  max-w-full flex flex-1 flex-col gap-2 border-l-0 p-4 shadow-lg sm:(max-w-18rem shadow-none) !sm:border-default-2-l bg-color";
     }
   }
 

@@ -13,6 +13,18 @@ interface Props {
   selectedIndex?: number
   overscan?: number
   getItemKey?: (item: any, index: number) => string | number
+  // 下拉刷新相关属性
+  enablePullToRefresh?: boolean
+  pullDistance?: number
+  pullTriggerDistance?: number
+  pullRefreshText?: string
+  pullReleaseText?: string
+  pullRefreshingText?: string
+  onRefresh?: () => Promise<any>
+  damping?: number
+  refreshTimeout?: number
+  disableWhenLoading?: boolean
+  isScrollTop?: boolean
 }
 
 interface Emits {
@@ -21,6 +33,7 @@ interface Emits {
   (e: "update:selectedIndex", index: number): void
   (e: "scroll", event: { scrollTop: number; scrollLeft: number }): void
   (e: "endReached", direction: ScrollbarDirection): void
+  (e: "refresh"): Promise<any>
 }
 
 // Props 解构
@@ -289,8 +302,6 @@ defineExpose({
           left: 0,
           right: 0,
           height: `${parsedItemHeight}px`,
-          display: 'flex',
-          alignItems: 'center',
         }"
         :class="[
           itemClass,

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { appName } from "@/constants";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { appName } from "@/constants";
 
 
 useSeoMeta({
@@ -24,23 +24,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
+  <iframe
+    v-if="shopUrl"
     v-loading="isLoading"
+    :src="shopUrl"
+    frameborder="0"
+    width="100%"
+    height="100%"
     :element-loading-spinner="defaultLoadingIcon"
     element-loading-background="transparent"
     class="w-full flex flex-col select-none"
-  >
-    <iframe
-      v-if="shopUrl"
-      class="select-none"
-      :src="shopUrl"
-      frameborder="0"
-      width="100%"
-      height="100%"
-      @load="isLoading = false"
-      @error="isLoading = false"
-    />
-  </div>
+    @load="isLoading = false"
+    @error="isLoading = false"
+  />
 </template>
 
 <style scoped lang="scss">

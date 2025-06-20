@@ -23,22 +23,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
+  <iframe
+    v-if="url"
     v-loading="isLoading"
     :element-loading-spinner="defaultLoadingIcon"
     class="w-full flex flex-col select-none"
-  >
-    <iframe
-      v-if="url"
-      class="select-none"
-      :src="url"
-      frameborder="0"
-      width="100%"
-      height="100%"
-      @load="isLoading = false"
-      @error="isLoading = false"
-    />
-  </div>
+    :src="url"
+    frameborder="0"
+    width="100%"
+    height="100%"
+    @load="isLoading = false"
+    @error="isLoading = false"
+  />
 </template>
 
 <style scoped lang="scss">

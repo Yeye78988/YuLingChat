@@ -164,7 +164,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="ml-a flex-row-c-c flex-shrink-0">
           <template v-if="p.status === ChatApplyStatusType.Load">
-            <el-button-group class="card-rounded-df transition-200 bg-color-2 hover:shadow">
+            <el-button-group class="card-rounded-df bg-color-2 transition-200 hover:shadow">
               <BtnElButton size="small" @click="onArgeeFriend(p.applyId)">
                 同意
               </BtnElButton>
@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
                   </template>
                   <template #default>
                     <div
-                      class="w-fit px-2.6 py-1 text-0.8rem btn-primary-bg"
+                      class="w-fit btn-primary-bg px-2.6 py-1 text-0.8rem"
                       @click="onRejectFriend(p.applyId)"
                     >
                       <i class="i-solar:user-block-outline mr-1 p-2" />

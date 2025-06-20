@@ -122,38 +122,39 @@ async function onExitOrDeleteFriend() {
           preview-teleported
           loading="lazy"
           error-class="i-solar:user-bold-duotone p-3"
-          class="mr-3 h-3rem w-3rem flex-shrink-0 overflow-auto object-cover shadow-sm border-default-2 card-default"
+          class="mr-3 h-3rem w-3rem flex-shrink-0 overflow-auto border-default-2 card-default object-cover shadow-sm"
         />
         <div w-full flex flex-col justify-between text-sm>
           <div flex items-center>
             <span class="block max-w-10em flex-1 truncate sm:max-w-6em">
               {{ targetUserInfo.nickname || chat.theContact?.name || '未设置' }}
             </span>
-            <i mx-1 flex-shrink-0 p-2 :class="targetUserInfo.gender === Gender.BOY ? 'i-tabler:gender-male text-blue' : targetUserInfo.gender === Gender.GIRL ? 'i-tabler:gender-female text-pink' : 'i-tabler:gender-transgender text-yellow'" />
+            <i ml-a flex-shrink-0 p-2 :class="targetUserInfo.gender === Gender.BOY ? 'i-tabler:gender-male text-blue' : targetUserInfo.gender === Gender.GIRL ? 'i-tabler:gender-female text-pink' : 'i-tabler:gender-transgender text-yellow'" />
             <BtnElButton
               size="small"
-              class="ml-a flex-shrink-0 tracking-0.2em text-mini hover:shadow"
+              class="ml-2 flex-shrink-0 text-mini tracking-0.2em hover:shadow"
               text
               bg
-              icon-class="i-solar:user-outline"
+              icon-class="i-solar:user-outline mr-1"
               @click="chat.theContact.targetUid && navigateToUserDetail(chat.theContact.targetUid)"
             >
               资料
             </BtnElButton>
           </div>
-          <p v-if="targetUserInfo.email" mt-a truncate text-mini>
-            邮箱：{{ targetUserInfo.email }}
+          <p mt-a truncate text-mini>
+            邮箱：<BtnCopyText v-if="targetUserInfo.email" icon="i-solar:copy-bold-duotone" :text="targetUserInfo.email" class="inline" />
+            <span v-else>-</span>
           </p>
         </div>
       </div>
       <!-- 详细信息 -->
-      <div class="my-5 flex flex-col gap-3 border-x-0 py-5 border-default-2 text-mini">
+      <div class="my-5 flex flex-col gap-3 border-default-2 border-x-0 py-5 text-mini">
         <p truncate>
           <template v-if="targetUserInfo.birthday">
-            <span class="mr-2 pr-2 border-default-2-r">
+            <span class="mr-2 border-default-2-r pr-2">
               {{ getAgeText }}
             </span>
-            <span class="mr-2 pr-2 border-default-2-r">
+            <span class="mr-2 border-default-2-r pr-2">
               {{ targetUserInfo.birthday || ' - ' }}
             </span>
             <span>
@@ -171,7 +172,7 @@ async function onExitOrDeleteFriend() {
         </p>
         <p truncate>
           <i class="i-carbon:user mr-3 p-2" />
-          上次在线：{{ targetUserInfo.lastLoginTime || ' - ' }}
+          上次在线：{{ targetUserInfo.lastLoginTime ? formatContactDate(targetUserInfo.lastLoginTime) : ' - ' }}
         </p>
       </div>
       <div class="label-item select-none">

@@ -74,7 +74,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
     popper-class="!border-default !card-default-br-2"
   >
     <template #reference>
-      <div class="relative mx-a h-9 w-9 rounded-1/2 shadow card-default border-default-hover">
+      <div class="relative mx-a h-9 w-9 border-default-hover card-default rounded-1/2 shadow">
         <CardElImage
           :default-src="avatarUrl"
           error-class="i-solar-user-line-duotone p-2 "
@@ -91,10 +91,10 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
     <template #default>
       <div class="card-bg-linear w-22em card-rounded-df p-6 pt-8">
         <!-- 信息 -->
-        <div class="mb-5 flex gap-4 pb-5 sm:gap-6 border-default-2-b">
+        <div class="mb-5 flex gap-4 border-default-2-b pb-5 sm:gap-6">
           <div
             v-loading="isLoading"
-            class="avatar h-5em w-5em flex-row-c-c flex-shrink-0 shadow-md card-default-br"
+            class="avatar h-5em w-5em flex-row-c-c flex-shrink-0 card-default-br shadow-md"
           >
             <!-- 上传 -->
             <el-upload
@@ -149,14 +149,14 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
         <div class="flex flex-col gap-4 truncate pb-6">
           <p class="text">
             <i mr-3 p-2 :class="data.gender === Gender.BOY ? 'i-tabler:gender-male text-blue' : data.gender === Gender.GIRL ? 'i-tabler:gender-female text-pink' : 'i-tabler:gender-transgender text-yellow'" />
-            <span class="mr-2 pr-2 border-default-r">
+            <span class="mr-2 border-default-r pr-2">
               {{ data.gender }}
             </span>
             <template v-if="data.birthday">
-              <span class="mr-2 pr-2 border-default-r">
+              <span class="mr-2 border-default-r pr-2">
                 {{ getAgeText }}
               </span>
-              <span class="mr-2 pr-2 border-default-r">
+              <span class="mr-2 border-default-r pr-2">
                 {{ data.birthday || ' - ' }}
               </span>
               <span>
@@ -183,7 +183,7 @@ const getBirthdayCount = computed(() => calculateBirthdayCount(data.birthday));
           <p class="text op-80">
             <i class="i-solar:user-speak-outline mr-3 p-2" />
             上次在线：
-            {{ data.lastLoginTime || ' - ' }}
+            {{ data.lastLoginTime ? formatContactDate(data.lastLoginTime) : ' - ' }}
           </p>
         </div>
         <!-- 按钮 -->

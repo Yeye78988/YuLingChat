@@ -19,6 +19,11 @@ const shorcutKeyMap: Record<string, { name: string, action: () => void }> = {
     name: "退出应用",
     action: () => closeWindowHandler(true),
   },
+  // 关闭窗口
+  "ctrl+w": {
+    name: "关闭窗口",
+    action: () => closeWindowHandler(false),
+  },
   // esc 最小化窗口
   "Escape": {
     name: "最小化窗口",

@@ -70,7 +70,7 @@ definePageMeta({
   <div class="h-100vh overflow-hidden text-0.8rem" @mouseleave="handleMouseLeave">
     <NuxtLayout>
       <main class="h-100vh flex flex-col justify-between gap-3 truncate p-3">
-        <div class="border-0 border-b-1px pb-2 border-default">
+        <div class="border-0 border-default border-b-1px pb-2">
           新消息 ({{ unreadCount }})
         </div>
         <el-scrollbar
@@ -108,7 +108,7 @@ definePageMeta({
             class="group w-full flex cursor-pointer gap-2 rounded bg-white p-2 shadow-sm transition-all !items-center dark:bg-dark-7 hover:(bg-[var(--el-color-primary)] text-light shadow-lg)"
             @click="handleReadMessage(p)"
           >
-            <CardElImage :src="BaseUrlImg + p.avatar" fit="cover" class="h-8 w-8 rounded-1 object-cover card-default" />
+            <CardElImage :src="BaseUrlImg + p.avatar" fit="cover" class="h-8 w-8 card-default rounded-1 object-cover" />
             <div class="flex flex-1 flex-col justify-between gap-1 truncate px-1">
               <p class="truncate">
                 {{ p.name }}
@@ -123,7 +123,7 @@ definePageMeta({
           </div>
         </el-scrollbar>
 
-        <small v-if="unReadContactList.length || applyUnReadCount > 0" class="border-0 border-t-1px pt-2 text-right btn-info border-default" @click="readAllContact()">
+        <small v-if="unReadContactList.length || applyUnReadCount > 0" class="btn-info border-0 border-default border-t-1px pt-2 text-right" @click="readAllContact()">
           忽略全部
         </small>
         <!-- 没有消息 -->

@@ -100,7 +100,7 @@ async function changShieldStatus() {
     class="group scroll relative"
     wrap-class="pb-16"
   >
-    <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate px-2 pb-2 bg-color>
+    <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate bg-color px-2 pb-2>
       <i
         class="i-solar:magnifer-linear block h-4.5 w-4.5 btn-info"
         @click="() => {
@@ -112,7 +112,7 @@ async function changShieldStatus() {
       />
       <small>群成员</small>
       <div class="rounded-2rem p-1.5" @click="showJoinGroup">
-        <i class="block h-1.8em h-5 w-1.8em w-5 rounded-2rem btn-info border-default" i-carbon:add-large />
+        <i class="block h-1.8em h-5 w-1.8em w-5 btn-info border-default rounded-2rem" i-carbon:add-large />
       </div>
     </div>
     <!-- 搜索群聊 -->
@@ -161,7 +161,7 @@ async function changShieldStatus() {
               <CardElImage
                 :default-src="p.data.avatar" fit="cover"
                 error-class="i-solar-user-line-duotone p-2 op-80"
-                class="h-2rem w-2rem flex-shrink-0 overflow-auto rounded-1/2 object-cover border-default"
+                class="h-2rem w-2rem flex-shrink-0 overflow-auto border-default rounded-1/2 object-cover"
               />
               <span class="g-avatar" />
             </div>
@@ -189,7 +189,7 @@ async function changShieldStatus() {
       </small> -->
       </div>
     </div>
-    <div class="mt-4 w-full flex-1 select-none overflow-y-auto text-3.5 leading-1.8em border-default-t">
+    <div class="mt-4 w-full flex-1 select-none overflow-y-auto border-default-t text-3.5 leading-1.8em">
       <div relative mt-3>
         群头像
         <InputOssFileUpload
@@ -250,7 +250,7 @@ async function changShieldStatus() {
           @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
         />
       </div>
-      <div class="label-item mt-3 select-none pt-2 border-default-2-t">
+      <div class="label-item mt-3 select-none border-default-2-t pt-2">
         会话设置
         <div mt-2 flex-row-bt-c>
           <small text-0.8rem text-small>设为置顶</small>
