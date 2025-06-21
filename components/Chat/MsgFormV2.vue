@@ -121,6 +121,17 @@ const {
   inputOssFileUploadRef,
 } = useFileUpload({ img: "inputOssImgUploadRef", file: "inputOssFileUploadRef", video: "inputOssVideoUploadRef" }, isDisableUpload);
 
+// 移动端上传预览
+const showUploadPreview = computed({
+  get() {
+    return setting.isMobileSize && (imgList.value.length > 0 || fileList.value.length > 0 || videoList.value.length > 0);
+  },
+  set(val) {
+    if (!val)
+      resetForm();
+  },
+});
+
 // 拖拽区域处理
 const { isOverDropZone } = useDropZone(focusRef, {
   onDrop: (files: File[] | null) => {
@@ -154,7 +165,7 @@ onUnmounted(() => {
 // 处理图片插入输入框
 function onOssImgChange(imgRaws: File[]) {
   for (const imgRaw of imgRaws) {
-    if (imgRaw instanceof File) {
+    if (imgRaw instanceof File && imgRaw.type?.startsWith("image/")) {
       // 插入图片到输入框
       imageManager.insert(imgRaw);
     }
@@ -173,20 +184,16 @@ async function resolveFileUpload(fileType: OssConstantItemType, file: File) {
     imageManager.insert(file);
     return;
   }
+
   // 文件 | 视频
   const done = await uploadFile(fileType, file);
   if (!done) {
     return;
   }
+
+  // 移动端显示预览弹窗
   if (setting.isMobileSize) {
-    const res = await ElMessageBox.confirm("文件上传成功，是否发送？", "提示", {
-      confirmButtonText: "发送",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
-    if (res === "confirm") {
-      await onSubmit();
-    }
+    // showUploadPreview.value = true;
   }
 }
 
@@ -590,6 +597,13 @@ function onSubmitGroupNoticeMsg(formData: ChatMessageDTO) {
   });
 }
 
+// onSubmitUploadPreview
+function onSubmitUploadPreview(content?: string) {
+  // content
+  chat.msgForm.content = content || "";
+  onSubmit();
+}
+
 /**
  * 发送语音
  * @param callback 上传成功回调
@@ -762,7 +776,7 @@ const mobileTools = computed(() => {
       icon: "i-solar:video-library-line-duotone",
       label: "视频",
       disabled: isDisabledFile.value,
-      onClick: () => inputOssImgUploadRef.value?.openSelector?.({ accept: "video/*" }),
+      onClick: () => inputOssVideoUploadRef.value?.openSelector?.({ accept: "video/*" }),
     },
     // 录视频
     {
@@ -770,7 +784,7 @@ const mobileTools = computed(() => {
       icon: "i-solar:videocamera-add-bold",
       label: "录视频",
       disabled: isDisabledFile.value,
-      onClick: () => inputOssImgUploadRef.value?.openSelector?.({ accept: "video/*", capture: "environment" }),
+      onClick: () => inputOssVideoUploadRef.value?.openSelector?.({ accept: "video/*", capture: "environment" }),
     },
     {
       id: "file",
@@ -966,9 +980,9 @@ defineExpose({
           v-if="isDragDropOver"
           key="drag-over"
           :data-tauri-drag-region="setting.isDesktop"
-          class="fixed left-0 top-0 z-3000 h-full w-full flex select-none items-center justify-center card-rounded-df backdrop-blur border-default"
+          class="fixed left-0 top-0 z-3000 h-full w-full flex select-none items-center justify-center border-default card-rounded-df backdrop-blur"
         >
-          <div class="flex-row-c-c flex-col border-(1px [--el-border-color] dashed) rounded-4 p-6 transition-all hover:(border-1px border-[--el-color-primary] border-solid) card-default-br sm:p-12 text-small !hover:text-color">
+          <div class="flex-row-c-c flex-col border-(1px [--el-border-color] dashed) card-default-br rounded-4 p-6 text-small transition-all hover:(border-1px border-[--el-color-primary] border-solid) sm:p-12 !hover:text-color">
             <i class="i-solar:upload-minimalistic-linear p-4" />
             <p class="mt-4 text-0.8rem sm:text-1rem">
               拖拽文件到此处上传
@@ -980,8 +994,8 @@ defineExpose({
     <!-- 预览 -->
     <ChatMsgAttachview
       :img-list="[]"
-      :video-list="videoList"
-      :file-list="fileList"
+      :video-list="setting.isMobileSize ? [] : videoList"
+      :file-list="setting.isMobileSize ? [] : fileList"
       :reply-msg="chat.replyMsg"
       :the-contact="chat.theContact"
       :default-loading-icon="defaultLoadingIcon"
@@ -1000,7 +1014,7 @@ defineExpose({
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
               :class="!isSoundRecordMsg ? 'i-solar:microphone-3-broken hover:animate-pulse' : 'i-solar:keyboard-broken'"
-              class="h-6 w-6 cursor-pointer btn-primary"
+              class="h-6 w-6 btn-primary cursor-pointer"
               @click="chat.msgForm.msgType = chat.msgForm.msgType === MessageType.TEXT ? MessageType.SOUND : MessageType.TEXT"
             />
           </el-tooltip>
@@ -1034,7 +1048,7 @@ defineExpose({
                 <i :class="isPalyAudio ? 'i-solar:stop-bold' : 'i-solar:play-bold'" class="icon" ml-2 p-1 />
               </BtnElButton>
               <i
-                i-solar:trash-bin-minimalistic-broken ml-3 p-2.4 btn-danger
+                i-solar:trash-bin-minimalistic-broken ml-3 btn-danger p-2.4
                 @click="handlePlayAudio('del')"
               />
             </div>
@@ -1065,7 +1079,7 @@ defineExpose({
                 :limit="9"
                 :auto-upload="false"
                 :disable="isDisabledFile"
-                class="i-solar:album-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar:album-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.IMAGE"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -1085,7 +1099,7 @@ defineExpose({
                 :preview="false"
                 :limit="1"
                 :disable="isDisabledFile"
-                class="i-solar:video-library-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar:video-library-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.VIDEO"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -1105,7 +1119,7 @@ defineExpose({
                 :preview="false"
                 :limit="1"
                 :disable="isDisabledFile"
-                class="i-solar-folder-with-files-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar-folder-with-files-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.FILE"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -1161,7 +1175,7 @@ defineExpose({
                 :value="item"
               >
                 <div class="h-full w-8em flex items-center pr-1" :title="item.label">
-                  <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default bg-color" :src="BaseUrlImg + item.avatar" />
+                  <CardAvatar class="h-6 w-6 shrink-0 border-default rounded-1/2 bg-color" :src="BaseUrlImg + item.avatar" />
                   <span class="ml-2 flex-1 truncate text-xs text-color">{{ item.label }}</span>
                 </div>
               </el-option>
@@ -1171,26 +1185,26 @@ defineExpose({
             <div
               v-if="isLord"
               title="群通知消息"
-              class="i-carbon:bullhorn inline-block p-3.2 transition-200 btn-primary sm:p-2.8"
+              class="i-carbon:bullhorn inline-block btn-primary p-3.2 transition-200 sm:p-2.8"
               @click="showGroupNoticeDialog = true"
             />
             <template v-if="isSelfRoom && !setting.isMobileSize">
               <!-- 语音通话 -->
               <div
                 title="语音通话"
-                class="i-solar:phone-calling-outline p-3 transition-200 btn-primary sm:p-2.8"
+                class="i-solar:phone-calling-outline btn-primary p-3 transition-200 sm:p-2.8"
                 @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.AUDIO)"
               />
               <!-- 视频通话 -->
               <div
                 title="视频通话"
-                class="i-solar:videocamera-record-line-duotone p-3.2 transition-200 btn-primary sm:p-2.8"
+                class="i-solar:videocamera-record-line-duotone btn-primary p-3.2 transition-200 sm:p-2.8"
                 @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.VIDEO)"
               />
             </template>
             <!-- 工具栏打开扩展 -->
             <span
-              class="i-solar:add-circle-linear inline-block p-3 transition-200 sm:hidden btn-primary"
+              class="i-solar:add-circle-linear inline-block btn-primary p-3 transition-200 sm:hidden"
               :class="{ 'rotate-45': showMobileTools }"
               @click="showMobileTools = !showMobileTools"
             />
@@ -1199,7 +1213,7 @@ defineExpose({
         <!-- 录音 -->
         <p
           v-if="isSoundRecordMsg"
-          class="relative max-h-3.1rem min-h-3.1rem w-full flex-row-c-c flex-1 overflow-y-auto text-wrap sm:(h-fit max-h-full p-6) text-small"
+          class="relative max-h-3.1rem min-h-3.1rem w-full flex-row-c-c flex-1 overflow-y-auto text-wrap text-small sm:(h-fit max-h-full p-6)"
         >
           {{ (isChating && speechRecognition.isSupported || theAudioFile?.id) ? (audioTransfromText || '...') : `识别你的声音 🎧${speechRecognition.isSupported ? '' : '（不支持）'}` }}
         </p>
@@ -1214,7 +1228,7 @@ defineExpose({
         <div
           v-if="isOverDropZone"
           key="drag-over"
-          class="absolute left-0 top-0 z-999 h-full w-full flex-row-c-c select-none card-rounded-df backdrop-blur border-default-dashed text-small"
+          class="absolute left-0 top-0 z-999 h-full w-full flex-row-c-c select-none border-default-dashed card-rounded-df text-small backdrop-blur"
         >
           <i class="i-solar:upload-minimalistic-linear mr-2 p-2.6" />
           拖拽文件到此处上传
@@ -1320,7 +1334,7 @@ defineExpose({
         v-if="!setting.isMobileSize && !isSoundRecordMsg"
         class="hidden items-end sm:flex"
       >
-        <div class="tip ml-a hidden sm:block text-mini">
+        <div class="tip ml-a hidden text-mini sm:block">
           <p>
             <i i-solar:plain-2-line-duotone mr-1.8 p-1.6 />Enter
           </p>
@@ -1344,7 +1358,7 @@ defineExpose({
       <!-- 已经不是好友 -->
       <div
         v-show="isNotExistOrNorFriend"
-        class="absolute left-0 top-0 h-full w-full flex-row-c-c border-0 border-t-1px tracking-2px shadow backdrop-blur-4px border-default"
+        class="absolute left-0 top-0 h-full w-full flex-row-c-c border-0 border-default border-t-1px tracking-2px shadow backdrop-blur-4px"
       >
         <span op-80>
           <i i-solar:adhesive-plaster-bold-duotone mr-3 p-2.4 />
@@ -1379,6 +1393,22 @@ defineExpose({
   </Transition>
   <!-- 新建通知 -->
   <ChatGroupNoticeMsgDialog v-model:show="showGroupNoticeDialog" @submit="onSubmitGroupNoticeMsg" />
+  <!-- 上传预览弹窗 -->
+  <ChatUploadPreviewDialog
+    v-model:show="showUploadPreview"
+    :target-contact="chat.theContact"
+    :img-list="imgList"
+    :video-list="videoList"
+    :file-list="fileList"
+    :input-props="{
+      maxlength: maxContentLen,
+    }"
+    @remove-file="removeOssFile"
+    @show-video="showVideoDialog"
+    @clear-reply="chat.setReplyMsg({})"
+    @scroll-bottom="setReadAndScrollBottom"
+    @submit="onSubmitUploadPreview"
+  />
 </template>
 
 <style lang="scss" scoped>

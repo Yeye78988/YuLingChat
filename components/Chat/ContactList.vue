@@ -82,6 +82,10 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
     if (!setting.isMobileSize && historyContactId.value && chat.contactMap[historyContactId.value]) {
       chat.setContact(chat.contactMap[historyContactId.value]);
     }
+    else {
+      chat.setContact();
+      chat.isOpenContact = true;
+    }
   }
   else if (roomId) { // 刷新某一房间
     refreshItem(roomId);

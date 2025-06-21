@@ -170,8 +170,8 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
         @contextmenu="onContextFileMenu($event, file.key, i, OssFileType.FILE)"
       >
         <img :src="file?.file?.type ? (FILE_TYPE_ICON_MAP[file?.file?.type] || FILE_TYPE_ICON_DEFAULT) : FILE_TYPE_ICON_DEFAULT" class="mr-2 h-8 w-8">
-        <div class="max-w-16rem min-w-8rem">
-          <p class="truncate text-sm">
+        <div class="max-w-16rem min-w-10rem">
+          <p class="truncate text-sm" :title="file?.file?.name">
             {{ (file?.file?.name || file.key)?.replace(/(.{10}).*(\..+)/, '$1****$2') }}
           </p>
           <el-progress

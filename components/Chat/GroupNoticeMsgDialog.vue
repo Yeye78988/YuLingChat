@@ -68,7 +68,7 @@ async function addMsg() {
                    required: true,
                    message: '内容不能为空！',
                  }]"
-        class="w-20rem"
+        class="max-w-80vw w-20rem"
       >
         <el-input
           v-model="applyForm.content"

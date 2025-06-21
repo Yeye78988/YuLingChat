@@ -58,7 +58,7 @@ const fileItem = computed(() => setting.fileDownloadMap[BaseUrlFile + body.url])
       <div
         ctx-name="file"
         :title="fileName"
-        class="file max-w-14em w-fit flex flex-row-reverse cursor-pointer gap-3 p-3 shadow-sm transition-all !items-center border-default hover:border-[var(--el-color-primary)] card-default bg-color hover:shadow-lg"
+        class="file max-w-14em min-w-10em w-fit flex cursor-pointer gap-3 border-default card-default bg-color p-3 shadow-sm transition-all !items-center hover:border-[var(--el-color-primary)] hover:shadow-lg"
         @click="onDownloadFile(BaseUrlFile + body.url, fileName)"
       >
         <img ctx-name="file" :src="body.mimeType ? FILE_TYPE_ICON_MAP[body.mimeType] : FILE_TYPE_ICON_DEFAULT" class="file-icon h-8 w-8 object-contain">
