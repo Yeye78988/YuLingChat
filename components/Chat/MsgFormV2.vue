@@ -71,7 +71,6 @@ const {
 
   // 选区和范围
   updateSelectionRange,
-  updateOptionsPosition,
 
   // 标签插入
   insertAtUserTag,
@@ -390,14 +389,24 @@ async function onSubmit() {
     }
   }
   // 文件
-  if (formDataTemp.msgType === MessageType.FILE && isUploadFile.value) {
-    ElMessage.warning("文件正在上传中，请稍等！");
-    return false;
+  if (formDataTemp.msgType === MessageType.FILE) {
+    if (isUploadFile.value) {
+      ElMessage.warning("文件正在上传中，请稍等！");
+      return false;
+    }
+    if (fileList.value.length > 1) {
+      return await multiSubmitFile(formDataTemp);
+    }
   }
   // 视频
-  if (formDataTemp.msgType === MessageType.VIDEO && isUploadVideo.value) {
-    ElMessage.warning("视频正在上传中，请稍等！");
-    return false;
+  if (formDataTemp.msgType === MessageType.VIDEO) {
+    if (isUploadVideo.value) {
+      ElMessage.warning("视频正在上传中，请稍等！");
+      return false;
+    }
+    if (videoList.value.length > 1) {
+      return await multiSubmitVideo(formDataTemp);
+    }
   }
   // 开始提交
   isSending.value = true;
@@ -552,6 +561,107 @@ async function multiSubmitImg(rawMsgFormData: ChatMessageDTO) {
 }
 
 /**
+ * 批量发送文件消息
+ */
+async function multiSubmitFile(rawMsgFormData: ChatMessageDTO) {
+  isSending.value = true;
+  const uploadedFiles = new Set();
+
+  // 批量发送文件
+  for (const file of fileList.value) {
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.FILE,
+      content: "",
+      body: {
+        fileName: file?.file?.name || Date.now().toString(),
+        url: file.key!,
+        size: file?.file?.size || 0,
+      },
+      _skipReset: true,
+    });
+    uploadedFiles.add(file.key);
+  }
+
+  // 清理已上传的文件
+  fileList.value = fileList.value.filter(file => !uploadedFiles.has(file.key));
+
+  // 发送文本消息
+  if (rawMsgFormData.content) {
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.TEXT,
+      content: rawMsgFormData.content,
+      body: {
+        ...rawMsgFormData.body,
+        fileName: undefined,
+        url: undefined,
+        size: undefined,
+      },
+      _skipReset: true,
+    });
+  }
+
+  resetForm();
+  isSending.value = false;
+}
+
+/**
+ * 批量发送视频消息
+ */
+async function multiSubmitVideo(rawMsgFormData: ChatMessageDTO) {
+  isSending.value = true;
+  const uploadedFiles = new Set();
+
+  // 批量发送视频
+  for (const file of videoList.value) {
+    const thumb = file.children?.[0];
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.VIDEO,
+      content: "",
+      body: {
+        url: file.key,
+        size: file.file?.size || 0,
+        duration: thumb?.duration || 0,
+        thumbUrl: thumb?.key,
+        thumbSize: thumb?.thumbSize,
+        thumbWidth: thumb?.thumbWidth,
+        thumbHeight: thumb?.thumbHeight,
+      },
+      _skipReset: true,
+    });
+    uploadedFiles.add(file.key);
+  }
+
+  // 清理已上传的视频
+  videoList.value = videoList.value.filter(file => !uploadedFiles.has(file.key));
+
+  // 发送文本消息
+  if (rawMsgFormData.content) {
+    await submitMessage({
+      roomId: chat.theRoomId!,
+      msgType: MessageType.TEXT,
+      content: rawMsgFormData.content,
+      body: {
+        ...rawMsgFormData.body,
+        url: undefined,
+        size: undefined,
+        duration: undefined,
+        thumbUrl: undefined,
+        thumbSize: undefined,
+        thumbWidth: undefined,
+        thumbHeight: undefined,
+      },
+      _skipReset: true,
+    });
+  }
+
+  resetForm();
+  isSending.value = false;
+}
+
+/**
  * 将消息提交到队列
  */
 async function submitToQueue(formData: ChatMessageDTO = chat.msgForm, callback?: (msg: ChatMessageVO) => void) {
@@ -564,7 +674,6 @@ async function submitToQueue(formData: ChatMessageDTO = chat.msgForm, callback?:
   }, (msg: ChatMessageVO) => {
     // 发送信息后触发
     emit("submit", msg);
-    resetForm();
     typeof callback === "function" && callback(msg); // 执行回调
   });
 
@@ -1093,11 +1202,11 @@ defineExpose({
               <InputOssFileUpload
                 ref="inputOssVideoUploadRef"
                 v-model="videoList"
-                :multiple="false"
                 :size="setting.systemConstant.ossInfo?.video?.fileSize"
                 :min-size="1024"
+                :multiple="true"
+                :limit="9"
                 :preview="false"
-                :limit="1"
                 :disable="isDisabledFile"
                 class="i-solar:video-library-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
@@ -1113,11 +1222,11 @@ defineExpose({
               <InputOssFileUpload
                 ref="inputOssFileUploadRef"
                 v-model="fileList"
-                :multiple="false"
                 :size="setting.systemConstant.ossInfo?.file?.fileSize"
                 :min-size="1024"
                 :preview="false"
-                :limit="1"
+                :multiple="true"
+                :limit="9"
                 :disable="isDisabledFile"
                 class="i-solar-folder-with-files-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"

@@ -542,12 +542,12 @@ defineExpose({
       key="inputs"
       flex-row-c-c
       transition-300 hover:border="[var(--el-color-primary)]"
-      class="relative z-1 backdrop-blur-12px border-default-dashed hover:text-[var(--el-color-primary)]"
+      class="relative z-1 border-default-dashed backdrop-blur-12px hover:text-[var(--el-color-primary)]"
       :class="inputClass"
     >
       <input
         ref="inputRef"
-        class="z-10 block h-full w-full cursor-pointer opacity-0 absolute-center"
+        class="absolute-center z-10 block h-full w-full cursor-pointer opacity-0"
         type="file"
         :multiple="multiple"
         :accept="accept"
@@ -560,7 +560,7 @@ defineExpose({
         }"
         @change="hangdleChange"
       >
-      <ElIconPlus class="h-1/3 w-1/3 absolute-center" />
+      <ElIconPlus class="absolute-center h-1/3 w-1/3" />
     </div>
     <!-- 图片预览 -->
     <template v-if="uploadType === OssFileType.IMAGE && preview">
@@ -597,7 +597,7 @@ defineExpose({
           <!-- 编辑 -->
           <div
             v-else-if="showEdit"
-            class="pre-group-hover absolute left-0 top-0 h-full w-full flex-row-c-c gap-1 opacity-0 backdrop-blur-20px transition-300 card-default"
+            class="pre-group-hover absolute left-0 top-0 h-full w-full flex-row-c-c gap-1 card-default opacity-0 backdrop-blur-20px transition-300"
           >
             <slot name="pre-btns">
               <div
@@ -652,7 +652,7 @@ defineExpose({
           <!-- 编辑 -->
           <div
             v-else-if="showEdit"
-            class="pre-group-hover absolute left-0 top-0 h-full w-full flex-row-c-c gap-1 opacity-0 backdrop-blur-20px transition-300 card-default"
+            class="pre-group-hover absolute left-0 top-0 h-full w-full flex-row-c-c gap-1 card-default opacity-0 backdrop-blur-20px transition-300"
           >
             <slot name="pre-btns">
               <div

@@ -36,6 +36,11 @@ const setting = useSettingStore();
 
 const replyContentRef = useTemplateRef("replyContentRef");
 const replyContent = ref("");
+const isLoading = computed(() => {
+  return imgList.some(img => img.status !== "success")
+    || fileList.some(file => file.status !== "success")
+    || videoList.some(video => video.status !== "success");
+});
 // 控制弹窗显示
 const dialogVisible = computed({
   get: () => {
@@ -151,13 +156,13 @@ async function onSend() {
         <!-- 视频 -->
         <div
           v-if="videoList.length > 0"
-          class="w-full cursor-pointer gap-2"
+          class="w-full flex flex-row cursor-pointer gap-2"
         >
           <div
             v-for="(video, i) in videoList"
             :key="i"
             title="点击播放[视频]"
-            class="relative"
+            class="relative shrink-0"
             @click="emit('showVideo', $event, video)"
             @contextmenu="onContextFileMenu($event, video.key, i, OssFileType.VIDEO)"
           >
@@ -171,14 +176,15 @@ async function onSend() {
               <div title="撤销视频" class="absolute right-1 top-1 z-5 h-6 w-6 card-default-br transition-opacity !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.VIDEO, video.key!, i)">
                 <i i-carbon:close block h-full w-full />
               </div>
-              <img
+              <CardElImage
                 error-class="i-solar:file-smile-line-duotone p-2.8"
                 :src="video?.children?.[0]?.id"
                 class="h-full max-h-16rem max-w-16rem min-h-8rem min-w-8rem w-full flex-row-c-c card-default shadow"
               >
-              <div class="play-btn absolute-center-center h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
-                <i i-solar:alt-arrow-right-bold ml-1 p-4 />
-              </div>
+                <div class="play-btn absolute-center-center h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
+                  <i i-solar:alt-arrow-right-bold ml-1 p-4 />
+                </div>
+              </CardElImage>
             </div>
             <div class="mt-1 w-full truncate card-rounded-df bg-color-br pb-2 pl-3 pr-2 backdrop-blur transition-all" :class="video.status !== 'success' ? 'h-8' : 'h-0 !p-0 '">
               <el-progress
@@ -246,6 +252,7 @@ async function onSend() {
           class="w-full"
           type="primary"
           bg
+          :disabled="isLoading"
           @click="onSend"
         >
           发送
