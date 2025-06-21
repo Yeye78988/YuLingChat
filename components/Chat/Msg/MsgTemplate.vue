@@ -126,7 +126,7 @@ const { renderMessageContent } = useRenderMsg(data);
         ctx-name="urlContentMap"
         :url="String(key)"
         :data="urlInfo"
-        class="url-info max-w-16rem min-w-12rem card-rounded-df bg-color-br p-4 shadow-sm transition-200 hover:(shadow)"
+        class="url-info max-w-full w-14rem card-rounded-df bg-color-br p-4 shadow-sm transition-200 sm:(max-w-16rem min-w-12rem) hover:(shadow)"
       />
       <!-- AT -->
       <small

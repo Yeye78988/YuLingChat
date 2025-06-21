@@ -70,7 +70,7 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
     <div
       v-show="!chat.isScrollBottom"
       data-fade
-      class="mb-2 ml-a mr-2 w-fit rounded-full px-3 text-right shadow-lg btn-info card-bg-color border-default-hover"
+      class="mb-2 ml-a mr-2 w-fit btn-info border-default-hover rounded-full card-bg-color px-3 text-right shadow-lg"
       @click="emit('scrollBottom')"
     >
       <i class="i-solar:double-alt-arrow-down-line-duotone block h-5 w-5 transition-200" />
@@ -93,12 +93,12 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
     >
       <div
         v-for="(img, i) in imgList" :key="i" v-loading="img.status !== 'success'"
-        class="group relative flex-row-c-c shadow-sm transition-shadow border-default-2 card-default hover:shadow"
+        class="group relative flex-row-c-c border-default-2 card-default shadow-sm transition-shadow hover:shadow"
         :element-loading-spinner="defaultLoadingIcon"
         element-loading-background="transparent"
         @contextmenu="onContextFileMenu($event, img.key, i, OssFileType.IMAGE)"
       >
-        <div title="撤销图片" class="absolute right-2 top-2 z-5 h-6 w-6 transition-opacity !rounded-full card-default-br group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.IMAGE, img.key!, i)">
+        <div title="撤销图片" class="absolute right-2 top-2 z-5 h-6 w-6 card-default-br transition-opacity !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.IMAGE, img.key!, i)">
           <i i-solar:minus-circle-linear block h-full w-full />
         </div>
         <CardElImage
@@ -108,7 +108,7 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
           :src="img.id || BaseUrlImg + img.key"
           ctx-name="img"
           load-class="sky-loading block absolute top-0"
-          class="shadow-sm transition-shadow card-default hover:shadow"
+          class="card-default shadow-sm transition-shadow hover:shadow"
           :style="getImgSize(img.width, img.height)"
           :class="imgList.length > 1 ? '!w-6rem !h-6rem sm:(!w-8rem !h-8rem)' : '!max-h-80vw !max-w-50vh !sm:(max-h-18rem max-w-18rem)'"
           title="左键放大 | 右键删除"
@@ -139,13 +139,13 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
           <img
             error-class="i-solar:file-smile-line-duotone p-2.8"
             :src="video?.children?.[0]?.id"
-            class="h-full max-h-16rem max-w-16rem min-h-8rem min-w-8rem w-full flex-row-c-c shadow card-default"
+            class="h-full max-h-16rem max-w-16rem min-h-8rem min-w-8rem w-full flex-row-c-c card-default shadow"
           >
-          <div class="play-btn h-12 w-12 flex-row-c-c rounded-full absolute-center-center" style="border-width: 2px;">
+          <div class="play-btn absolute-center-center h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
             <i i-solar:alt-arrow-right-bold ml-1 p-4 />
           </div>
         </div>
-        <div class="mt-1 w-full truncate card-rounded-df pb-2 pl-3 pr-2 backdrop-blur transition-all bg-color-br" :class="video.status !== 'success' ? 'h-8' : 'h-0 !p-0 '">
+        <div class="mt-1 w-full truncate card-rounded-df bg-color-br pb-2 pl-3 pr-2 backdrop-blur transition-all" :class="video.status !== 'success' ? 'h-8' : 'h-0 !p-0 '">
           <el-progress
             striped
             :striped-flow="video.status !== 'success'"
@@ -166,7 +166,7 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
     >
       <div
         v-for="(file, i) in fileList"
-        :key="i" class="flex-row-c-c p-3.2 shadow-sm transition-all border-default card-default bg-color sm:p-2.8 hover:shadow"
+        :key="i" class="flex-row-c-c border-default card-default bg-color p-3.2 shadow-sm transition-all sm:p-2.8 hover:shadow"
         @contextmenu="onContextFileMenu($event, file.key, i, OssFileType.FILE)"
       >
         <img :src="file?.file?.type ? (FILE_TYPE_ICON_MAP[file?.file?.type] || FILE_TYPE_ICON_DEFAULT) : FILE_TYPE_ICON_DEFAULT" class="mr-2 h-8 w-8">
@@ -192,14 +192,14 @@ function onContextFileMenu(e: MouseEvent, key?: string, index: number = 0, type:
       prop="body.replyMsgId"
       class="w-full text-sm"
     >
-      <div class="w-full flex animate-[300ms_fade-in] items-center p-2 shadow card-default-br border-default-hover">
+      <div class="w-full flex animate-[300ms_fade-in] items-center border-default-hover card-default-br p-2 shadow">
         <el-tag effect="dark" size="small" class="mr-2 shrink-0">
           回复
         </el-tag>
         <div class="max-w-4/5 truncate">
           {{ `${replyMsg?.fromUser?.nickName}: ${replyMsg ? resolveMsgReplyText(replyMsg as ChatMessageVO) : '未知'}` }}
         </div>
-        <div class="i-solar:close-circle-bold ml-a h-6 w-6 text-dark op-80 transition-200 transition-color sm:(h-5 w-5) btn-default dark:text-light hover:text-[var(--el-color-danger)]" @click="emit('clearReply')" />
+        <div class="i-solar:close-circle-bold ml-a h-6 w-6 btn-default text-dark op-80 transition-200 transition-color sm:(h-5 w-5) dark:text-light hover:text-[var(--el-color-danger)]" @click="emit('clearReply')" />
       </div>
     </div>
   </div>
