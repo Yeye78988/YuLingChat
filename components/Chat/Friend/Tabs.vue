@@ -18,7 +18,7 @@ const activeNames = useLocalStorage(`${route.fullPath}_activeNames`, {
     v-bind="$attrs"
   >
     <slot name="top">
-      <div class="card-item border-0 border-b-1px pb-4 border-default-b">
+      <div class="card-item border-0 border-default-b border-b-1px pb-3 pt-1">
         <div class="hover:bg-transparent">
           <ChatFriendApplySearch
             @submit="(val: any) => chat.setTheFriendOpt(FriendOptType.User, val)"

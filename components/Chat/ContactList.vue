@@ -40,7 +40,7 @@ function handleEndReached() {
  * 加载会话列表
  */
 async function loadData(dto?: ContactPageDTO) {
-  if (isLoading.value || pageInfo.value.isLast)
+  if (isLoading.value || pageInfo.value.isLast || pageInfo.value.cursor !== undefined)
     return;
   isLoading.value = true;
   const { data } = await getChatContactPage({

@@ -267,6 +267,7 @@ class ImageManager {
         "contenteditable": "false",
         "role": "img",
         "tabindex": "0",
+        "draggable": "false",
       }) as any;
 
       const img = document.createElement("img");
@@ -674,6 +675,7 @@ export function useMsgInputForm(
       "data-type": "at-user",
       "data-uid": user.userId,
       "data-username": user.username || "",
+      "draggable": "false",
       "title": `@${SecurityUtils.sanitizeInput(user.nickName)} (${SecurityUtils.sanitizeInput(user.username || "")})`,
     });
 
@@ -700,6 +702,7 @@ export function useMsgInputForm(
     const outer = SecurityUtils.createSafeElement("span", "ai-robot-tag", {
       "data-type": "ai-robot",
       "data-uid": robot.userId,
+      "draggable": "false",
       "data-username": robot.username || "",
       "title": `${SecurityUtils.sanitizeInput(robot.nickName)} (${SecurityUtils.sanitizeInput(robot.username || "")})`,
     });
