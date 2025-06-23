@@ -293,7 +293,7 @@ onDeactivated(() => {
       <!-- <span float-right mr-3 rounded bg-theme-primary px-2 py-1 text-0.65rem text-light>AI生成内容，仅供参考！</span> -->
     </p>
     <!-- 内容 -->
-    <el-scrollbar ref="scollRef" wrap-class="shadow-sm shadow-inset" view-class="shadow-sm shadow-inset h-full  p-2 md:p-4" class="relative sm:card-rounded-df bg-color-2">
+    <el-scrollbar ref="scollRef" wrap-class="shadow-sm shadow-inset" view-class="shadow-sm shadow-inset h-full  p-2 md:p-4" class="relative bg-color-2 sm:card-rounded-df">
       <!-- 消息适配器 -->
       <div class="pb-24">
         <ChatAIJiwuMsg
@@ -321,7 +321,7 @@ onDeactivated(() => {
               class="h-full w-full cursor-pointer rounded-1/2 shadow"
             />
             <div
-              class="h-full w-full flex-row-c-c rounded-full op-0 transition-opacity absolute-center-center btn-primary-text bg-color-br group-hover:op-100 border-default-hover"
+              class="absolute-center-center h-full w-full flex-row-c-c btn-primary-text border-default-hover rounded-full bg-color-br op-0 transition-opacity group-hover:op-100"
               @click="handleNewChat"
             >
               <el-tooltip content="新对话" placement="top">

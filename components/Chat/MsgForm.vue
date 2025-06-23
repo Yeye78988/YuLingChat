@@ -655,9 +655,9 @@ defineExpose({
           v-if="isDragDropOver"
           key="drag-over"
           :data-tauri-drag-region="setting.isDesktop"
-          class="fixed left-0 top-0 z-3000 h-full w-full flex select-none items-center justify-center card-rounded-df backdrop-blur border-default"
+          class="fixed left-0 top-0 z-3000 h-full w-full flex select-none items-center justify-center border-default card-rounded-df backdrop-blur"
         >
-          <div class="flex-row-c-c flex-col border-(1px [--el-border-color] dashed) rounded-4 p-6 transition-all hover:(border-1px border-[--el-color-primary] border-solid) card-default-br sm:p-12 text-small !hover:text-color">
+          <div class="flex-row-c-c flex-col border-(1px [--el-border-color] dashed) card-default-br rounded-4 p-6 text-small transition-all hover:(border-1px border-[--el-color-primary] border-solid) sm:p-12 !hover:text-color">
             <i class="i-solar:upload-minimalistic-linear p-4" />
             <p class="mt-4 text-0.8rem sm:text-1rem">
               拖拽文件到此处上传
@@ -689,7 +689,7 @@ defineExpose({
           <el-tooltip popper-style="padding: 0.2em 0.5em;" :content="!isSoundRecordMsg ? (setting.isMobileSize ? '语音' : '语音 Ctrl+T') : '键盘'" placement="top">
             <i
               :class="!isSoundRecordMsg ? 'i-solar:microphone-3-broken hover:animate-pulse' : 'i-solar:keyboard-broken'"
-              class="h-6 w-6 cursor-pointer btn-primary"
+              class="h-6 w-6 btn-primary cursor-pointer"
               @click="chat.msgForm.msgType = chat.msgForm.msgType === MessageType.TEXT ? MessageType.SOUND : MessageType.TEXT"
             />
           </el-tooltip>
@@ -723,7 +723,7 @@ defineExpose({
                 <i :class="isPalyAudio ? 'i-solar:stop-bold' : 'i-solar:play-bold'" class="icon" ml-2 p-1 />
               </BtnElButton>
               <i
-                i-solar:trash-bin-minimalistic-broken ml-3 p-2.4 btn-danger
+                i-solar:trash-bin-minimalistic-broken ml-3 btn-danger p-2.4
                 @click="handlePlayAudio('del')"
               />
             </div>
@@ -753,7 +753,7 @@ defineExpose({
                 :min-size="1024"
                 :limit="9"
                 :disable="isDisabledFile"
-                class="i-solar:album-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar:album-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.IMAGE"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -773,7 +773,7 @@ defineExpose({
                 :preview="false"
                 :limit="1"
                 :disable="isDisabledFile"
-                class="i-solar:video-library-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar:video-library-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.VIDEO"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -793,7 +793,7 @@ defineExpose({
                 :preview="false"
                 :limit="1"
                 :disable="isDisabledFile"
-                class="i-solar-folder-with-files-line-duotone h-6 w-6 cursor-pointer sm:(h-5 w-5) btn-primary"
+                class="i-solar-folder-with-files-line-duotone h-6 w-6 btn-primary cursor-pointer sm:(h-5 w-5)"
                 pre-class="hidden"
                 :upload-type="OssFileType.FILE"
                 input-class="op-0 h-6 w-6 sm:(w-5 h-5) cursor-pointer "
@@ -849,7 +849,7 @@ defineExpose({
                 :value="item"
               >
                 <div class="h-full w-8em flex items-center pr-1" :title="item.label">
-                  <CardAvatar class="h-6 w-6 shrink-0 rounded-1/2 border-default bg-color" :src="BaseUrlImg + item.avatar" />
+                  <CardAvatar class="h-6 w-6 shrink-0 border-default rounded-1/2 bg-color" :src="BaseUrlImg + item.avatar" />
                   <span class="ml-2 flex-1 truncate text-xs text-color">{{ item.label }}</span>
                 </div>
               </el-option>
@@ -859,26 +859,26 @@ defineExpose({
             <div
               v-if="isLord"
               title="群通知消息"
-              class="i-carbon:bullhorn inline-block p-3.2 transition-200 btn-primary sm:p-2.8"
+              class="i-carbon:bullhorn inline-block btn-primary p-3.2 transition-200 sm:p-2.8"
               @click="showGroupNoticeDialog = true"
             />
             <template v-if="isSelfRoom && !setting.isMobileSize">
               <!-- 语音通话 -->
               <div
                 title="语音通话"
-                class="i-solar:phone-calling-outline p-3 transition-200 btn-primary sm:p-2.8"
+                class="i-solar:phone-calling-outline btn-primary p-3 transition-200 sm:p-2.8"
                 @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.AUDIO)"
               />
               <!-- 视频通话 -->
               <div
                 title="视频通话"
-                class="i-solar:videocamera-record-line-duotone p-3.2 transition-200 btn-primary sm:p-2.8"
+                class="i-solar:videocamera-record-line-duotone btn-primary p-3.2 transition-200 sm:p-2.8"
                 @click="chat.openRtcCall(chat.theRoomId!, CallTypeEnum.VIDEO)"
               />
             </template>
             <!-- 工具栏打开扩展 -->
             <span
-              class="i-solar:add-circle-linear inline-block p-3 transition-200 sm:hidden btn-primary"
+              class="i-solar:add-circle-linear inline-block btn-primary p-3 transition-200 sm:hidden"
               :class="{ 'rotate-45': showMobileTools }"
               @click="showMobileTools = !showMobileTools"
             />
@@ -887,7 +887,7 @@ defineExpose({
         <!-- 录音 -->
         <p
           v-if="isSoundRecordMsg"
-          class="relative max-h-3.1rem min-h-3.1rem w-full flex-row-c-c flex-1 overflow-y-auto text-wrap sm:(h-fit max-h-full p-6) text-small"
+          class="relative max-h-3.1rem min-h-3.1rem w-full flex-row-c-c flex-1 overflow-y-auto text-wrap text-small sm:(h-fit max-h-full p-6)"
         >
           {{ (isChating && speechRecognition.isSupported || theAudioFile?.id) ? (audioTransfromText || '...') : `识别你的声音 🎧${speechRecognition.isSupported ? '' : '（不支持）'}` }}
         </p>
@@ -937,7 +937,7 @@ defineExpose({
           >
             <template #label="{ item }">
               <div class="h-full w-9rem flex items-center pr-1" :title="item.label">
-                <CardElImage class="h-6 w-6 rounded-full border-default" :src="BaseUrlImg + item.avatar" />
+                <CardElImage class="h-6 w-6 border-default rounded-full" :src="BaseUrlImg + item.avatar" />
                 <span class="ml-2 flex-1 truncate">{{ item.label }}</span>
               </div>
             </template>
@@ -960,7 +960,7 @@ defineExpose({
         v-if="!setting.isMobileSize"
         class="hidden items-end p-1 pt-0 sm:flex"
       >
-        <div class="tip ml-a hidden sm:block text-mini">
+        <div class="tip ml-a hidden text-mini sm:block">
           Enter发送, Shift+Enter换行
         </div>
         <BtnElButton
@@ -979,7 +979,7 @@ defineExpose({
       </div>
       <div
         v-show="isNotExistOrNorFriend"
-        class="absolute left-0 top-0 h-full w-full flex-row-c-c border-0 border-t-1px tracking-2px shadow backdrop-blur-4px border-default"
+        class="absolute left-0 top-0 h-full w-full flex-row-c-c border-0 border-default border-t-1px tracking-2px shadow backdrop-blur-4px"
       >
         <span op-80>
           <i i-solar:adhesive-plaster-bold-duotone mr-3 p-2.4 />

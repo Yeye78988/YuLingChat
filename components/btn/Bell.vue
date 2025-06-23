@@ -28,7 +28,7 @@ interface NoticeInfo {
       </el-badge>
     </template>
     <template #default>
-      <div class="top mb-2 flex gap-2 border-0 border-b-1 pb-2 border-default">
+      <div class="top mb-2 flex gap-2 border-0 border-default border-b-1 pb-2">
         <i
           i-solar:bell-outline block h-1.2em w-1.2em px-0.7em
         /> <span>消息通知</span>
@@ -36,7 +36,7 @@ interface NoticeInfo {
       <el-scrollbar height="300px">
         <div
           v-for="(p, i) in noticeList" :key="i"
-          class="p-3 leading-1.5em border-default card-default"
+          class="border-default card-default p-3 leading-1.5em"
         >
           <NuxtLink
             class="text-overflow-3"

@@ -391,11 +391,9 @@ function forgetPassword() {
           :fetch-suggestions="querySearchAccount"
           :trigger-on-focus="true"
           placement="bottom"
-          clearable
-          fit-input-width
-          select-when-unmatched
-          teleported
-          hide-loading
+
+
+          clearable teleported fit-input-width select-when-unmatched hide-loading
           value-key="account"
           placeholder="请输入用户名、手机号或邮箱"
           @select="handleSelectAccount"

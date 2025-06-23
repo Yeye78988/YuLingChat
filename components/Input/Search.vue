@@ -72,7 +72,7 @@ onUnmounted(() => {
     <el-button
       v-show="word !== ''"
       type="primary"
-      class="absolute right-0 shadow border-default group-hover:opacity-100 md:opacity-0"
+      class="absolute right-0 border-default shadow group-hover:opacity-100 md:opacity-0"
       round style="height: 80%;margin: 0 0.5rem;"
       @click="onSearch()"
     >

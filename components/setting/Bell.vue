@@ -17,7 +17,7 @@ const {
     <div class="ml-a flex items-center gap-3 pr-4 text-0.9em" :title="setting.isDefaultRtcCallBell ? '默认铃声' : '自定义铃声'">
       <span
         v-if="!setting.isDefaultRtcCallBell"
-        class="cursor-pointer tracking-0.1em op-0 btn-warning group-hover:op-100"
+        class="btn-warning cursor-pointer tracking-0.1em op-0 group-hover:op-100"
         @click="setting.settingPage.rtcCallBellUrl = DEFAULT_RTC_CALL_BELL_URL"
       >恢复默认</span>
       <div
@@ -32,13 +32,13 @@ const {
         />
         {{ setting.isDefaultRtcCallBell ? '默认铃声' : '自定义铃声' }}
       </div>
-      <span class="cursor-pointer tracking-0.1em btn-warning" @click="toggleRtcCallBell()">
+      <span class="btn-warning cursor-pointer tracking-0.1em" @click="toggleRtcCallBell()">
         {{ setting.settingPage.rtcCallBellUrl ? '更改' : '添加' }}
       </span>
       <!-- 关闭 -->
       <span
         v-if="setting.settingPage.rtcCallBellUrl"
-        class="cursor-pointer tracking-0.1em btn-warning" @click="setting.settingPage.rtcCallBellUrl = ''"
+        class="btn-warning cursor-pointer tracking-0.1em" @click="setting.settingPage.rtcCallBellUrl = ''"
       >
         关闭
       </span>

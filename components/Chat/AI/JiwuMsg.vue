@@ -29,7 +29,7 @@ const user = useUserStore();
         </p>
       </template>
       <template v-else>
-        <div class="msg-popper relative sm:max-w-40rem text-color">
+        <div class="msg-popper relative text-color sm:max-w-40rem">
           <MdPreview
             language="zh-CN"
             show-code-row-number

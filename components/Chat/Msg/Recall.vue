@@ -34,9 +34,9 @@ function editRecallMsg() {
 </script>
 
 <template>
-  <span class="recall block max-w-full max-w-full w-full truncate px-4 py-2 text-center text-wrap font-500 text-mini-50">
+  <span class="recall block max-w-full max-w-full w-full truncate px-4 py-2 text-center text-wrap text-mini-50 font-500">
     {{ data?.message?.content }}
-    <span v-if="enoughEditMsgInfo" class="edit ml-1 el-color-info btn-info" title="只能重新编辑文字消息" @click="editRecallMsg()">重新编辑</span>
+    <span v-if="enoughEditMsgInfo" class="edit ml-1 btn-info el-color-info" title="只能重新编辑文字消息" @click="editRecallMsg()">重新编辑</span>
   </span>
 </template>
 

@@ -9,7 +9,7 @@ const { data } = defineProps<{
 </script>
 
 <template>
-  <span class="recall block max-w-full max-w-full w-full truncate px-4 py-2 text-center text-wrap font-500 text-mini-50">
+  <span class="recall block max-w-full max-w-full w-full truncate px-4 py-2 text-center text-wrap text-mini-50 font-500">
     {{ data?.message?.content }}
   </span>
 </template>

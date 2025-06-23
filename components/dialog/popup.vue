@@ -260,7 +260,7 @@ defineExpose({
         <Transition name="page-fade">
           <div
             v-if="modelValue"
-            class="fixed inset-0 z-0 card-rounded-df bg-black/30 transition-opacity duration-300 border-default-2 dark:bg-black/40"
+            class="fixed inset-0 z-0 border-default-2 card-rounded-df bg-black/30 transition-opacity duration-300 dark:bg-black/40"
             @click.stop.prevent="handleClose"
           >
             <slot name="mark-content" />
@@ -289,7 +289,7 @@ defineExpose({
             </slot>
             <span
               v-if="showClose"
-              class="absolute right-0 top-0 cursor-pointer btn-danger"
+              class="absolute right-0 top-0 btn-danger cursor-pointer"
               @click="handleClose"
             >
               <i

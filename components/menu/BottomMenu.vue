@@ -130,7 +130,7 @@ const activeMenu = computed({
 
 <template>
   <div
-    class="relative z-998 grid grid-cols-5 select-none justify-center border-0 border-t-1px bg-white shadow-md border-default dark:bg-dark-8"
+    class="relative z-998 grid grid-cols-5 select-none justify-center border-0 border-default border-t-1px bg-white shadow-md dark:bg-dark-8"
   >
     <div
       v-for="p in menuList" :key="p.path" :index="p.path" class="item"

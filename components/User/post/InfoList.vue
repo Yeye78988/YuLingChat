@@ -155,7 +155,7 @@ defineExpose({
           >
             <!-- 帖子卡片 -->
             <UserPostInfoLine
-              class="p-4 transition-300 transition-shadow card-default md:p-6 hover:shadow"
+              class="card-default p-4 transition-300 transition-shadow md:p-6 hover:shadow"
               :data="p"
               :user-id="p?.userId"
               @delete="onDelete"
@@ -166,7 +166,7 @@ defineExpose({
           <p
             v-show="isNoMore || isNot"
             class="w-full py-8"
-            text-center tracking-1 text-mini
+            text-center text-mini tracking-1
           >
             {{ isNoMore ? "暂无更多帖子" : "暂无帖子" }}
           </p>

@@ -9,7 +9,7 @@ const {
 
 <template>
   <div
-    class="h-18 w-full flex cursor-pointer items-center gap-3 sm:(card-rounded-df mb-2 w-full border-transparent card-bg-color p-3 text-color) p-4 text-sm card-bg-color dark:bg-transparent !hover:bg-[#f8f8f8] !dark:hover:bg-[#151515]"
+    class="h-18 w-full flex cursor-pointer items-center gap-3 card-bg-color p-4 text-sm sm:(mb-2 w-full border-transparent card-rounded-df card-bg-color p-3 text-color) dark:bg-transparent !hover:bg-[#f8f8f8] !dark:hover:bg-[#151515]"
   >
     <!-- 头像 -->
     <div

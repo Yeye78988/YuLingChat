@@ -94,7 +94,7 @@ const getAppTitle = computed(() => {
           <template #btn>
             <div
               text
-              class="mx-1 w-2em flex-row-c-c sm:w-2.2em btn-primary"
+              class="mx-1 w-2em flex-row-c-c btn-primary sm:w-2.2em"
               size="small"
               title="菜单"
             >
@@ -107,7 +107,7 @@ const getAppTitle = computed(() => {
           <BtnAppDownload />
           <!-- 菜单按钮 -->
           <template v-if="!['android', 'web', 'ios'].includes(setting.appPlatform)">
-            <div class="mx-1 h-1.2em sm:mx-2 border-default-l" />
+            <div class="mx-1 h-1.2em border-default-l sm:mx-2" />
             <MenuController size="small">
               <template #start="{ data }">
                 <ElButton

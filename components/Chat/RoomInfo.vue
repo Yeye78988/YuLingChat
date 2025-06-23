@@ -77,7 +77,7 @@ function navigateToDetail(type?: RoomType) {
           :error-class="contactTypeIconClassMap[chat?.theContact?.type || RoomType.SELFT]"
           :alt="chat.theContact.name"
           :default-src="chat?.theContact?.avatar"
-          class="h-2rem w-2rem flex-shrink-0 object-cover sm:(h-2.2rem w-2.2rem) border-default-2 card-default"
+          class="h-2rem w-2rem flex-shrink-0 border-default-2 card-default object-cover sm:(h-2.2rem w-2.2rem)"
         />
         <span truncate text-sm font-500>
           {{ chat.theContact.name }}
@@ -88,7 +88,7 @@ function navigateToDetail(type?: RoomType) {
       </div>
       <!-- <span v-if="chat.theContact.type === RoomType.AICHAT" class="border-(1px  solid) rounded px-2 py-1 text-0.65rem text-light">AI生成内容，仅供参考！</span> -->
       <i
-        class="ml-a flex-row-c-c grid-gap-2 btn-primary"
+        class="ml-a flex-row-c-c btn-primary grid-gap-2"
         transition="all  op-60 group-hover:op-100 300  cubic-bezier(0.61, 0.225, 0.195, 1.3)"
         i-solar:menu-dots-bold
         title="更多"

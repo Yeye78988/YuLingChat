@@ -124,7 +124,7 @@ const menuList = ref([
                 <!-- 替换头像 -->
                 <el-badge
                   :is-dot="!user.userInfo.avatar || user.userInfo.avatar === 'default.png'"
-                  class="item mr-2 rounded-10em border-default"
+                  class="item mr-2 border-default rounded-10em"
                 >
                   <el-avatar
                     :src="

@@ -16,7 +16,7 @@ const { data } = defineProps<{
       <p class="msg-popper msg-wrap">
         {{ data.message.content }}
       </p>
-      <span class="rounded-2rem px-2 py-1 text-xs card-default border-default-hover">
+      <span class="border-default-hover card-default rounded-2rem px-2 py-1 text-xs">
         未适配该消息，请升级客户端查看
       </span>
     </template>

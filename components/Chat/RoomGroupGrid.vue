@@ -267,7 +267,7 @@ function onInviteMember() {
       <span>
         群成员
       </span>
-      <i class="block h-1.8em w-1.8em rounded-2rem sm:(h-1.6em w-1.6em) btn-info border-default" i-carbon:add-large @click="onInviteMember" />
+      <i class="block h-1.8em w-1.8em btn-info border-default rounded-2rem sm:(h-1.6em w-1.6em)" i-carbon:add-large @click="onInviteMember" />
     </div>
     <el-scrollbar
       height="45vh"
@@ -296,9 +296,9 @@ function onInviteMember() {
               <CardElImage
                 v-if="p.avatar"
                 :src="BaseUrlImg + p.avatar" fit="cover"
-                class="h-2.4rem w-2.4rem flex-shrink-0 overflow-auto object-cover border-default card-default"
+                class="h-2.4rem w-2.4rem flex-shrink-0 overflow-auto border-default card-default object-cover"
               />
-              <div v-else class="h-2.4rem w-2.4rem text-center leading-2.4rem border-default card-default text-small">
+              <div v-else class="h-2.4rem w-2.4rem border-default card-default text-center text-small leading-2.4rem">
                 <i class="i-solar-user-line-duotone p-2.5 op-80" />
               </div>
               <span class="g-avatar" />

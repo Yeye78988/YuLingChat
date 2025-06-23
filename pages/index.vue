@@ -28,7 +28,7 @@ const showGroupDialog = computed({
 useMsgLinear();
 
 // 页面过渡
-const pageTransition = computed(() => setting.isMobileSize && !setting.settingPage.isCloseAllTransition ? chat.pageTransition : false);
+const pageTransition = computed(() => (setting.isMobileSize && !setting.settingPage.isCloseAllTransition) ? (setting.settingPage.pageTransition ? chat.pageTransition : false) : false);
 
 // 好友申请弹窗状态
 const isShowApply = ref(false);
@@ -117,7 +117,7 @@ onUnmounted(() => {
       <MenuHeaderMenuBar nav-class="relative z-999 left-0 w-full top-0 ml-a h-3.5rem w-full flex flex-shrink-0 select-none items-center justify-right gap-4 rounded-b-0 px-3 sm:(absolute right-0 top-0  p-1 ml-a h-3.125rem h-fit border-b-0 !bg-transparent) border-default-b bg-color">
         <template #center="{ appTitle }">
           <!-- 移动端菜单 -->
-          <div v-if="setting.isMobile" class="block tracking-0.1em absolute-center-center sm:hidden" :data-tauri-drag-region="setting.isDesktop">
+          <div v-if="setting.isMobile" class="absolute-center-center block tracking-0.1em sm:hidden" :data-tauri-drag-region="setting.isDesktop">
             {{ appTitle || appName }}
           </div>
           <!-- 连接状态 -->

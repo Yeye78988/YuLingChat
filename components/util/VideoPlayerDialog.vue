@@ -224,7 +224,7 @@ const videoSize = computed(() => {
     >
       <div
         ref="dragRef"
-        class="group video-player fixed flex-row-c-c animate-[fade-in_0.4s] select-none card-rounded-df shadow-lg transition-none bg-color-2 border-default-hover"
+        class="group video-player fixed flex-row-c-c animate-[fade-in_0.4s] select-none border-default-hover card-rounded-df bg-color-2 shadow-lg transition-none"
         :style="{
           touchAction: 'none',
           left: `${x}px`,
@@ -234,14 +234,14 @@ const videoSize = computed(() => {
         <div class="menu absolute left-0 top-0 z-1 w-full flex flex items-center p-2">
           <!-- 拖拽柄 -->
           <div ref="dragHandler" class="h-10 flex flex-1 select-none sm:cursor-move" />
-          <div class="ml-a flex-row-c-c gap-4 px-4 py-2 transition-opacity card-default-br sm:(op-0 group-hover:op-100)">
+          <div class="ml-a flex-row-c-c gap-4 card-default-br px-4 py-2 transition-opacity sm:(op-0 group-hover:op-100)">
             <div
               @click.stop="saveVideoLocal(videoInfo.url)"
             >
               <i
                 class="i-solar:download-minimalistic-linear"
                 title="另存为"
-                p-2.4 filter-drop-shadow-lg btn-info
+                btn-info p-2.4 filter-drop-shadow-lg
               />
             </div>
             <div
@@ -250,11 +250,11 @@ const videoSize = computed(() => {
               <i
                 :class="isFullscreen ? 'i-tabler:minimize' : 'i-tabler:maximize'"
                 title="全屏"
-                p-2.4 filter-drop-shadow-lg btn-info
+                btn-info p-2.4 filter-drop-shadow-lg
               />
             </div>
             <div @click.stop="closeDialog">
-              <i title="关闭" i-carbon:close p-2.8 filter-drop-shadow-lg btn-danger />
+              <i title="关闭" i-carbon:close btn-danger p-2.8 filter-drop-shadow-lg />
             </div>
           </div>
         </div>

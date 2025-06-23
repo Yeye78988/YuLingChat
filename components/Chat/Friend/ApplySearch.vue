@@ -188,7 +188,7 @@ onDeactivated(() => {
           <div mt-2 text-mini>
             历史记录：
             <i
-              i-solar:close-circle-bold class="float-right p-2.8 btn-primary" @click="() => {
+              i-solar:close-circle-bold class="float-right btn-primary p-2.8" @click="() => {
                 isShowModel = false;
                 clearSearch();
               }"
@@ -196,7 +196,7 @@ onDeactivated(() => {
             <i
               i-solar:round-alt-arrow-down-bold
               title="查看更多"
-              class="float-right mr-1 p-2.8 btn-primary"
+              class="float-right mr-1 btn-primary p-2.8"
               :class="{ 'rotate-180': showSearchHistory }"
               @click="showSearchHistory = !showSearchHistory"
             />
@@ -241,7 +241,7 @@ onDeactivated(() => {
               <div
                 v-for="(p, index) in searchPageList"
                 :key="p.id"
-                class="relative mb-2 flex cursor-pointer items-center truncate p-2 transition-300 transition-all card-default card-bg-color hover:(bg-color-2 shadow-sm)"
+                class="relative mb-2 flex cursor-pointer items-center truncate card-default card-bg-color p-2 transition-300 transition-all hover:(bg-color-2 shadow-sm)"
                 :class="{
                   selected: chat.theFriendOpt.type === FriendOptType.User && chat.theFriendOpt.data?.id === p?.id,
                   focused: currentFocus === index,
@@ -253,7 +253,7 @@ onDeactivated(() => {
                   :src="BaseUrlImg + p.avatar"
                   fit="cover"
                   error-class="i-solar:user-bold-duotone"
-                  class="mr-2 h-2.2rem w-2.2rem object-cover border-default card-default"
+                  class="mr-2 h-2.2rem w-2.2rem border-default card-default object-cover"
                 />
                 <small>{{ p.nickname || p.username }}</small>
               </div>

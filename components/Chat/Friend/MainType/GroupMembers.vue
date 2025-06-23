@@ -73,14 +73,14 @@ async function toSend(roomId: number) {
     <div absolute left-0 top-0 h-4.2rem w-full flex items-center gap-2 px-5>
       <CardElImage
         :src="BaseUrlImg + data.data.avatar" fit="cover"
-        class="h-2em w-2em flex-shrink-0 overflow-auto object-cover shadow-sm border-default card-default"
+        class="h-2em w-2em flex-shrink-0 overflow-auto border-default card-default object-cover shadow-sm"
       />
       <strong text-0.9em font-500>{{ room.groupName }}</strong>
       <small op-60 el-color-info>在线：{{ room.onlineNum || "0" }}</small>
     </div>
     <!-- 群成员 -->
     <ChatRoomGroupGrid class="mx-a mt-24 max-h-50vh sm:w-2/3" :data="data.data" />
-    <div class="mx-a my-6 w-4/5 sm:(my-10 w-3/5) border-default-b" />
+    <div class="mx-a my-6 w-4/5 border-default-b sm:(my-10 w-3/5)" />
     <!-- 按钮 -->
     <div flex-row-c-c gap-4>
       <BtnElButton

@@ -55,7 +55,7 @@ const showContentLoading = computed(() => (body.value?.status !== undefined && b
           </span>
           {{ isResonFold ? `${data?.message?.body?.reasoningContent.slice(0, OVERFLOW_LENGTH)}...` : data?.message?.body?.reasoningContent }}
           <span
-            class="text absolute bottom-1.5 right-1.5 z-2 h-2em px-3 leading-2em shadow btn-info text-mini"
+            class="text absolute bottom-1.5 right-1.5 z-2 h-2em btn-info px-3 text-mini leading-2em shadow"
             @click="isResonFold = !isResonFold"
           >
             {{ isResonFold ? '展开' : '收起' }}

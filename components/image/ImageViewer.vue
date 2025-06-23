@@ -410,13 +410,13 @@ defineExpose({
       >
         <!-- 关闭按钮 -->
         <div
-          class="btn-bg flex-center pointer-events-auto absolute right-5 top-5 cursor-pointer rounded-full p-2 text-6 btn-primary"
+          class="btn-bg flex-center pointer-events-auto absolute right-5 top-5 btn-primary cursor-pointer rounded-full p-2 text-6"
           @click="close"
         >
           <i class="i-carbon:close p-3" />
         </div>
         <!-- 工具栏 -->
-        <div class="pointer-events-auto absolute bottom-10 left-1/2 flex transform gap-4 rounded-2 p-2.5 p-x-3.75 -translate-x-1/2 card-default-br">
+        <div class="pointer-events-auto absolute bottom-10 left-1/2 flex transform gap-4 card-default-br rounded-2 p-2.5 p-x-3.75 -translate-x-1/2">
           <el-icon-d-arrow-left
             v-if="showPrev"
             class="btn"
@@ -493,17 +493,17 @@ defineExpose({
         <!-- 快捷键提示卡片 -->
         <div
           v-if="showShortcutTips"
-          class="pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df text-sm shadow-md transition-200 sm:(left-4 top-4) bg-color-br"
+          class="pointer-events-auto absolute left-2 top-2 w-12rem select-none card-rounded-df bg-color-br text-sm shadow-md transition-200 sm:(left-4 top-4)"
           :class="[isShortcutCardCollapsed ? 'transform -translate-x-full !left-0' : '']"
         >
-          <div class="mb-2 flex-row-bt-c px-3 py-2 border-default-2-b">
+          <div class="mb-2 flex-row-bt-c border-default-2-b px-3 py-2">
             <h4 class="text-3.5">
               <i class="i-carbon:keyboard mr-2 p-2.6" />
               快捷键
             </h4>
             <i class="i-carbon:close cursor-pointer p-2.6 hover:opacity-70" @click="isShortcutCardCollapsed = true" />
           </div>
-          <div class="px-3 py-2 leading-1.6em border-default-2-b text-mini">
+          <div class="border-default-2-b px-3 py-2 text-mini leading-1.6em">
             <div v-for="shortcut in filterKeyShortList" :key="shortcut.key" class="flex-row-bt-c">
               <span>{{ shortcut.key }}</span>
               <span>{{ shortcut.description }}</span>
@@ -514,7 +514,7 @@ defineExpose({
               不再提醒
             </el-checkbox>
             <span
-              class="text-xs btn-primary"
+              class="btn-primary text-xs"
               @click="closeShortcutCard"
             >知道了</span>
           </div>
@@ -522,7 +522,7 @@ defineExpose({
           <div
             v-show="isShortcutCardCollapsed && showShortcutTips"
             title="快捷键提示"
-            class="absolute right-0 top-1/2 translate-x-full rounded-r-md px-1 py-2 shadow -translate-y-1/2 btn-primary-bg !rounded-l-0 bg-color text-color"
+            class="absolute right-0 top-1/2 translate-x-full btn-primary-bg rounded-r-md bg-color px-1 py-2 text-color shadow -translate-y-1/2 !rounded-l-0"
             @click="toggleShortcutCard"
           >
             <i :class="[isShortcutCardCollapsed ? 'i-carbon:chevron-right' : 'i-carbon:chevron-left']" class="p-2.6" />

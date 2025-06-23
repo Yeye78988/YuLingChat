@@ -85,7 +85,7 @@ function toEditView() {
           v-for="(img, i) in getImages"
           :key="i"
           fit="cover"
-          class="h-8rem max-w-14rem object-cover card-default"
+          class="h-8rem max-w-14rem card-default object-cover"
           loading="lazy"
           preview-teleported
           :src="img"

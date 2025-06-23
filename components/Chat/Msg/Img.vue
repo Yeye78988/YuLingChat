@@ -57,7 +57,7 @@ function handleImagePreview() {
         v-if="body?.url"
         ctx-name="img"
         :style="{ width, height }"
-        class="max-h-50vh max-w-76vw cursor-pointer shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) border-default-2 card-default hover:shadow"
+        class="max-h-50vh max-w-76vw cursor-pointer border-default-2 card-default shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) hover:shadow"
         @click="handleImagePreview"
       >
         <CardElImage

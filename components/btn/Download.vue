@@ -68,7 +68,7 @@ onMounted(() => {
         <div class="flex items-center gap-2 p-2 pt-0">
           <i class="i-solar-download-minimalistic-broken p-0.6em" />
           <span>下载</span>
-          <nuxt-link to="/setting#system" title="设置下载路径" class="i-solar:settings-linear ml-a p-0.6em btn-primary" />
+          <nuxt-link to="/setting#system" title="设置下载路径" class="i-solar:settings-linear ml-a btn-primary p-0.6em" />
           <!-- 搜索框 -->
           <el-input
             ref="inputRef"

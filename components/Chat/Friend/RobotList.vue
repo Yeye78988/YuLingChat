@@ -95,7 +95,7 @@ onDeactivated(() => {
     <!-- 骨架屏 -->
     <template v-if="isReload">
       <div v-for="p in 6" :key="p" class="item">
-        <div class="h-3rem w-3rem flex-row-c-c flex-shrink-0 cursor-pointer rounded-1/2 sm:(h-3.5rem w-3.5rem) card-bg-color-2" />
+        <div class="h-3rem w-3rem flex-row-c-c flex-shrink-0 cursor-pointer rounded-1/2 card-bg-color-2 sm:(h-3.5rem w-3.5rem)" />
         <div>
           <div class="h-3 w-8em bg-gray-1 dark:bg-dark-4" />
           <div class="mt-2 h-3 w-12em rounded bg-gray-1 dark:bg-dark-4" />

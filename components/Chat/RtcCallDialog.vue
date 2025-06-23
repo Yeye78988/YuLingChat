@@ -339,14 +339,14 @@ defineExpose({
         <div v-if="!isConnected" relative w-full flex-row-bt-c>
           <span />
           {{ callType === CallTypeEnum.AUDIO ? '语音通话' : '视频通话' }}
-          <i i-carbon:close p-3 btn-danger title="关闭" @click.capture="closeDialog" />
+          <i i-carbon:close btn-danger p-3 title="关闭" @click.capture="closeDialog" />
         </div>
         <template v-else>
           <!-- 视频比例控制 -->
           <el-dropdown v-if="callType === CallTypeEnum.VIDEO && maxWindStream?.getVideoTracks()?.[0]?.enabled" trigger="hover">
             <i
               :class="isMaxVideoClass === MaxVideoObjEnum.COVER ? 'i-solar:scale-bold' : 'i-solar:scale-outline'"
-              :title="isMaxVideoClass ? '视频还原' : '视频最大化'" class="bg-white p-2.6 text-white btn-info"
+              :title="isMaxVideoClass ? '视频还原' : '视频最大化'" class="btn-info bg-white p-2.6 text-white"
               @click.capture="isMaxVideoClass = isMaxVideoClass === MaxVideoObjEnum.CONTAIN ? MaxVideoObjEnum.COVER : MaxVideoObjEnum.CONTAIN"
             />
             <template #dropdown>
@@ -369,17 +369,17 @@ defineExpose({
           >
             <i
               :class="isScreenSharing ? 'i-solar:screencast-bold-duotone text-color-info' : 'i-solar:screencast-outline'"
-              class="ml-4 p-2.8 sm:ml-3 btn-info"
+              class="ml-4 btn-info p-2.8 sm:ml-3"
               @click="isScreenSharing ? stopScreenShare() : startScreenShare()"
             />
           </el-tooltip>
-          <div v-if="isMaxWind" class="h-12 w-3/4 flex-1 absolute-center-x" :data-tauri-drag-region="setting.isDesktop" />
-          <span max-w-full truncate absolute-center-x>
+          <div v-if="isMaxWind" class="absolute-center-x h-12 w-3/4 flex-1" :data-tauri-drag-region="setting.isDesktop" />
+          <span absolute-center-x max-w-full truncate>
             {{ rtcDescText }}
           </span>
           <!-- 操作按钮 -->
           <i
-            title="缩小" class="i-carbon:subtract ml-a p-3 btn-info" @click.capture="() => {
+            title="缩小" class="i-carbon:subtract ml-a btn-info p-3" @click.capture="() => {
               isMaxWind = false;
               isMinWind = true;
             }"
@@ -387,13 +387,13 @@ defineExpose({
           <i
             :title="isMaxWind ? '最小化' : '全屏'"
             :class="isMaxWind ? 'text-color-info i-tabler:minimize' : 'i-tabler:maximize'"
-            ml-4 hidden p-2.6 sm:ml-3 sm:block btn-info
+            ml-4 hidden btn-info p-2.6 sm:ml-3 sm:block
             @click.capture="() => {
               isMinWind = false;
               isMaxWind = !isMaxWind;
             }"
           />
-          <i i-carbon:close ml-4 p-3 sm:ml-3 btn-danger title="关闭" @click.capture="closeDialog" />
+          <i i-carbon:close ml-4 btn-danger p-3 sm:ml-3 title="关闭" @click.capture="closeDialog" />
         </template>
       </h4>
       <div
@@ -411,7 +411,7 @@ defineExpose({
           <CardElImage
             :draggable="false"
             :src="BaseUrlImg + theContact.avatar"
-            class="avatar mx-a h-20 w-20 select-none rounded-full shadow-lg border-default-hover"
+            class="avatar mx-a h-20 w-20 select-none border-default-hover rounded-full shadow-lg"
           />
           <div class="username mt-4 text-center text-lg font-medium">
             {{ theContact.name }}
@@ -523,13 +523,13 @@ defineExpose({
         <video
           v-show="minWindStream?.getVideoTracks()[0]?.enabled" :srcObject="minWindStream" autoplay
           :controls="false" title="点击切换" v-bind="minWindStreamProps"
-          class="h-24 w-16 cursor-pointer object-cover md:(h-30 w-20) card-default-br border-default-hover"
+          class="h-24 w-16 cursor-pointer border-default-hover card-default-br object-cover md:(h-30 w-20)"
           @click="isSelfMinView = !isSelfMinView"
         />
         <CardElImage
           v-show="!minWindStream?.getVideoTracks()[0]?.enabled" title="点击切换"
           :src="isSelfMinView ? BaseUrlImg + user.userInfo.avatar : BaseUrlImg + theContact.avatar"
-          class="h-24 w-16 cursor-pointer select-none object-cover md:(h-30 w-20) border-default card-default-br"
+          class="h-24 w-16 cursor-pointer select-none border-default card-default-br object-cover md:(h-30 w-20)"
           @click="isSelfMinView = !isSelfMinView"
         />
       </div>
@@ -555,7 +555,7 @@ defineExpose({
     <!-- 视频最大化 -->
     <div
       v-if="callType === CallTypeEnum.VIDEO && isSupportFullscreen && maxWindStream?.getVideoTracks()[0]?.enabled "
-      class="video-max absolute bottom-0 right-0 z-100 h-10 w-10 flex-row-c-c rounded-[1rem_0_0_0] bg-dark-1 bg-op-50 pl-1 pt-1 op-100 backdrop-blur-12px backdrop-saturate-180 transition-opacity btn-info sm:(op-0 group-hover:op-100)"
+      class="video-max absolute bottom-0 right-0 z-100 h-10 w-10 flex-row-c-c btn-info rounded-[1rem_0_0_0] bg-dark-1 bg-op-50 pl-1 pt-1 op-100 backdrop-blur-12px backdrop-saturate-180 transition-opacity sm:(op-0 group-hover:op-100)"
       @click="openMaxVideo"
     >
       <i

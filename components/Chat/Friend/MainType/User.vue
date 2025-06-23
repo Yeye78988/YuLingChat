@@ -75,14 +75,14 @@ watch(userId, (val: string) => {
     class="h-full w-full flex flex-1 flex-col gap-6 px-10 transition-300 sm:px-1/4 !pt-14vh sm:!pt-20vh"
   >
     <!-- 信息 -->
-    <div flex gap-4 pb-6 sm:gap-6 border-default-b>
+    <div flex gap-4 border-default-b pb-6 sm:gap-6>
       <CardElImage
         :src="BaseUrlImg + targetUserInfo.avatar" fit="cover"
         :preview-src-list="[BaseUrlImg + targetUserInfo.avatar]"
         preview-teleported
         loading="lazy"
         error-class="i-solar:user-bold-duotone p-5"
-        class="h-4rem w-4rem flex-shrink-0 overflow-auto object-cover shadow-sm sm:(h-4.8rem w-4.8rem) border-default card-default"
+        class="h-4rem w-4rem flex-shrink-0 overflow-auto border-default card-default object-cover shadow-sm sm:(h-4.8rem w-4.8rem)"
       />
       <div flex flex-col gap-1 py-1>
         <strong truncate text-1.2rem>{{ targetUserInfo.nickname }}</strong>
@@ -95,17 +95,17 @@ watch(userId, (val: string) => {
       </div>
     </div>
     <!-- 详情 -->
-    <div gap-6 pb-6 border-default-b>
+    <div gap-6 border-default-b pb-6>
       <p truncate text-sm>
         <i mr-3 p-2 :class="targetUserInfo.gender === Gender.BOY ? 'i-tabler:gender-male text-blue' : targetUserInfo.gender === Gender.GIRL ? 'i-tabler:gender-female text-pink' : 'i-tabler:gender-transgender text-yellow'" />
-        <span class="mr-2 pr-2 border-default-r">
+        <span class="mr-2 border-default-r pr-2">
           {{ targetUserInfo.gender }}
         </span>
         <template v-if="targetUserInfo.birthday">
-          <span class="mr-2 pr-2 border-default-r">
+          <span class="mr-2 border-default-r pr-2">
             {{ getAgeText }}
           </span>
-          <span class="mr-2 pr-2 border-default-r">
+          <span class="mr-2 border-default-r pr-2">
             {{ targetUserInfo.birthday || ' - ' }}
           </span>
           <span>

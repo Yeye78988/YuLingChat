@@ -77,7 +77,13 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
       setting.isOpenContactSearch = true;// 打开搜索框
     }
     // const list = await loadData(dto || props.dto);
-    await loadData(dto || props.dto);
+    try {
+      await loadData(dto || props.dto);
+    }
+    catch (error) {
+      console.error("加载会话列表失败", error);
+      isReload.value = false;
+    }
     // 默认加载首个会话
     if (!setting.isMobileSize && historyContactId.value && chat.contactMap[historyContactId.value]) {
       chat.setContact(chat.contactMap[historyContactId.value]);

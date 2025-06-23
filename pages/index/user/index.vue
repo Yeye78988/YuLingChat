@@ -63,10 +63,10 @@ definePageMeta({
           :user="user"
           grid-class="grid grid-cols-4 gap-4"
           card-class="truncate word-nowrap text-0.85rem"
-          class="p-4 shadow-sm card-default-br border-default-hover"
+          class="border-default-hover card-default-br p-4 shadow-sm"
         />
         <!-- 签到 -->
-        <UserInfoSigninCard class="shadow-sm card-default-br border-default-hover" />
+        <UserInfoSigninCard class="border-default-hover card-default-br shadow-sm" />
       </div>
     </div>
   </div>

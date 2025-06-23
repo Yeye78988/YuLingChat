@@ -129,7 +129,7 @@ const {
               <el-tag v-else-if="item.isLatest" type="danger" effect="dark" size="small" class="ml-2 text-xs text-dark">
                 有新版本
               </el-tag>
-              <div class="ml-a mt-2 font-400 text-mini">
+              <div class="ml-a mt-2 text-mini font-400">
                 {{ item.createTime }}
               </div>
             </div>
@@ -149,11 +149,11 @@ const {
                 no-img-zoom-in
                 preview-theme="smart-blue"
                 style="font-size: 12px;background-color: transparent;"
-                class="mt-2 card-rounded-df px-4 op-60 shadow-sm shadow-inset transition-opacity hover:op-100 !border-default-hover"
+                class="mt-2 card-rounded-df px-4 op-60 shadow-sm shadow-inset transition-opacity !border-default-hover hover:op-100"
                 :model-value="item.notice.substring(0, 200)"
               />
               <div
-                class="linear-bt absolute bottom-0 left-0 w-full pt-6 text-center hover:text-color-info text-mini"
+                class="linear-bt absolute bottom-0 left-0 w-full pt-6 text-center text-mini hover:text-color-info"
               >
                 <span op-0 transition-opacity group-hover:op-100>
                   查看更多

@@ -270,14 +270,14 @@ defineExpose({
                 trigger: ['blur'],
                 message: '群成员不能为空！',
               }]"
-            class="right h-fit flex-1 p-4 bg-color-2 sm:p-6"
+            class="right h-fit flex-1 bg-color-2 p-4 sm:p-6"
             style="display: flex;;flex-direction: column;margin: 0;"
           >
             <ListTransitionGroup
               v-show="getCheckList.length > 0" tag="div" class="scroll-bar grid grid-cols-3 mt-0 max-h-200px min-h-200px w-full items-start gap-col-2 overflow-y-auto card-rounded-df sm:(grid-cols-4 max-h-300px min-h-300px)"
             >
               <div v-for="p in getCheckList" :key="p.userId" class="item" :label="p.userId">
-                <i i-solar:close-circle-bold p-2 btn-primary class="absolute right-2px top-2px z-1" @click="remove(p.userId)" />
+                <i i-solar:close-circle-bold btn-primary p-2 class="absolute right-2px top-2px z-1" @click="remove(p.userId)" />
                 <div class="avatar-icon">
                   <CardElImage class="h-full w-full overflow-hidden rounded-6px" :src="BaseUrlImg + p.avatar" fit="cover" />
                 </div>
@@ -285,7 +285,7 @@ defineExpose({
               </div>
             </ListTransitionGroup>
             <!-- 空白 -->
-            <div v-show="getCheckList.length <= 0" class="h-200px w-full flex-row-c-c card-rounded-df sm:h-300px text-small-50">
+            <div v-show="getCheckList.length <= 0" class="h-200px w-full flex-row-c-c card-rounded-df text-small-50 sm:h-300px">
               <i i-solar:user-plus-broken mr-2 p-2.5 />
               <p>未选择成员</p>
             </div>

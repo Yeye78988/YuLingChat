@@ -43,7 +43,7 @@ const bgUrl = useLocalStorage("jiwu_user_bg", "/image/user-bg/kiwi-bg-4.jpg");
               alt="Design By Kiwi23333"
               :src="BaseUrlImg + p"
               object-cover
-              class="h-5em cursor-pointer rounded-4px object-cover transition-300 hover:scale-105 border-default"
+              class="h-5em cursor-pointer border-default rounded-4px object-cover transition-300 hover:scale-105"
               @click="bgUrl = p"
             />
           </div>

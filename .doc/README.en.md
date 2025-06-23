@@ -56,15 +56,15 @@ JiwuChat is a lightweight `(~8MB)` multi-platform chat application built with Ta
 
 ## Default Account
 
-- Username: ikun233  
-- Password: 123456  
-- Demo: [Web Version](https://jiwuchat.top/)  
+- Username: ikun233
+- Password: 123456
+- Demo: [Web Version](https://jiwuchat.top/)
 
-> ⚠ Note: ~~This test account has limited permissions (e.g., no file uploads, profile edits, or password changes).~~  
+> ⚠ Note: ~~This test account has limited permissions (e.g., no file uploads, profile edits, or password changes).~~
 
-> 👀 Thanks for your support! The project is still under development, and the backend is not yet open-source. Feel free to share your feedback via email or QQ.  
+> 👀 Thanks for your support! The project is still under development, and the backend is not yet open-source. Feel free to share your feedback via email or QQ.
 
-## Feature List  
+## Feature List
 
 | Module         | Description                                                                 | Status |
 |----------------|-----------------------------------------------------------------------------|--------|
@@ -80,57 +80,57 @@ JiwuChat is a lightweight `(~8MB)` multi-platform chat application built with Ta
 | Audio/Video    | `WebRTC`-based screen sharing, voice, and video calls                       | ✔      |
 | Others         | AI translation, dark/light mode, fonts, custom download paths, multi-OS support | ✔      |
 
-## Screenshots  
+## Screenshots
 
-- Desktop App: Login / Register  
+- Desktop App: Login / Register
 
-![Login](./login.png)  
+![Login](./login.png)
 
-![Register](./register.png)  
+![Register](./register.png)
 
-- Light / Dark Themes  
+- Light / Dark Themes
 
-![Light](./chat1.png)  
+![Light](./chat1.png)
 
-![Home](./chat.png)  
+![Home](./chat.png)
 
-- AI Chatbots (DeepSeek, iFlytek Spark, Kimi AI) 🤩  
+- AI Chatbots (DeepSeek, iFlytek Spark, Kimi AI) 🤩
 
-![AI Chatbot](./group-ai-ds.png)  
+![AI Chatbot](./group-ai-ds.png)
 
-![AI Chatbot](./group-ai-2.png)  
+![AI Chatbot](./group-ai-2.png)
 
-![AI Chatbot](./group-ai-1.png)  
+![AI Chatbot](./group-ai-1.png)
 
-- Audio/Video Calls (WebRTC)  
+- Audio/Video Calls (WebRTC)
 
-![Audio/Video](./rtc1.png)  
+![Audio/Video](./rtc1.png)
 
-- Screen Sharing  
+- Screen Sharing
 
-![Screen Sharing](./rtc3.png)  
+![Screen Sharing](./rtc3.png)
 
-- Social Chat  
+- Social Chat
 
-![Dark](./chat2.png)  
+![Dark](./chat2.png)
 
-- AI Shopping (Powered by [Jiwu Circle](https://github.com/KiWi233333/jiwu-mall-sites))  
+- AI Shopping (Powered by [Jiwu Circle](https://github.com/KiWi233333/jiwu-mall-sites))
 
-![Dark](./chat3.png)  
+![Dark](./chat3.png)
 
-![Dark](./chat3.2.png)  
+![Dark](./chat3.2.png)
 
-- Account & Security  
+- Account & Security
 
-![Account](./chat4.png)  
+![Account](./chat4.png)
 
-![Security](./chat5.png)  
+![Security](./chat5.png)
 
-- Settings  
+- Settings
 
-![Settings](./chat6-light.png)  
+![Settings](./chat6-light.png)
 
-- Mobile Adaptation  
+- Mobile Adaptation
 
 <div>
  <img src="./chat12.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
@@ -146,31 +146,31 @@ JiwuChat is a lightweight `(~8MB)` multi-platform chat application built with Ta
  <img src="./chat17.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
  <img src="./chat16.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
  <img src="./chat9.png" width = "190" style="display:inline-block;" alt="Mobile" align=center />
-</div>  
+</div>
 
-## ⏳ Getting Started  
+## ⏳ Getting Started
 
-### 📦 Install Dependencies  
+### 📦 Install Dependencies
 
 ```sh
 Node.js >= 18 required
 npm install -g pnpm
 
 pnpm install
-```  
+```
 
-### ✨ Development  
+### ✨ Development
 
-- 📌 If you **don't** have a backend server, modify `.env.development` or use `.env.production`.  
+- 📌 If you **don't** have a backend server, modify `.env.development` or use `.env.production`.
 
 ```sh
 Terminal 1: Start Nuxt (Production)
 pnpm run prod:nuxt
 Terminal 2: Start Tauri
 pnpm run dev:tauri
-```  
+```
 
-- If you **have** a backend, customize `.env.development` for development:  
+- If you **have** a backend, customize `.env.development` for development:
 
 ```sh
 Recommended to run separately
@@ -178,41 +178,41 @@ Terminal 1: Start Nuxt
 pnpm run dev:nuxt
 Terminal 2: Start Tauri
 pnpm run dev:tauri
-```  
+```
 
-### 📦 Build  
+### 📦 Build
 
 ```sh
 pnpm run build:tauri
-```  
+```
 
-### ❌ pnpm Install Errors  
+### ❌ pnpm Install Errors
 
-Check registry:  
+Check registry:
 
 ```sh
 pnpm get registry
-```  
+```
 
-Temporary fix:  
+Temporary fix:
 
 ```sh
 pnpm --registry https://registry.npm.taobao.org install any-touch
-```  
+```
 
-Persistent change:  
+Persistent change:
 
 ```sh
 pnpm config set registry https://registry.npm.taobao.org
-```  
+```
 
-Revert:  
+Revert:
 
 ```sh
 pnpm config set registry https://registry.npmjs.org
-```  
+```
 
-## 🔧 Tech Stack  
+## 🔧 Tech Stack
 
 | Category       | Technology/Component       | Version       |
 |----------------|----------------------------|---------------|
@@ -226,14 +226,14 @@ pnpm config set registry https://registry.npmjs.org
 | Code Quality   | ESLint                     | 8.56.0        |
 |                | Prettier                   | 3.3.2         |
 | Type Checking  | TypeScript                 | 5.3.2         |
-| Styling        | Sass                       | 1.77.6        |  
+| Styling        | Sass                       | 1.77.6        |
 
-## 🦾 Trends  
+## 🦾 Trends
 
 ![JiwuChat Star History Chart](https://api.star-history.com/svg?repos=KiWi233333/jiwu-mall-chat-tauri&type=Date)
 
-## 💬 Contact  
+## 💬 Contact
 
-- Email: [kiwi2333@qq.com](mailto:kiwi2333@qq.com)  
-- QQ: [1329634286](https://wpa.qq.com/msgrd?v=3&uin=1329634286&site=qqq&menu=yes)  
+- Email: [kiwi2333@qq.com](mailto:kiwi2333@qq.com)
+- QQ: [1329634286](https://wpa.qq.com/msgrd?v=3&uin=1329634286&site=qqq&menu=yes)
 - QQ Group: [939204073](https://qm.qq.com/q/iSaETNVdKw)

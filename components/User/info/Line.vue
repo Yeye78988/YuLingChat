@@ -181,7 +181,7 @@ onMounted(() => {
   <div>
     <div
       v-loading="isLoading"
-      class="avatar shadow-md card-default-br"
+      class="avatar card-default-br shadow-md"
     >
       <!-- 上传 -->
       <el-upload
