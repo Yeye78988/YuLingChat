@@ -163,11 +163,20 @@ export interface MenuItem {
   top:0;
 }
 .item {
-  --at-apply: "card-rounded-df hover:(bg-gray-3 bg-op-30 dark:bg-dark-3 text-color-theme-primary) h-10 w-10 flex-row-c-c cursor-pointer transition-200";
-  &.action {
-    --at-apply: "text-theme-primary bg-gray-4 bg-op-20 dark:bg-dark-5";
+  --at-apply: "card-rounded-df hover:(bg-gray-3 bg-op-30 dark:(bg-dark-3 bg-op-30) text-color-theme-primary) h-10 w-10 flex-row-c-c cursor-pointer transition-200";
+
+  .icon {
+      --at-apply: "dark:op-80";
+  }
+  &:hover {
     .icon {
-      --at-apply: "text-theme-primary block";
+      --at-apply: "op-100";
+    }
+  }
+  &.action {
+    --at-apply: "text-theme-primary bg-gray-4 bg-op-20 dark:(bg-dark-3 bg-op-20)";
+    .icon {
+      --at-apply: "text-theme-primary op-100 block";
       filter: drop-shadow(0 0 8px var(--el-color-primary));
     }
   }

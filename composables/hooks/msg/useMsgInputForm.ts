@@ -785,7 +785,6 @@ export function useMsgInputForm(
       return "";
     }
   }
-
   /**
    * 处理键盘事件
    * @param e 键盘事件对象
@@ -793,6 +792,13 @@ export function useMsgInputForm(
   function handleKeyDown(e: KeyboardEvent) {
     try {
       updateSelectionRange();
+
+      // 限制快捷键 - 只允许常规输入框快捷键
+      if (isRestrictedShortcut(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
 
       // 处理选项导航
       if ((showAtOptions.value || showAiOptions.value) && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
@@ -984,6 +990,32 @@ export function useMsgInputForm(
       y: e.y,
       theme: setting.contextMenuTheme,
       items: contextMenuItems,
+    });
+  }
+  // 快捷键限制函数
+  function isRestrictedShortcut(e: KeyboardEvent): boolean {
+    const { key, ctrlKey, metaKey } = e;
+
+    // 禁用的快捷键列表
+    const restrictedShortcuts = [
+      // 格式化快捷键
+      { ctrl: true, key: "b" }, // 加粗
+      { ctrl: true, key: "i" }, // 斜体
+      { ctrl: true, key: "u" }, // 下划线
+
+      // Mac 系统对应的快捷键
+      { meta: true, key: "b" }, // 加粗 (Mac)
+      { meta: true, key: "i" }, // 斜体 (Mac)
+      { meta: true, key: "u" }, // 下划线 (Mac)
+    ];
+
+    // 检查是否为禁用的快捷键
+    return restrictedShortcuts.some((shortcut) => {
+      const ctrlMatch = shortcut.ctrl ? (ctrlKey || metaKey) : !ctrlKey && !metaKey;
+      const metaMatch = shortcut.meta ? metaKey : !metaKey;
+      const keyMatch = shortcut.key.toLowerCase() === key.toLowerCase();
+
+      return ctrlMatch && metaMatch && keyMatch;
     });
   }
 

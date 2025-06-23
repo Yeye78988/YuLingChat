@@ -40,7 +40,7 @@ function handleEndReached() {
  * 加载会话列表
  */
 async function loadData(dto?: ContactPageDTO) {
-  if (isLoading.value || pageInfo.value.isLast || pageInfo.value.cursor !== undefined)
+  if (isLoading.value || pageInfo.value.isLast)
     return;
   isLoading.value = true;
   const { data } = await getChatContactPage({
@@ -402,7 +402,7 @@ onMounted(() => {
     >
       <!-- 添加骨架屏 -->
       <template #pre>
-        <div v-if="isReload" key="skeleton" class="main-bg-color absolute left-0 top-0 z-2 h-full w-full flex-1 overflow-y-hidden">
+        <div v-if="isReload" key="skeleton" class="main-bg-color absolute left-0 top-0 z-2 h-100vh w-full flex-1 overflow-y-hidden">
           <ChatContactSkeleton v-for="i in 10" :key="i" class="contact-sky" />
         </div>
       </template>
