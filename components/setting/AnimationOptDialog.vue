@@ -1,0 +1,146 @@
+<script setup lang="ts">
+interface Props {
+  show?: boolean;
+  size?: "small" | "default" | "large";
+}
+
+const { show = false, size = "default" } = defineProps<Props>();
+const emit = defineEmits(["update:show"]);
+const setting = useSettingStore();
+
+const _show = computed({
+  get: () => show,
+  set: value => emit("update:show", value),
+});
+</script>
+
+<template>
+  <!-- 定制化动画设置弹窗 -->
+  <DialogPopup
+    v-model="_show"
+    title="动画定制"
+    :center="true"
+    :close-on-click-modal="true"
+    :show-close="true"
+    :duration="300"
+    destroy-on-close
+    class="select-none"
+    content-class="rounded-3 p-4 w-fit border-default-2 dialog-bg-color"
+  >
+    <div class="max-w-80vw w-20rem text-left">
+      <!-- 页面动画设置 -->
+      <div class="setting-group">
+        <p class="title">
+          页面动画
+        </p>
+        <div class="box">
+          <div class="setting-item">
+            <div class="setting-label" title="移动端页面切换动画">
+              页面切换
+              <span class="tip border-default rounded-8 px-2 py-0.2em text-mini">移动端</span>
+            </div>
+            <el-switch
+              v-model="setting.settingPage.pageTransition"
+              class="transition-opacity hover:op-80"
+              :size="size"
+              inline-prompt
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 主题切换动画设置 -->
+      <div class="setting-group">
+        <p class="title">
+          主题动画
+        </p>
+        <div class="box">
+          <div class="setting-item">
+            <span class="setting-label">主题切换动画</span>
+            <el-switch
+              v-model="setting.settingPage.themeTransition"
+              class="transition-opacity hover:op-80"
+              :size="size"
+              inline-prompt
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 组件动画设置 -->
+      <div class="setting-group">
+        <p class="title">
+          组件动画
+        </p>
+        <div class="box">
+          <div class="setting-item">
+            <span class="setting-label">列表过渡动画</span>
+            <el-switch
+              v-model="setting.settingPage.listTransition"
+              class="transition-opacity hover:op-80"
+              :size="size"
+              inline-prompt
+              disabled
+            />
+          </div>
+
+          <div class="setting-item">
+            <span class="setting-label">弹窗进入动画</span>
+            <el-switch
+              v-model="setting.settingPage.dialogTransition"
+              class="transition-opacity hover:op-80"
+              :size="size"
+              inline-prompt
+              disabled
+            />
+          </div>
+
+          <div class="setting-item">
+            <span class="setting-label">消息气泡动画</span>
+            <el-switch
+              v-model="setting.settingPage.messageTransition"
+              class="transition-opacity hover:op-80"
+              :size="size"
+              inline-prompt
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </DialogPopup>
+</template>
+
+<style lang="scss" scoped>
+.title {
+  --at-apply: "text-sm block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-4 mb-2) ";
+}
+.box {
+  border: 1px solid transparent;
+  --at-apply: "text-sm card-rounded-df bg-white dark:bg-dark shadow p-3 sm:p-4 flex flex-col gap-3";
+
+  .inputs {
+    --at-apply: "w-10rem sm:w-12rem";
+  }
+}
+.setting-group {
+
+  .title {
+    --at-apply: "text-sm block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-4 mb-2)";
+  }
+  .setting-label {
+    --at-apply: "text-sm";
+  }
+  .box {
+    border: 1px solid transparent;
+    --at-apply: "text-sm card-rounded-df bg-white dark:bg-dark shadow px-3 sm:px-4 py-2 flex flex-col gap-3";
+
+    .inputs {
+      --at-apply: "w-10rem sm:w-12rem";
+    }
+    .setting-item {
+      --at-apply: "h-8 text-sm flex-row-bt-c";
+    }
+  }
+}
+</style>

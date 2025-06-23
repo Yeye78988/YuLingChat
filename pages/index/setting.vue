@@ -20,6 +20,9 @@ const {
   changeAnimateMode,
 } = useSettingDefault();
 
+// 定制化动画设置弹窗
+const showCustomTransitionPanel = ref(false);
+
 const size = computed(() => {
   if (setting.settingPage?.fontSize?.value < 16) {
     return "small";
@@ -88,7 +91,7 @@ onUnmounted(() => {
   <el-scrollbar
     ref="scrollbarRef"
     v-loading.fullscreen="isFullLoading"
-    class="setting-page h-full w-full flex-1 pt-10 bg-color-3 sm:card-bg-color-2"
+    class="setting-page h-full w-full flex-1 bg-color-3 pt-10 sm:card-bg-color-2"
     wrap-class="h-full w-full pb-4 sm:pb-20 flex flex-1 flex-col px-4"
     element-loading-text="更新中..."
     element-loading-background="transparent"
@@ -138,8 +141,18 @@ onUnmounted(() => {
     <label class="title">功能与交互</label>
     <div id="function" class="box">
       <!-- 关闭动画 -->
-      <div class="group h-8 flex-row-bt-c">
+      <div class="group h-8 flex items-center">
         流畅模式
+        <BtnElButton
+          class="ml-a mr-2 h-5"
+          icon-class="i-solar:pen-2-bold mr-1"
+          title="定制化"
+          bg
+          text
+          round
+          size="small"
+          @click="showCustomTransitionPanel = true"
+        />
         <el-tooltip
           :content="!setting.settingPage.isCloseAllTransition ? '开启动画' : '关闭动画'" placement="left"
           popper-style="padding: 0 0.5em;"
@@ -208,6 +221,10 @@ onUnmounted(() => {
       </BtnElButton>
     </div>
   </el-scrollbar>
+  <SettingAnimationOptDialog
+    v-model:show="showCustomTransitionPanel"
+    :size="size"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -265,6 +282,25 @@ onUnmounted(() => {
   .btns {
     background-image: none !important;
   }
+}
+
+.setting-group {
+
+  .title {
+    --at-apply: "text-0.9em block px-3 tracking-0.1em mt-4 mb-2 sm:(px-4 mt-6 mb-3) ";
+  }
+  .box {
+    border: 1px solid transparent;
+    --at-apply: "text-0.9em card-rounded-df bg-white dark:bg-dark shadow px-3 sm:px-4 py-2 flex flex-col gap-3";
+
+    .inputs {
+      --at-apply: "w-10rem sm:w-12rem";
+    }
+    .setting-item {
+      --at-apply: "h-8 text-sm flex-row-bt-c";
+    }
+  }
+
 }
 </style>
 
