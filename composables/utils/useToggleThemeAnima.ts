@@ -15,7 +15,7 @@ export function useModeToggle(mode: "system" | "dark" | "light" | "auto" | strin
   const isAppearanceTransition = document?.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // 不支持动画
-  if (!isAppearanceTransition || !isAnimated || !setting.settingPage.themeTransition) {
+  if (!isAppearanceTransition || !isAnimated || !setting.settingPage.animation.themeTransition) {
     colorMode.preference = mode || "system";
     setting.isThemeChangeLoad = false;
     return;

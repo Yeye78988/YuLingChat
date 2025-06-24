@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { appKeywords, appName } from "@/constants/index";
-import { useDefaultInit, useInit, useUmounted } from "@/init/index";
+import { useDefaultInit, useInit, useUnmounted } from "@/init/index";
 
 // https://nuxt.com.cn/docs/guide/directory-structure/app
 useHead({
@@ -33,7 +33,7 @@ onMounted(() => {
   else
     useInit();
 });
-onUnmounted(useUmounted);
+onUnmounted(useUnmounted);
 </script>
 
 <template>

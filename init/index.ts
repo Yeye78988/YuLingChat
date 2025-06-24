@@ -9,7 +9,7 @@ let unMountedMsgBoxWebView: (() => void) | undefined;
 let unMountedTauri: (() => void) | undefined;
 let unMountedSettingInit: (() => void) | undefined;
 let unMountedHotkeyInit: (() => void) | undefined;
-let unMoundtedIframeInit: (() => void) | undefined;
+let unMountedIframeInit: (() => void) | undefined;
 let unMountedWindowVisibilityInit: (() => void) | undefined;
 
 
@@ -28,7 +28,9 @@ export async function useDefaultInit() {
   // 初始化快捷键
   unMountedHotkeyInit = useHotkeyInit();
   // iframe通信
-  unMoundtedIframeInit = useIframeInit();
+  unMountedIframeInit = useIframeInit();
+  // 硬件加速管理
+  useHardwareAcceleration();
 }
 
 /**
@@ -48,13 +50,13 @@ export async function useInit() {
 }
 
 // 卸载
-export async function useUmounted() {
+export async function useUnmounted() {
   unMountedTauri?.();
   useWSUnmounted?.();
   unMountedMsgBoxWebView?.();
 
   unMountedSettingInit?.();
   unMountedHotkeyInit?.();
-  unMoundtedIframeInit?.();
+  unMountedIframeInit?.();
   unMountedWindowVisibilityInit?.();
 }

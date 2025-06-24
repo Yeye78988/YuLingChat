@@ -28,7 +28,7 @@ const showGroupDialog = computed({
 useMsgLinear();
 
 // 页面过渡
-const pageTransition = computed(() => (setting.isMobileSize && !setting.settingPage.isCloseAllTransition) ? (setting.settingPage.pageTransition ? chat.pageTransition : false) : false);
+const pageTransition = computed(() => (setting.isMobileSize && !setting.settingPage.isCloseAllTransition) ? (setting.settingPage.animation.pageTransition ? chat.pageTransition : false) : false);
 
 // 好友申请弹窗状态
 const isShowApply = ref(false);
