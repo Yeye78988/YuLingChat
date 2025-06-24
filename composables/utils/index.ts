@@ -285,7 +285,12 @@ export function formatFriendlyDate(date: Date | number | string): string {
   }
 }
 
-// 格式化时间
+/**
+ * 格式化会话日期
+ *
+ * @param date 日期
+ * @returns 格式化后的日期字符串
+ */
 export function formatContactDate(date: Date | number | string): string {
   if (typeof date === "string") {
     date = new Date(date);
@@ -323,6 +328,63 @@ export function formatContactDate(date: Date | number | string): string {
     return `${year}-${month}-${day}`;
   }
 }
+// 格式化版本更新日期
+export function formatVersionDate(date: Date | string | number): string {
+  if (typeof date === "string") {
+    date = new Date(date);
+  }
+  if (typeof date === "number") {
+    date = new Date(date);
+  }
+  if (!(date instanceof Date)) {
+    date = dayjs(date).toDate();
+  }
+
+  const now = new Date();
+  const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffInDays = Math.floor((now.getTime() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // 如果是未来日期
+  if (diffInDays < 0) {
+    const futureDays = Math.abs(diffInDays);
+    if (futureDays === 1) {
+      return "明天发布";
+    }
+    else if (futureDays <= 7) {
+      return `${futureDays}天后发布`;
+    }
+    else {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day} 发布`;
+    }
+  }
+
+  // 历史版本日期
+  if (diffInDays === 0) {
+    return "今天";
+  }
+  else if (diffInDays === 1) {
+    return "昨天";
+  }
+  else if (diffInDays <= 7) {
+    return `${diffInDays}天前`;
+  }
+  else if (diffInDays <= 30) {
+    const weeks = Math.floor(diffInDays / 7);
+    return weeks === 1 ? "1周前" : `${weeks}周前`;
+  }
+  else if (diffInDays <= 365) {
+    const months = Math.floor(diffInDays / 30);
+    return months === 1 ? "1个月前" : `${months}个月前`;
+  }
+  else {
+    const years = Math.floor(diffInDays / 365);
+    return years === 1 ? "1年前" : `${years}年前`;
+  }
+}
+
 
 const supportFetch = typeof window !== "undefined" && "fetch" in window;
 

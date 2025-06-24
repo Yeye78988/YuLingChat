@@ -188,6 +188,7 @@ onMounted(() => {
         ref="avatatRef"
         :disabled="!isEdit"
         class="avatar-uploader"
+        :class="{ 'is-disabled': !isEdit }"
         drag
         :action="`${BaseUrlRef}/user/info/avatar`"
         :headers="{ Authorization: store.token }"
@@ -202,12 +203,12 @@ onMounted(() => {
         :on-success="updateSucess"
       >
         <div class="group relative flex-row-c-c">
-          <img
+          <CardAvatar
             v-if="avatarUrl"
             alt="Design By Kiwi23333"
             :src="BaseUrlImg + avatarUrl"
-            class="avatar-mark h-6em w-6em overflow-hidden overflow-hidden rounded-1/2 object-cover p-0 transition-300 group-hover:filter-blur-4"
-          >
+            class="avatar-mark h-6em w-6em select-none overflow-hidden overflow-hidden rounded-1/2 object-cover p-0 transition-300 group-hover:filter-blur-4"
+          />
           <ElIconPlus
             v-else
             size="2em"
@@ -323,6 +324,7 @@ onMounted(() => {
             placeholder="Select"
             style="width: 10.5em"
             size="small"
+            :disabled="!isEdit"
             @change="submitUpdateUser('gender')"
           >
             <el-option
@@ -371,6 +373,9 @@ onMounted(() => {
       }
       transition: $transition-delay;
     }
+  }
+  .is-disabled {
+    pointer-events: none;
   }
 }
 /* stylelint-disable-next-line selector-class-pattern */

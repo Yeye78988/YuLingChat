@@ -85,5 +85,10 @@ export interface CommUserVO {
    * 昵称
    */
   nickname?: string
+
+  /**
+   * 个性签名
+   */
+  slogan?: string
   [property: string]: any
 }

@@ -218,7 +218,7 @@ const videoSize = computed(() => {
     <div
       v-show="show"
       title="视频播放器"
-      class="video-player-dialog fixed left-0 top-0 z-999 h-full w-full flex-row-c-c"
+      class="video-player-dialog fixed left-0 top-0 z-1000 h-full w-full flex-row-c-c"
       :style="videoInfo.mouseX !== undefined && videoInfo.mouseY !== undefined ? `transform-origin: ${videoInfo.mouseX}px ${videoInfo.mouseY}px` : ''"
       @click.self="closeDialog"
     >

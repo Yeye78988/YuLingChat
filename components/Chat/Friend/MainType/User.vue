@@ -84,8 +84,22 @@ watch(userId, (val: string) => {
         error-class="i-solar:user-bold-duotone p-5"
         class="h-4rem w-4rem flex-shrink-0 overflow-auto border-default card-default object-cover shadow-sm sm:(h-4.8rem w-4.8rem)"
       />
-      <div flex flex-col gap-1 py-1>
-        <strong truncate text-1.2rem>{{ targetUserInfo.nickname }}</strong>
+      <div flex flex-1 flex-col gap-1 py-1>
+        <div w-full flex-row-bt-c>
+          <div class="flex-1 truncate text-1.2rem">
+            {{ targetUserInfo.nickname }}
+          </div>
+          <BtnElButton
+            size="small"
+            class="ml-a flex-shrink-0 text-mini tracking-0.2em hover:shadow"
+            text
+            bg
+            icon-class="i-solar:user-outline mr-1"
+            @click="navigateToUserInfoPage(userId)"
+          >
+            资料
+          </BtnElButton>
+        </div>
         <p mt-a truncate text-mini :title="userId">
           ID：{{ userId }}
         </p>
@@ -115,7 +129,7 @@ watch(userId, (val: string) => {
       </p>
       <p mt-6 truncate text-sm>
         <i class="i-carbon:send mr-3 p-2" />
-        签名：-
+        签名：{{ targetUserInfo.slogan || ' - ' }}
       </p>
       <p mt-6 truncate text-sm>
         <i class="i-tabler:calendar mr-3 p-2" />

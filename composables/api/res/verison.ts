@@ -76,7 +76,6 @@ export enum TimeSortKeyEnum {
  * ResAppVersionCommVO
  */
 export interface ResAppVersionCommVO {
-  createTime?: string;
   /**
    * ID
    */
@@ -90,6 +89,10 @@ export interface ResAppVersionCommVO {
    */
   notice?: string;
   /**
+   * 公告概要
+   */
+  noticeSummary?: string;
+  /**
    * 版本号 1.0.0
    */
   version: string;
@@ -101,6 +104,7 @@ export interface ResAppVersionCommVO {
    * tauri更新器内容
    */
   updaterJson?: AppPlatformsJSON;
+  createTime: string;
   updateTime?: string;
 }
 

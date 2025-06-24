@@ -50,7 +50,7 @@ const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
   >
     <template #body-pre>
       <div
-        class="relative max-h-50vh max-w-76vw flex-row-c-c cursor-pointer border-default-2 card-default shadow-sm transition-shadow md:(max-h-18rem max-w-18rem) hover:shadow"
+        class="relative max-h-50vh max-w-76vw flex-row-c-c cursor-pointer border-default-hover card-default md:(max-h-18rem max-w-18rem)"
         title="点击播放[视频]"
         ctx-name="video"
         :style="{ width, height }"
@@ -64,7 +64,7 @@ const { width, height } = getImgSize(body?.thumbWidth, body?.thumbHeight);
             ctx-name="video"
             error-class="i-solar:file-smile-line-duotone p-2.8"
             :src="thumbUrl"
-            class="h-full w-full flex-row-c-c card-default shadow"
+            class="h-full w-full flex-row-c-c card-default"
           />
           <div ctx-name="video" class="play-btn absolute h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
             <i i-solar:alt-arrow-right-bold ml-1 p-4 ctx-name="video" />

@@ -33,7 +33,7 @@ const {
           <ElButton
             v-if="setting.isDesktop"
             class="flex-row-c-c cursor-pointer transition-all"
-            round plain
+            plain round
             style="height: 2em;padding: 0 0.8em;"
             :type="setting.appUploader.isUpdating ? 'warning' : 'info'"
             @click="!setting.appUploader.isCheckUpdatateLoad && setting.checkUpdates(true)"
@@ -129,14 +129,14 @@ const {
               <el-tag v-else-if="item.isLatest" type="danger" effect="dark" size="small" class="ml-2 text-xs text-dark">
                 有新版本
               </el-tag>
-              <div class="ml-a mt-2 text-mini font-400">
-                {{ item.createTime }}
+              <div :title="item.createTime" class="ml-a mt-2 text-mini font-400">
+                {{ formatVersionDate(item.createTime) }}
               </div>
             </div>
             <div
-              v-if="item.notice"
+              v-if="item.noticeSummary"
               class="relative max-h-12em cursor-pointer truncate sm:max-h-16em"
-              :class="{ '!max-h-28em': item.isLatest }"
+              :class="{ '!max-h-30em pb-6': item.isLatest }"
               @click="showVersionNotice(item.version)"
             >
               <MdPreview
@@ -147,11 +147,11 @@ const {
                 :code-foldable="false"
                 code-theme="a11y"
                 no-img-zoom-in
-                preview-theme="smart-blue"
-                style="font-size: 12px;background-color: transparent;"
-                class="mt-2 card-rounded-df px-4 op-60 shadow-sm shadow-inset transition-opacity !border-default-hover hover:op-100"
-                :model-value="item.notice.substring(0, 200)"
+                style="background-color: transparent;"
+                class="mt-2 card-rounded-df op-60 shadow-sm shadow-inset transition-opacity !border-default-hover hover:op-100"
+                :model-value="item.noticeSummary.substring(0, 400)"
               />
+              <!-- <div class="notice-summary">{{ item.noticeSummary }}</div> -->
               <div
                 class="linear-bt absolute bottom-0 left-0 w-full pt-6 text-center text-mini hover:text-color-info"
               >
@@ -160,8 +160,12 @@ const {
                 </span>
               </div>
             </div>
-            <div v-else class="text-small">
-              暂无更新日志
+            <div
+              v-else
+              class="cursor-pointer text-center text-mini transition-200 hover:text-color-info"
+              @click="item.notice ? showVersionNotice(item.version) : ''"
+            >
+              {{ item.notice ? "查看更多" : "暂无更新日志" }}
             </div>
           </el-timeline-item>
           <template #done>
@@ -193,14 +197,19 @@ const {
 :deep(.md-editor-preview-wrapper) {
   padding: 0;
   h1:first-of-type {
-    font-size: 1.6em;
+    font-size: 1.5em;
   }
 }
-:deep(.notice-toast-preview-wrapper) {
-  .task-list-item-checkbox[type="checkbox"] {
-    display: none !important;
+:deep(#notice-toast-preview) {
+  font-size: 0.84rem;
+
+  .notice-toast-preview-wrapper {
+    .task-list-item-checkbox[type="checkbox"] {
+      display: none !important;
+    }
   }
 }
+
 
 :deep(.el-timeline-item){
   .el-timeline-item__tail {
@@ -211,6 +220,10 @@ const {
     left: 0;
     top: 0.3em;
   }
+}
+
+.notice-summary:nth-of-type(1) {
+  font-weight: bold;
 }
 
 .linear-bt {

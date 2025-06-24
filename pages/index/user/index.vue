@@ -66,7 +66,7 @@ definePageMeta({
           class="border-default-hover card-default-br p-4 shadow-sm"
         />
         <!-- 签到 -->
-        <UserInfoSigninCard class="border-default-hover card-default-br shadow-sm" />
+        <!-- <UserInfoSigninCard class="border-default-hover card-default-br shadow-sm" /> -->
       </div>
     </div>
   </div>

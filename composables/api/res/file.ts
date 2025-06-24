@@ -166,6 +166,7 @@ export async function downloadFile(url: string, fileName: string, options: {
     ElNotification.warning({
       title: "下载失败",
       message: "文件下载失败，请稍后重试",
+      zIndex: 3000,
     });
     setting.fileDownloadMap[url]!.status = FileStatus.ERROR;
   }

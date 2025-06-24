@@ -103,7 +103,7 @@ async function onSend() {
     v-model="dialogVisible"
     :min-scale="0.98"
     :duration="20"
-    :z-index="990"
+    :z-index="999"
     destroy-on-close
     :show-close="false"
     content-class="w-86vw sm:(w-fit max-w-24rem) shadow-lg border-default-2  rounded-2 dialog-bg-color"
@@ -117,13 +117,13 @@ async function onSend() {
           :error-class="contactTypeIconClassMap[(targetContact as ChatContactVO).type]"
           :default-src="targetContact.avatar"
           fit="cover"
-          class="h-7 w-7 card-rounded-df card-bg-color-2 object-cover shadow-sm"
+          class="h-7 w-7 card-rounded-df card-bg-color-2 object-cover"
         />
         <p class="max-w-14em truncate px-4 text-sm">
           {{ targetContact.name }}
         </p>
       </div>
-      <el-scrollbar class="my-6" wrap-class="px-2" max-height="40vh" max-width="100%">
+      <el-scrollbar wrap-class="py-6 px-2" max-height="40vh" max-width="100%">
         <!-- 图片 -->
         <div
           v-if="imgList.length > 0"
@@ -137,7 +137,7 @@ async function onSend() {
             element-loading-background="transparent"
             @contextmenu="onContextFileMenu($event, img.key, i, OssFileType.IMAGE)"
           >
-            <div title="撤销图片" class="absolute right-1 top-1 z-5 h-6 w-6 card-default-br transition-opacity !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.IMAGE, img.key!, i)">
+            <div title="撤销图片" class="absolute z-5 h-6 w-6 card-default transition-opacity -right-2 -top-2 !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.IMAGE, img.key!, i)">
               <i i-carbon:close block h-full w-full />
             </div>
             <CardElImage
@@ -147,7 +147,7 @@ async function onSend() {
               :src="img.id || BaseUrlImg + img.key"
               ctx-name="img"
               load-class="sky-loading block absolute top-0"
-              class="card-default shadow-sm transition-shadow !h-6rem !w-6rem hover:shadow !sm:h-8rem !sm:w-8rem"
+              class="border-default-2 card-default transition-shadow !h-6rem !w-6rem hover:shadow !sm:h-8rem !sm:w-8rem"
               :style="getImgSize(img.width, img.height)"
               title="左键放大 | 右键删除"
             />
@@ -173,18 +173,17 @@ async function onSend() {
               element-loading-background="transparent"
               class="relative flex-row-c-c cursor-pointer"
             >
-              <div title="撤销视频" class="absolute right-1 top-1 z-5 h-6 w-6 card-default-br transition-opacity !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.VIDEO, video.key!, i)">
+              <div title="撤销视频" class="absolute z-5 h-6 w-6 border-default-2 card-default transition-opacity -right-2 -top-2 !rounded-full group-hover-op-80 hover-op-100 sm:op-0" @click.stop="emit('removeFile', OssFileType.VIDEO, video.key!, i)">
                 <i i-carbon:close block h-full w-full />
               </div>
               <CardElImage
                 error-class="i-solar:file-smile-line-duotone p-2.8"
                 :src="video?.children?.[0]?.id"
                 class="h-full max-h-16rem max-w-16rem min-h-8rem min-w-8rem w-full flex-row-c-c card-default shadow"
-              >
-                <div class="play-btn absolute-center-center h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
-                  <i i-solar:alt-arrow-right-bold ml-1 p-4 />
-                </div>
-              </CardElImage>
+              />
+              <div class="play-btn absolute-center-center h-12 w-12 flex-row-c-c rounded-full" style="border-width: 2px;">
+                <i i-solar:alt-arrow-right-bold ml-1 p-4 />
+              </div>
             </div>
             <div class="mt-1 w-full truncate card-rounded-df bg-color-br pb-2 pl-3 pr-2 backdrop-blur transition-all" :class="video.status !== 'success' ? 'h-8' : 'h-0 !p-0 '">
               <el-progress
