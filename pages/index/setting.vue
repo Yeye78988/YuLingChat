@@ -144,7 +144,7 @@ onUnmounted(() => {
       <div class="group h-8 flex items-center">
         流畅模式
         <BtnElButton
-          class="ml-a mr-2 h-5"
+          class="ml-a mr-2 h-5 !border-default-hover"
           icon-class="i-solar:pen-2-bold text-1em mr-1"
           title="定制化动画"
           bg

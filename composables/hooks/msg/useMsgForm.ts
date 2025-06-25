@@ -960,6 +960,21 @@ export const SelfExistTextMap = {
  * 跳转到用户详情
  * @param userId 用户id
  */
+export function navigateToUserInfoPage(userId: string) {
+  navigateTo({
+    path: "/user",
+    query: {
+      id: userId,
+      dis: 1, // 移动尺寸禁止路由拦截
+    },
+    replace: false,
+  });
+}
+
+/**
+ * 跳转到用户详情
+ * @param userId 用户id
+ */
 export function navigateToUserDetail(userId: string) {
   const chat = useChatStore();
   chat.setTheFriendOpt(FriendOptType.User, {

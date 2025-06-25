@@ -2,6 +2,7 @@ import type { OsType, Platform } from "@tauri-apps/plugin-os";
 import type { Update } from "@tauri-apps/plugin-updater";
 import type { Action } from "element-plus";
 import type { ExtendItem } from "~/components/menu/extension";
+import type { ThemeConfig } from "~/composables/hooks/useThemeCustomization";
 import type { SystemConstantVO } from "~/init/system";
 import { appDataDir } from "@tauri-apps/api/path";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -150,6 +151,8 @@ export const useSettingStore = defineStore(
       notificationType: NotificationEnums.TRAY as NotificationEnums, // 托盘通知
       rtcCallBellUrl: DEFAULT_RTC_CALL_BELL_URL as string, // 呼叫铃声
     });
+    // 自定义主题配置
+    const customThemeConfig = ref<ThemeConfig | null>(null);
     const translationTool = computed(() => settingPage.value.translation.list.find(item => item.value === settingPage.value.translation.value));
     const isDefaultRtcCallBell = computed(() => settingPage.value.rtcCallBellUrl === DEFAULT_RTC_CALL_BELL_URL);
     const isChatFold = ref(false);
@@ -550,6 +553,7 @@ export const useSettingStore = defineStore(
       fileDownloadMap.value = {};
       appDataDownloadDirUrl.value = "";
       downUpChangeContact.value = true;
+      customThemeConfig.value = null;
       loadSystemFonts();
       if (!isWeb.value) {
         await nextTick();
@@ -618,6 +622,7 @@ export const useSettingStore = defineStore(
       isWeb,
       isDefaultRtcCallBell,
       selectExtendMenuList,
+      customThemeConfig,
       // actions
       checkUpdates,
       checkMainWinVisible,
