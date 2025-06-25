@@ -13,7 +13,8 @@
         "desktop-capability",
         "mobile-capability"
       ]
-    }
+    },
+    "macOSPrivateApi": true
   },
   "build": {
     "frontendDist": "../.output/public",

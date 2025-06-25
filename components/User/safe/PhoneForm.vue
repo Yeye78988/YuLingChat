@@ -227,7 +227,6 @@ async function getPhoneCode() {
 
     * {
       color: #fff;
-      font-weight: 600;
       letter-spacing: 0.3em;
     }
   }

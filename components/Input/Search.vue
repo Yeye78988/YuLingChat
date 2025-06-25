@@ -91,13 +91,11 @@ $scle-input-width: min(68vw, 520px);
     transition-timing-function: $animate-cubic-bount;
     letter-spacing: 0.2em;
     border-radius: 20px;
-    font-weight: 600;
     height: 36px;
     padding: 0 20px;
     font-size: 14px;
     input::placeholder {
       transition: width $transition-delay;
-      font-weight: 600;
       color: var(--el-color-primary-light-5);
     }
     input:focus::placeholder {

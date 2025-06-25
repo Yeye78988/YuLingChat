@@ -515,7 +515,7 @@ function forgetPassword() {
     padding: 0;
 
     .el-input-group__append {
-      --at-apply: "text-theme-primary card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-primary op-100)";
+      --at-apply: "w-10em text-theme-primary card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-primary op-100)";
     }
     .code-btn {
       --at-apply: " h-full flex-row-c-c px-4 transition-200 ";
@@ -551,7 +551,6 @@ function forgetPassword() {
   }
   .el-segmented__item.is-selected {
     color: #fff;
-    font-weight: 600;
   }
 }
 

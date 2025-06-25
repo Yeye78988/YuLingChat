@@ -130,13 +130,20 @@ const {
                 有新版本
               </el-tag>
               <div :title="item.createTime" class="ml-a mt-2 text-mini font-400">
+                <span
+                  v-if="item.notice "
+                  class="mr-2 cursor-pointer text-center text-mini transition-200 hover:text-color-info group-hover:op-100 sm:op-0"
+                  @click="item.notice ? showVersionNotice(item.version) : ''"
+                >
+                  更多
+                </span>
                 {{ formatVersionDate(item.createTime) }}
               </div>
             </div>
             <div
               v-if="item.noticeSummary"
               class="relative max-h-12em cursor-pointer truncate sm:max-h-16em"
-              :class="{ '!max-h-30em pb-6': item.isLatest }"
+              :class="{ '!max-h-30em pb-4': item.isLatest }"
               @click="showVersionNotice(item.version)"
             >
               <MdPreview
@@ -148,7 +155,7 @@ const {
                 code-theme="a11y"
                 no-img-zoom-in
                 style="background-color: transparent;"
-                class="mt-2 card-rounded-df op-60 shadow-sm shadow-inset transition-opacity !border-default-hover hover:op-100"
+                class="preview mt-2 card-rounded-df op-60 shadow-sm shadow-inset transition-opacity !border-default-hover hover:op-100"
                 :model-value="item.noticeSummary.substring(0, 400)"
               />
               <!-- <div class="notice-summary">{{ item.noticeSummary }}</div> -->
@@ -159,13 +166,6 @@ const {
                   查看更多
                 </span>
               </div>
-            </div>
-            <div
-              v-else
-              class="cursor-pointer text-center text-mini transition-200 hover:text-color-info"
-              @click="item.notice ? showVersionNotice(item.version) : ''"
-            >
-              {{ item.notice ? "查看更多" : "暂无更新日志" }}
             </div>
           </el-timeline-item>
           <template #done>
@@ -200,17 +200,17 @@ const {
     font-size: 1.5em;
   }
 }
-:deep(#notice-toast-preview) {
-  font-size: 0.84rem;
+.preview {
+  :deep(#notice-toast-preview) {
+    font-size: 0.74rem;
 
-  .notice-toast-preview-wrapper {
-    .task-list-item-checkbox[type="checkbox"] {
-      display: none !important;
+    .notice-toast-preview-wrapper {
+      .task-list-item-checkbox[type="checkbox"] {
+        display: none !important;
+      }
     }
   }
 }
-
-
 :deep(.el-timeline-item){
   .el-timeline-item__tail {
     left: 5px;
