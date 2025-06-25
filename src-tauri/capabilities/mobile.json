@@ -78,6 +78,15 @@
           "path": "**"
         }
       ]
+    },    
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "http*://*",
+          "app": "inAppBrowser"
+        }
+      ]
     }
   ]
 }

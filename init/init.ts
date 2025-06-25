@@ -57,8 +57,9 @@ export async function userTauriInit() {
   // 监听open_url事件
   const unListenOpenUrl = await listen<PayloadType>("open_url", (e) => {
     const url = e.payload.message; // 路径
+    const urlProgram = setting.isMobile ? "inAppBrowser" : "";
     if (url)
-      openUrl(url);
+      openUrl(url, urlProgram);
   });
   // 监听路由事件
   const unListenRouter = await listen<PayloadType>("router", (e) => {
