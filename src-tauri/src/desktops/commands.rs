@@ -172,6 +172,7 @@ async fn create_msgbox_window(app_handle: AppHandle) -> tauri::Result<()> {
             .always_on_top(true)
             .shadow(false)
             .position(-240.0, -300.0)
+            .focused(false)
             .visible(false);
 
     #[cfg(any(target_os = "windows", target_os = "linux"))]

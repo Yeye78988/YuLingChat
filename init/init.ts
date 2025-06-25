@@ -270,32 +270,39 @@ export async function useMsgBoxWebViewInit() {
         y = availHeight - msgHeight;
       }
       // 使用 LogicalPosition 设置位置
-      await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
+      if (!await win.isVisible()) {
+        await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
+      }
     }
     else if (setting.osType === "macos") {
       // macOS 托盘位置通常在顶部，调整窗口位置
       const x = position.x - msgWidth / 2;
       const y = position.y;
-      await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
+      if (!await win.isVisible()) {
+        await win.setPosition(new PhysicalPosition(x, y).toLogical(scaleFactor));
+      }
     }
-
+    await win.setAlwaysOnTop(true);
     await win.show();
-    await win.setFocus();
   });
 
   // 移出托盘
-  // const trayMouseoutUnlisten = await listen("tray_mouseleave", async (event) => {
-  //   const win = await WebviewWindow.getByLabel("msgbox");
-  //   if (!win)
-  //     return;
-  //   await win.hide();
-  // });
+  const debounceTrayleave = useDebounceFn(async (event) => {
+    const win = await WebviewWindow.getByLabel("msgbox");
+    if (!win)
+      return;
+    if (!await win.isFocused()) {
+      await win.hide();
+    }
+  }, 300);
+  const trayMouseoutUnlisten = await listen("tray_mouseleave", debounceTrayleave);
 
   return () => {
     stop();
     channel.removeEventListener("message", handleChannelMsg);
     trayMouseoverUnlisten?.();
     trayClickUnlisten?.();
+    trayMouseoutUnlisten?.();
   };
 }
 

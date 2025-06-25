@@ -102,22 +102,22 @@ pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
             } => {
                 let app = tray.app_handle();
                 app.emit("tray_mouseenter", position).unwrap();
-                if let Some(msgbox) = app.get_webview_window("msgbox") {
-                    msgbox.set_focus().unwrap();
-                }
+                // if let Some(msgbox) = app.get_webview_window("msgbox") {
+                //     msgbox.set_focus().unwrap();
+                // }
             }
             TrayIconEvent::Move {
                 id: _,
                 position: _,
                 rect: _,
             } => {
-                let app: &AppHandle = tray.app_handle();
-                if let Some(msgbox) = app.get_webview_window("msgbox") {
-                    // 是否可见
-                    if msgbox.is_visible().unwrap() {
-                        msgbox.set_focus().unwrap();
-                    }
-                }
+                // let app: &AppHandle = tray.app_handle();
+                // if let Some(msgbox) = app.get_webview_window("msgbox") {
+                //     // 是否可见
+                //     if msgbox.is_visible().unwrap() {
+                //         msgbox.set_focus().unwrap();
+                //     }
+                // }
             }
             TrayIconEvent::Leave {
                 id: _,
@@ -125,12 +125,12 @@ pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
                 rect: _,
             } => {
                 let app = tray.app_handle();
-                std::thread::sleep(std::time::Duration::from_millis(200));
-                if let Some(webview_window) = app.get_webview_window("msgbox") {
-                    if !webview_window.is_focused().unwrap() {
-                        webview_window.hide().unwrap();
-                    };
-                }
+                // if let Some(webview_window) = app.get_webview_window("msgbox") {
+                //     std::thread::sleep(std::time::Duration::from_millis(300));
+                //     if webview_window.is_visible().unwrap() {
+                //         webview_window.hide().unwrap();
+                //     }
+                // }
                 app.emit("tray_mouseleave", position).unwrap();
             }
             _ => {}

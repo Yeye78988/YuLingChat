@@ -51,6 +51,10 @@ onMounted(() => {
 });
 
 
+// 显示窗口
+function handleMouseEnter() {
+  appWindow.setFocus();
+}
 // 隐藏窗口
 function handleMouseLeave() {
   appWindow.hide();
@@ -67,7 +71,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="h-100vh overflow-hidden text-0.8rem" @mouseleave="handleMouseLeave">
+  <div class="h-100vh overflow-hidden text-0.8rem" @mouseleave="handleMouseLeave" @mouseenter="handleMouseEnter">
     <NuxtLayout>
       <main class="h-100vh flex flex-col justify-between gap-3 truncate p-3">
         <div class="border-0 border-default border-b-1px pb-2">
