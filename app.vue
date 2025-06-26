@@ -25,14 +25,18 @@ useSeoMeta({
 const route = useRoute();
 const setting = useSettingStore();
 const isIframe = ref(false);
+const isBorderRadius = computed(() => setting.isWeb || (setting.isDesktop && checkBorderRadiusSupport()));
 onMounted(() => {
   if (window) // 判断是否在iframe中
     isIframe.value = window?.self !== undefined && window?.self !== window?.top;
-  if (route.path === "/msg" || route.path.startsWith("/extend") || (setting.isDesktop && route.path === "/login")) // 进入消息页面
+  if (route.path === "/msg" || route.path.startsWith("/extend") || (setting.isDesktop && route.path === "/login")) { // 进入消息页面
     useDefaultInit();
-  else
+  }
+  else {
     useInit();
+  }
 });
+
 onUnmounted(useUnmounted);
 </script>
 
@@ -42,7 +46,7 @@ onUnmounted(useUnmounted);
       class="h-full w-full overflow-hidden bg-color"
       :class="{
         'sm:(w-100vw mx-a h-full) md:(w-100vw mx-a h-full)  lg:(w-1360px mx-a h-92vh max-w-86vw max-h-1020px) shadow-lg': !isIframe && setting.isWeb,
-        '!rounded-2 border-default': setting.isDesktop || !setting.isMobileSize,
+        '!rounded-2 wind-border-default': isBorderRadius,
       }"
     >
       <NuxtLayout>

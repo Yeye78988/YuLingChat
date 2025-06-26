@@ -89,7 +89,7 @@ pub async fn animate_window_resize(
 
 pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
     // 主窗口配置
-    let mut main_builder =
+    let mut wind_builder =
         WebviewWindowBuilder::new(&app_handle, "main", WebviewUrl::App("/".into()))
             .title("极物聊天")
             .resizable(true)
@@ -104,17 +104,23 @@ pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
     // Windows 和 Linux 平台特定配置
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        main_builder = main_builder.transparent(true);
+        wind_builder = wind_builder.transparent(true);
+        // wind_builder = wind_builder.effects(
+        //     tauri::window::EffectsBuilder::new()
+        //         .effects(vec![tauri::window::Effect::Acrylic, tauri::window::Effect::Blur])
+        //         .build(),
+        // );
     }
 
     // macOS 平台特定配置
     #[cfg(target_os = "macos")]
     {
         use tauri::utils::TitleBarStyle;
-        main_builder = main_builder.title_bar_style(TitleBarStyle::Transparent);
+        wind_builder = wind_builder.title_bar_style(TitleBarStyle::Overlay);
+        wind_builder = wind_builder.shadow(true);
     }
 
-    let main_window = main_builder.build()?;
+    let main_window = wind_builder.build()?;
 
     let _app = app_handle.app_handle().clone();
 
@@ -162,7 +168,7 @@ pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
 
 async fn create_msgbox_window(app_handle: AppHandle) -> tauri::Result<()> {
     #[cfg(desktop)]
-    let mut msgbox_builder =
+    let mut wind_builder =
         WebviewWindowBuilder::new(&app_handle, "msgbox", WebviewUrl::App("/msg".into()))
             .title("消息通知")
             .inner_size(240.0, 300.0)
@@ -177,16 +183,16 @@ async fn create_msgbox_window(app_handle: AppHandle) -> tauri::Result<()> {
 
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        msgbox_builder = msgbox_builder.transparent(true);
+        wind_builder = wind_builder.transparent(true);
     }
 
     #[cfg(target_os = "macos")]
     {
         use tauri::utils::TitleBarStyle;
-        msgbox_builder = msgbox_builder.title_bar_style(TitleBarStyle::Transparent);
+        wind_builder = wind_builder.title_bar_style(TitleBarStyle::Overlay);
     }
 
-    let msgbox_window = msgbox_builder.build()?;
+    let msgbox_window = wind_builder.build()?;
 
     msgbox_window
         .clone()
@@ -210,28 +216,29 @@ async fn create_msgbox_window(app_handle: AppHandle) -> tauri::Result<()> {
 
 async fn create_login_window(app_handle: AppHandle) -> tauri::Result<()> {
     // 只创建登录窗口
-    let mut login_builder =
+    let mut wind_builder =
         WebviewWindowBuilder::new(&app_handle, "login", WebviewUrl::App("/login".into()))
             .title("极物聊天 - 登录")
             .resizable(false)
             .center()
             .shadow(false)
             .decorations(false)
-            .inner_size(340.0, 480.0)
+            .inner_size(360.0, 480.0)
             .visible(true);
 
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        login_builder = login_builder.transparent(true);
+        wind_builder = wind_builder.transparent(true);
     }
 
     #[cfg(target_os = "macos")]
     {
         use tauri::utils::TitleBarStyle;
-        login_builder = login_builder.title_bar_style(TitleBarStyle::Transparent);
+        wind_builder = wind_builder.title_bar_style(TitleBarStyle::Overlay);
+        wind_builder = wind_builder.shadow(true);
     }
 
-    let login_window = login_builder.build()?;
+    let login_window = wind_builder.build()?;
 
     // 监听登录窗口事件
     #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
@@ -274,7 +281,7 @@ async fn create_extend_window(
     url: String,
 ) -> tauri::Result<()> {
     // 主窗口配置
-    let mut main_builder =
+    let mut wind_builder =
         WebviewWindowBuilder::new(&app_handle, "extend", WebviewUrl::App(url.into()))
             .title(title)
             .resizable(true)
@@ -289,18 +296,19 @@ async fn create_extend_window(
     // Windows 和 Linux 平台特定配置
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     {
-        main_builder = main_builder.transparent(true);
-        main_builder.build()?;
+        wind_builder = wind_builder.transparent(true);
+        wind_builder.build()?;
     }
 
     // macOS 平台特定配置
     #[cfg(target_os = "macos")]
     {
         use tauri::utils::TitleBarStyle;
-        main_builder = main_builder.title_bar_style(TitleBarStyle::Transparent);
+        wind_builder = wind_builder.title_bar_style(TitleBarStyle::Overlay);
+        wind_builder = wind_builder.shadow(true);
         use cocoa::appkit::{NSColor, NSWindow};
         use cocoa::base::{id, nil};
-        let main_window = main_builder.build()?;
+        let main_window = wind_builder.build()?;
 
         let ns_window_main = main_window.ns_window().unwrap() as id;
         unsafe {

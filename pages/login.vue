@@ -22,15 +22,16 @@ onMounted(async () => {
     watch(() => user.showLoginPageType, async (val) => {
       if (val !== "") {
         // 关闭窗口动画
+        const height = val === "login" ? 460 : val === "register" ? 500 : val === "env-config" ? 460 : 460;
         if (setting.settingPage.isCloseAllTransition) {
-          getCurrentWindow()?.setSize(new LogicalSize(360, val === "login" ? 450 : val === "register" ? 480 : val === "env-config" ? 600 : 520));
+          getCurrentWindow()?.setSize(new LogicalSize(360, height));
           return;
         }
         // 窗口动画
         invoke("animate_window_resize", {
           windowLabel: LOGIN_WINDOW_LABEL,
-          toWidth: 340,
-          toHeight: val === "login" ? 450 : val === "register" ? 480 : val === "env-config" ? 480 : 520,
+          toWidth: 360,
+          toHeight: height,
           duration: 160,
           steps: 12,
         }).catch((err: any) => console.error("窗口动画失败:", err));

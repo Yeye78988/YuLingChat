@@ -550,7 +550,7 @@ function toLoginForm() {
     padding: 0.3em 0;
 
     .el-input-group__append {
-      --at-apply: "w-10em text-theme-info card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-info op-100)";
+      --at-apply: "w-8rem min-w-fit  text-theme-info card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-info op-100)";
     }
     .code-btn {
       --at-apply: "h-full flex-row-c-c px-4 transition-200 ";

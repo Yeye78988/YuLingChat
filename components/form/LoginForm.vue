@@ -236,10 +236,6 @@ async function onLogin(formEl: any | undefined) {
       }
       // 登录失败
       else {
-        ElMessage.error({
-          message: res.message,
-          duration: 2000,
-        });
         // store
         store.$patch({
           token: "",
@@ -249,7 +245,6 @@ async function onLogin(formEl: any | undefined) {
       }
     }
     else {
-      ElMessage.error(res.message);
       done();
     }
   });
@@ -515,7 +510,7 @@ function forgetPassword() {
     padding: 0;
 
     .el-input-group__append {
-      --at-apply: "w-10em text-theme-primary card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-primary op-100)";
+      --at-apply: "w-8rem min-w-fit text-theme-primary card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-primary op-100)";
     }
     .code-btn {
       --at-apply: " h-full flex-row-c-c px-4 transition-200 ";
