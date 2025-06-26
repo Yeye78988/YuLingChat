@@ -292,21 +292,7 @@ export function useSettingTheme() {
 
 export function useSettingDefault() {
   const setting = useSettingStore();
-  const isFullLoading = ref(false);
-  // 字体监听
-  watchDebounced(
-    () => setting.settingPage.fontFamily.value,
-    (val: string) => {
-      if (val && document) {
-        isFullLoading.value = true;
-        localStorage.setItem("--font-family", val);
-        document.documentElement.style.setProperty("--font-family", val);
-        setTimeout(() => {
-          isFullLoading.value = false;
-        }, 500);
-      }
-    },
-  );
+
 
   // 通知设置
   const notificationTypeList = computed(() => (setting.isMobile || setting.isWeb)
@@ -345,7 +331,6 @@ export function useSettingDefault() {
   }
 
   return {
-    isFullLoading,
     notificationTypeList,
     changeAnimateMode,
   };

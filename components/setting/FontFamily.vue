@@ -40,7 +40,7 @@ function applyFontSettings() {
       allow-create
       filterable
       default-first-option
-      placeholder="请选择主题字体"
+      placeholder="选择系统字体"
     >
       <el-option
         v-for="item in setting.settingPage.fontFamily.list"

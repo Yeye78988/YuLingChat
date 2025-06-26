@@ -15,7 +15,6 @@ const setting = useSettingStore();
 
 // 默认
 const {
-  isFullLoading,
   notificationTypeList,
   changeAnimateMode,
 } = useSettingDefault();
@@ -90,12 +89,8 @@ onUnmounted(() => {
 <template>
   <el-scrollbar
     ref="scrollbarRef"
-    v-loading.fullscreen="isFullLoading"
     class="setting-page h-full w-full flex-1 bg-color-3 pt-10 sm:card-bg-color-2"
     wrap-class="h-full w-full pb-4 sm:pb-20 flex flex-1 flex-col px-4"
-    element-loading-text="更新中..."
-    element-loading-background="transparent"
-    :element-loading-spinner="defaultLoadingIcon"
     :class="{ 'settinlink-animated': showAnima }"
   >
     <h3 flex items-center px-3 sm:px-4>

@@ -59,32 +59,65 @@ function checkAndExecuteShortcutKey(e: KeyboardEvent) {
   return false;
 }
 
+interface ShortcutKeyItem {
+  key: string;
+  ctrl?: boolean;
+  shift?: boolean;
+  alt?: boolean;
+  meta?: boolean;
+}
+
+
+// 禁用的快捷键组合
+const disabledShortcuts: ShortcutKeyItem[] = [
+  // 打印相关
+  { key: "p", ctrl: true },
+  // 查找相关
+  { key: "f", ctrl: true },
+  { key: "F3" },
+  // 刷新相关
+  { key: "r", ctrl: true },
+  { key: "F", ctrl: true, shift: true },
+  // 开发者工具
+  // { key: "F12" },
+  { key: "I", ctrl: true, shift: true },
+  // 页面缩放
+  { key: "=", ctrl: true },
+  { key: "-", ctrl: true },
+  { key: "0", ctrl: true },
+  // 新建窗口/标签页
+  { key: "n", ctrl: true },
+  { key: "t", ctrl: true },
+  // 书签
+  { key: "d", ctrl: true },
+  // 历史记录
+  { key: "h", ctrl: true },
+  // 地址栏
+  { key: "l", ctrl: true },
+  // 保存页面
+  { key: "s", ctrl: true },
+];
+
 async function onKeyDown(e: KeyboardEvent) {
-  const setting = useSettingStore();
-  // 允许刷新
-  // const isReload = e.key === "F5" || (e.key === "R" && e.ctrlKey) || (e.key === "F" && e.ctrlKey && e.shiftKey);
-  if ((e.key === "p" && e.ctrlKey) || (e.key === "f" && e.ctrlKey))
+  // 检查是否为禁用的快捷键
+  const isDisabledShortcut = disabledShortcuts.some((shortcut) => {
+    return e.key === shortcut.key
+      && (shortcut.ctrl ? e.ctrlKey : !e.ctrlKey)
+      && (shortcut.shift ? e.shiftKey : !e.shiftKey)
+      && (shortcut.alt ? e.altKey : !e.altKey)
+      && (shortcut.meta ? e.metaKey : !e.metaKey);
+  });
+
+  if (isDisabledShortcut) {
     e.preventDefault();
+    return;
+  }
   if (!e.key)
     return;
+  // 快捷键处理
   if (checkAndExecuteShortcutKey(e)) {
     e.preventDefault();
   }
-  // mitter.emit(MittEventType.SHORTCUT_KEY, {
-  //   key: e.key,
-  //   options: {
-  //     ctrlKey: e.ctrlKey,
-  //     shiftKey: e.shiftKey,
-  //     altKey: e.altKey,
-  //     metaKey: e.metaKey,
-  //   },
-  // });
-  // esc 最小化窗口
-  // const disShortcuts = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;
-  // if (e.key === "Escape" && disShortcuts && setting.settingPage.isEscMin && !document.querySelector(".el-image-viewer__wrapper")) {
-  //   e.stopPropagation();
-  //   e.preventDefault();
-  // }
 }
 
 function onContextMenu(e: MouseEvent) {

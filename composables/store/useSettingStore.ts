@@ -24,6 +24,13 @@ export enum NotificationEnums {
   TRAY = "tray",
   CLOSE = "close",
 }
+export const DEFAULT_FONT_FAMILY_LIST = [
+  { name: "阿里妈妈方圆体", value: "AlimamaFangYuanTiVF", url: "/font/AlimamaFangYuanTiVF.woff2" },
+  { name: "阿里巴巴健康体（盲文）", value: "AlibabaHealthFont2.0Pro", url: `${BaseUrlFont}/AlibabaHealthFont2.0Pro.ttc` },
+  { name: "钉钉进步体", value: "DingTalk-JinBuTi", url: `${BaseUrlFont}/DingTalk-JinBuTi.woff2`, baseFontWeight: 300 },
+  { name: "抖音美好体", value: "DouyinSansBold", url: `${BaseUrlFont}/DouyinSansBold.ttf` },
+  { name: "HarmonyOS_Sans_SC", value: "HarmonyOS_Sans_SC", url: `${BaseUrlFont}/HarmonyOS_Sans_SC.woff2` },
+];
 
 // @unocss-include
 // https://pinia.web3doc.top/ssr/nuxt.html#%E5%AE%89%E8%A3%85
@@ -110,7 +117,7 @@ export const useSettingStore = defineStore(
     const settingPage = ref({
       // 字体
       fontFamily: {
-        value: "Alimama",
+        value: "HarmonyOS_Sans_SC",
         list: [] as { name: string; value: string }[],
       },
       fontSize: {
@@ -418,13 +425,7 @@ export const useSettingStore = defineStore(
     }
 
     async function loadSystemFonts() {
-      settingPage.value.fontFamily.list = [
-        { name: "阿里妈妈方圆体", value: "Alimama" },
-        { name: "字玩哥特黑白无常体", value: "ZiWanGeTe" },
-        { name: "阿里健康体2.0", value: "AlibabaHealthFont2" },
-        { name: "阿里妈妈刀隶体", value: "AlimamaDaoLiTi" },
-        { name: "阿里妈妈东方大楷", value: "Alimama_DongFangDaKai" },
-      ];
+      settingPage.value.fontFamily.list = DEFAULT_FONT_FAMILY_LIST;
       // @ts-expect-error
       if (window.queryLocalFonts) {
         try {
@@ -475,7 +476,7 @@ export const useSettingStore = defineStore(
      * 重置设置
      */
     async function reset() {
-      settingPage.value.fontFamily.value = "Alimama";
+      settingPage.value.fontFamily.value = "HarmonyOS_Sans_SC";
       settingPage.value.modeToggle.value = "system";
       settingPage.value.isCloseAllTransition = false;
       settingPage.value.isEscMin = true;
@@ -508,7 +509,7 @@ export const useSettingStore = defineStore(
       settingPage.value = {
         // 字体
         fontFamily: {
-          value: "Alimama",
+          value: "HarmonyOS_Sans_SC",
           list: [],
         },
         fontSize: {

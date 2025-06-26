@@ -36,6 +36,7 @@ export function setEnvConfig(config: EnvConfigMap) {
 // http请求
 export const BASE_URL = savedConfig.value.VITE_API_BASE_URL;
 export const BaseUrl = savedConfig.value.VITE_API_BASE_URL;
+export const BaseUrlFont = `${savedConfig.value.VITE_API_BASE_URL}/public/font`;
 export const BaseUrlRef = computed(() => savedConfig.value.VITE_API_BASE_URL);
 
 // 图片
