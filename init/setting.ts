@@ -158,7 +158,7 @@ export function useSettingInit() {
     setting.appUploader.contentLength = 0;
     setting.appUploader.downloaded = 0;
     setting.appUploader.downloadedText = "";
-    setting.checkUpdates();
+    setting.checkUpdates(false);
   }
 
   // 3、准备完成关闭加载动画

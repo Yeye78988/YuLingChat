@@ -1,14 +1,26 @@
 <script lang="ts" setup>
+import type { ButtonProps } from "element-plus";
+import { ElButton } from "element-plus";
+
 // @unocss-include
-defineProps<{
-  iconClass?: string
-  transitionIcon?: boolean
-}>();
+interface Props extends Partial<ButtonProps> {
+  iconClass?: string;
+  transitionIcon?: boolean;
+}
+
+const props = defineProps<Props>();
+const vm = getCurrentInstance();
+function changeRef(instance: any) {
+  if (vm) {
+    vm.exposed = instance || {};
+    vm.exposeProxy = instance || {};
+  }
+}
 </script>
 
 <template>
-  <el-button
-    v-bind="$attrs"
+  <component
+    :is="h(ElButton, { ...$attrs, ...props, ref: changeRef }, $slots)"
     class="group-btn"
   >
     <span
@@ -17,7 +29,7 @@ defineProps<{
       :class="[iconClass, transitionIcon ? 'toggle' : 'w-1.1em']"
     />
     <slot name="default" />
-  </el-button>
+  </component>
 </template>
 
 <style lang="scss" scoped>

@@ -347,62 +347,7 @@ export const useSettingStore = defineStore(
           center: true,
           callback: async (action: Action) => {
             if (action === "confirm") {
-              handleOnUpload && handleOnUpload(update);
-              appUploader.value.isUpdating = true;
-              try {
-                appUploader.value.contentLength = 0;
-                appUploader.value.downloaded = 0;
-                await update
-                  .download((e) => {
-                    switch (e.event) {
-                      case "Started":
-                        appUploader.value.contentLength = e.data.contentLength || 0;
-                        appUploader.value.downloaded = 0;
-                        appUploader.value.downloadedText = "";
-                        console.log(`开始下载，长度 ${e.data.contentLength} bytes`);
-                        break;
-                      case "Progress":
-                        appUploader.value.downloaded += e.data.chunkLength || 0;
-                        appUploader.value.downloadedText = `${((appUploader.value.downloaded || 0) / 1024 / 1024).toFixed(2)}MB / ${((appUploader.value.contentLength || 0) / 1024 / 1024).toFixed(2)}MB`;
-                        console.log(`下载中 ${appUploader.value.downloadedText}`);
-                        break;
-                      case "Finished":
-                        appUploader.value.downloadedText = "安装中...";
-                        break;
-                    }
-                  })
-                  .finally(() => {
-                    appUploader.value.isUpload = false;
-                    appUploader.value.isCheckUpdatateLoad = false;
-                    appUploader.value.newVersion = "";
-                  });
-                // 安装中
-                appUploader.value.downloadedText = "安装中...";
-                setTimeout(() => {
-                  update.install().catch((err) => {
-                    appUploader.value.isUpdating = false;
-                    console.warn(err);
-                    ElMessage.error("安装失败，请稍后再试！");
-                    appUploader.value.isCheckUpdatateLoad = false;
-                  }).finally(() => {
-                    appUploader.value.downloaded = 0;
-                    appUploader.value.contentLength = 0;
-                    appUploader.value.isUpdating = false;
-                  });
-                }, 1000);
-              }
-              catch (error) {
-                console.log(error);
-                ElMessage.error("更新失败！请检查网络或稍后再试！");
-                appUploader.value.isCheckUpdatateLoad = false;
-                appUploader.value.isUpload = false;
-                appUploader.value.isCheckUpdatateLoad = false;
-                appUploader.value.isUpdating = false;
-                appUploader.value.downloaded = 0;
-                appUploader.value.downloadedText = "";
-                appUploader.value.contentLength = 0;
-                appUploader.value.newVersion = "";
-              }
+              handleAppUpdate(update, handleOnUpload);
             }
             else if (action === "cancel") {
               if (!appUploader.value.ignoreVersion.includes(update.version))
@@ -420,6 +365,74 @@ export const useSettingStore = defineStore(
         appUploader.value.downloaded = 0;
         appUploader.value.downloadedText = "";
         appUploader.value.contentLength = 0;
+      }
+    }
+
+    /**
+     * 处理更新
+     */
+    async function handleAppUpdate(updateInfo?: Update, handleOnUpload?: (update: Update) => void) {
+      const update = updateInfo || (await check()) as Update;
+      if (!update) {
+        ElMessage.info("已经是最新版本，无需再更新了！");
+        return;
+      }
+      handleOnUpload && handleOnUpload(update);
+
+      appUploader.value.isUpdating = true;
+      try {
+        appUploader.value.contentLength = 0;
+        appUploader.value.downloaded = 0;
+        await update
+          .download((e) => {
+            switch (e.event) {
+              case "Started":
+                appUploader.value.contentLength = e.data.contentLength || 0;
+                appUploader.value.downloaded = 0;
+                appUploader.value.downloadedText = "";
+                console.log(`开始下载，长度 ${e.data.contentLength} bytes`);
+                break;
+              case "Progress":
+                appUploader.value.downloaded += e.data.chunkLength || 0;
+                appUploader.value.downloadedText = `${((appUploader.value.downloaded || 0) / 1024 / 1024).toFixed(2)}MB / ${((appUploader.value.contentLength || 0) / 1024 / 1024).toFixed(2)}MB`;
+                console.log(`下载中 ${appUploader.value.downloadedText}`);
+                break;
+              case "Finished":
+                appUploader.value.downloadedText = "安装中...";
+                break;
+            }
+          })
+          .finally(() => {
+            appUploader.value.isUpload = false;
+            appUploader.value.isCheckUpdatateLoad = false;
+            appUploader.value.newVersion = "";
+          });
+        // 安装中
+        appUploader.value.downloadedText = "安装中...";
+        setTimeout(() => {
+          update.install().catch((err) => {
+            appUploader.value.isUpdating = false;
+            console.warn(err);
+            ElMessage.error("安装失败，请稍后再试！");
+            appUploader.value.isCheckUpdatateLoad = false;
+          }).finally(() => {
+            appUploader.value.downloaded = 0;
+            appUploader.value.contentLength = 0;
+            appUploader.value.isUpdating = false;
+          });
+        }, 1000);
+      }
+      catch (error) {
+        console.log(error);
+        ElMessage.error("更新失败！请检查网络或稍后再试！");
+        appUploader.value.isCheckUpdatateLoad = false;
+        appUploader.value.isUpload = false;
+        appUploader.value.isCheckUpdatateLoad = false;
+        appUploader.value.isUpdating = false;
+        appUploader.value.downloaded = 0;
+        appUploader.value.downloadedText = "";
+        appUploader.value.contentLength = 0;
+        appUploader.value.newVersion = "";
       }
     }
 
@@ -623,6 +636,7 @@ export const useSettingStore = defineStore(
       customThemeConfig,
       // actions
       checkUpdates,
+      handleAppUpdate,
       checkMainWinVisible,
       loadSystemFonts,
       loadSettingPreData,

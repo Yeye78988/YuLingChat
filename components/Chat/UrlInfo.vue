@@ -28,7 +28,7 @@ function handleContextMenu() {
       <CardElImage
         :src="data.image"
         alt="查看大图"
-        class="h-10 w-10 shrink-0 card-rounded-df bg-color-2 object-cover"
+        class="mt-a h-10 w-10 shrink-0 card-rounded-df bg-color-2 object-cover"
         @click.stop.prevent.capture="handleContextMenu"
       />
     </div>

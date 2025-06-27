@@ -34,7 +34,7 @@ const {
             v-if="setting.isDesktop"
             class="flex-row-c-c cursor-pointer transition-all"
             plain round
-            style="height: 2em;padding: 0 0.8em;"
+            style="height: 2em;padding: 0 0.8em 0 0.4em;"
             :type="setting.appUploader.isUpdating ? 'warning' : 'info'"
             @click="!setting.appUploader.isCheckUpdatateLoad && setting.checkUpdates(true)"
           >

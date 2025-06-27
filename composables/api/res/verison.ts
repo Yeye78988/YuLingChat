@@ -124,6 +124,10 @@ export interface AppVersionInfoVO {
    */
   notice?: null | string
   /**
+   * 公告摘要
+   */
+  noticeSummary?: null | string
+  /**
    * TAURI Updater内容
    */
   updaterJson?: AppPlatformsJSON
