@@ -19,12 +19,13 @@ const setting = useSettingStore();
 onMounted(async () => {
   user.showLoginPageType = "login";
   if (setting.isDesktop) {
+    const wind = getCurrentWindow();
     watch(() => user.showLoginPageType, async (val) => {
       if (val !== "") {
         // 关闭窗口动画
         const height = val === "login" ? 440 : val === "register" ? 480 : val === "env-config" ? 460 : 460;
         if (setting.settingPage.isCloseAllTransition) {
-          getCurrentWindow()?.setSize(new LogicalSize(340, height));
+          wind?.setSize(new LogicalSize(340, height));
           return;
         }
         // 窗口动画

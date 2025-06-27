@@ -320,9 +320,14 @@ class ImageManager {
           container.remove();
         }
         else if (target.tagName === "IMG") {
+          // 创建图片查看器
+          const url = URL.createObjectURL(container.__imageFile || file);
           useImageViewer.open({
-            urlList: [img.src],
+            urlList: [url],
             initialIndex: 0,
+            closeCallback() {
+              URL.revokeObjectURL(url);
+            },
           });
         }
       });

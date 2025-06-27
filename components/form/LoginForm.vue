@@ -605,7 +605,7 @@ defineExpose({
 }
 .has-account {
   .header {
-    --at-apply: "h-28 flex-row-c-c";
+    --at-apply: "h-30 flex-row-c-c";
   }
   .avatar {
     --at-apply: "mx-a h-20 w-20 border-2px border-default rounded-full shadow-lg block";

@@ -34,7 +34,7 @@ const keyDownFnMap: Record<string, () => void> = {
   "r": rotateClockwise,
   "R": rotateAnticlockwise,
   "0": resetImage,
-  // "Escape": close,
+  "Escape": close,
 };
 
 // 使用 localStorage 存储用户是否不再显示提示
@@ -65,17 +65,20 @@ export interface ViewerOptions {
   initialIndex?: number;
   index?: number;
   ctxName?: string;
+  closeCallback?: () => void;
 }
 export interface ImageViewerState {
   visible: boolean;
   index: number;
   urlList: string[];
+  closeCallback?: () => void;
 }
 
 const state = reactive<ImageViewerState>({
   visible: false,
   index: 0,
   urlList: [],
+  closeCallback: () => {},
 });
 
 // 图片操作状态
@@ -133,6 +136,7 @@ function open(options: ViewerOptions) {
   state.index = options.index || 0;
   state.urlList = options.urlList || [];
   state.visible = true;
+  state.closeCallback = options.closeCallback;
   if (setting.isMobileSize && showShortcutTips.value) {
     showShortcutTips.value = false;
   }
@@ -153,6 +157,7 @@ function open(options: ViewerOptions) {
 // 关闭预览
 function close() {
   state.visible = false;
+  nextTick(state.closeCallback);
 }
 
 // 保存图片
@@ -203,6 +208,8 @@ function handleKeydown(e: KeyboardEvent) {
   // 没有其他快捷键
   // if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.key.length > 1)
   //   return;
+  e.stopPropagation(); // 阻止事件冒泡
+  e.preventDefault(); // 阻止默认行为
   keyDownFnMap[e.key]?.();
 }
 
