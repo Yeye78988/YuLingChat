@@ -15,7 +15,7 @@ export interface HistoryAccount {
 
 export function useHistoryAccount(key: string = "history-accounts") {
   const historyAccounts = useLocalStorage<HistoryAccount[]>(key, [], {
-    shallow: true,
+    shallow: false,
   });
 
   /**
@@ -63,12 +63,35 @@ export function useHistoryAccount(key: string = "history-accounts") {
     );
   };
 
-  const removeHistoryAccount = (account: string, log: boolean = true) => {
-    const existingIndex = historyAccounts.value.findIndex(a => a.account === account);
-    if (existingIndex !== -1) {
-      historyAccounts.value.splice(existingIndex, 1);
-      if (log) {
-        ElMessage.success(`删除成功！`);
+  const removeHistoryAccount = (account: string, log: boolean = true, confirmCheck: boolean = false) => {
+    if (confirmCheck) {
+      ElMessageBox.confirm(
+        "确定要删除这个历史账号吗？",
+        "删除确认",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        },
+      ).then(() => {
+        const existingIndex = historyAccounts.value.findIndex(a => a.account === account);
+        if (existingIndex !== -1) {
+          historyAccounts.value.splice(existingIndex, 1);
+          if (log) {
+            ElMessage.success(`删除成功！`);
+          }
+        }
+      }).catch(() => {
+        // 用户取消删除
+      });
+    }
+    else {
+      const existingIndex = historyAccounts.value.findIndex(a => a.account === account);
+      if (existingIndex !== -1) {
+        historyAccounts.value.splice(existingIndex, 1);
+        if (log) {
+          ElMessage.success(`删除成功！`);
+        }
       }
     }
   };

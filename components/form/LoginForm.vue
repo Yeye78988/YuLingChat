@@ -6,10 +6,10 @@ import {
   toLoginByPhone,
   toLoginByPwd,
 } from "~/composables/api/user";
+import { appName } from "~/constants";
 import { LoginType } from "~/types/user/index.js";
 
 const user = useUserStore();
-const setting = useSettingStore();
 const loginType = useLocalStorage<LoginType>("loginType", LoginType.EMAIL);
 const {
   historyAccounts,
@@ -67,7 +67,6 @@ const phoneTimer = ref(-1);
 const emailTimer = ref(-1);
 const emailCodeStorage = ref<number>(0);
 const phoneCodeStorage = ref<number>(0);
-
 /**
  * 获取验证码
  * @param type
@@ -265,6 +264,9 @@ const theHistoryAccount = ref({
     nickname: "",
   },
 });
+
+const showAccountAvatar = computed(() => user.showLoginPageType === "login" && theHistoryAccount.value.account);
+
 async function handleSelectAccount(item: Record<string, any>) {
   if (!item || !item.account)
     return;
@@ -281,13 +283,30 @@ async function handleSelectAccount(item: Record<string, any>) {
 }
 
 function querySearchAccount(queryString: string, cb: (data: any[]) => void) {
-  const results = queryString ? historyAccounts.value.filter(p => p.account.toLowerCase().indexOf(queryString.toLowerCase()) === 0) : historyAccounts.value;
+  const results = historyAccounts.value.sort((a, b) => {
+    if (!queryString)
+      return 0;
+    const aIndex = a.account.toLowerCase().indexOf(queryString.toLowerCase());
+    const bIndex = b.account.toLowerCase().indexOf(queryString.toLowerCase());
+    if (aIndex === -1 && bIndex === -1)
+      return 0;
+    if (aIndex === -1)
+      return 1;
+    if (bIndex === -1)
+      return -1;
+    return aIndex - bIndex;
+  });
   cb(results);
 }
 
 function forgetPassword() {
   ElMessage.warning("请手机或者邮箱验证登录后，找回密码！");
 }
+
+defineExpose({
+  historyAccounts,
+  theAccount: theHistoryAccount,
+});
 </script>
 
 <template>
@@ -301,11 +320,22 @@ function forgetPassword() {
     :model="userForm"
     style="border: none;"
     class="form"
+    :class="{
+      'has-account': showAccountAvatar,
+    }"
     autocomplete="off"
   >
     <template v-if="!user.isLogin">
-      <div mb-6 text-sm tracking-0.2em op-80>
-        {{ setting.isWeb && !setting.isMobileSize ? '聊你所想，聊天随心✨' : '' }}
+      <div class="header flex-row-c-c">
+        <CardAvatar
+          v-show="user.showLoginPageType === 'login'"
+          style="--anima: blur-in;"
+          :src="showAccountAvatar ? BaseUrlImg + theHistoryAccount?.userInfo?.avatar : '/logo.png'"
+          class="avatar"
+        />
+        <div v-show="!showAccountAvatar" class="title">
+          {{ appName }}
+        </div>
       </div>
       <!-- 切换登录 -->
       <el-segmented
@@ -386,20 +416,22 @@ function forgetPassword() {
           :fetch-suggestions="querySearchAccount"
           :trigger-on-focus="true"
           placement="bottom"
-
-
-          clearable teleported fit-input-width select-when-unmatched hide-loading
+          clearable
+          teleported
+          fit-input-width
+          select-when-unmatched
+          hide-loading
           value-key="account"
           placeholder="请输入用户名、手机号或邮箱"
           @select="handleSelectAccount"
         >
           <template #default="{ item }">
-            <div :title="item.account" class="group w-full flex items-center px-2">
+            <div :title="item.account" class="group w-full flex items-center px-2" @contextmenu="removeHistoryAccount(item.account)">
               <el-avatar :size="30" class="mr-2 flex-shrink-0" :src="BaseUrlImg + item.userInfo.avatar" />
               <span class="block max-w-14em truncate">{{ item.account }}</span>
               <i
                 title="删除"
-                class="i-carbon:close ml-a h-0 w-0 flex-shrink-0 btn-danger overflow-hidden transition-all group-hover:(h-1.5em w-1.5em)"
+                class="i-carbon:close ml-a h-1.5em w-1.5em flex-shrink-0 scale-0 btn-danger overflow-hidden transition-all group-hover:(scale-100)"
                 @click.stop.capture="removeHistoryAccount(item.account)"
               />
               <span v-if="item.userInfo && item.userInfo.isAdmin" class="ml-2 flex-shrink-0 rounded-4px bg-theme-primary px-1 py-1px text-xs text-white">管理员</span>
@@ -461,7 +493,7 @@ function forgetPassword() {
     </template>
     <template v-else>
       <div class="mt-16 flex-row-c-c flex-col gap-8">
-        <CardElImage :src="BaseUrlImg + user.userInfo.avatar" class="h-6rem w-6rem border-default card-default sm:(h-8rem w-8rem)" />
+        <CardAvatar :src="BaseUrlImg + user.userInfo.avatar" class="h-6rem w-6rem border-default rounded-full bg-color-2 sm:(h-8rem w-8rem)" />
         <div text-center>
           <span>
             {{ user.userInfo.username || "未登录" }}
@@ -554,9 +586,29 @@ function forgetPassword() {
 }
 
 .submit {
-  --at-apply: "h-2.6rem transition-200 w-full tracking-0.2em text-4 shadow font-500";
+  --at-apply: "h-2.6rem transition-200 w-full tracking-0.2em text-4 shadow";
   :deep(.el-icon) {
     --at-apply: "text-5";
+  }
+}
+
+
+.header {
+  --at-apply: "h-24 transition-height flex-row-c-c";
+
+  .avatar {
+    --at-apply: "mx-0 h-8 w-8";
+  }
+  .title {
+    --at-apply: "ml-3 pr-2 text-lg font-500 tracking-0.1em";
+  }
+}
+.has-account {
+  .header {
+    --at-apply: "h-28 flex-row-c-c";
+  }
+  .avatar {
+    --at-apply: "mx-a h-20 w-20 border-2px border-default rounded-full shadow-lg block";
   }
 }
 </style>

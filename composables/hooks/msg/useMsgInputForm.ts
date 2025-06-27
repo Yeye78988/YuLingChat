@@ -879,6 +879,9 @@ export function useMsgInputForm(
           await navigator.clipboard.writeText(selection.toString());
           selection.deleteFromDocument();
           updateFormContent();
+          nextTick(() => {
+            selectionManager.focusAtEnd();
+          });
         }
         catch (err) {
           document.execCommand("cut");
@@ -892,6 +895,9 @@ export function useMsgInputForm(
       if (selection && selection.toString()) {
         try {
           await navigator.clipboard.writeText(selection.toString());
+          nextTick(() => {
+            selectionManager.focusAtEnd();
+          });
         }
         catch (err) {
           document.execCommand("copy");
@@ -940,6 +946,9 @@ export function useMsgInputForm(
           console.warn("Paste failed:", e);
         }
       }
+      nextTick(() => {
+        selectionManager.focusAtEnd();
+      });
     },
 
     selectAll() {

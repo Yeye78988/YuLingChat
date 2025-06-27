@@ -33,7 +33,7 @@ export async function mainWin() {
     width: 800,
     height: 600,
     minWidth: 500,
-    minHeight: 360,
+    minHeight: 340,
   });
 }
 
@@ -43,6 +43,6 @@ export async function aboutWindow() {
     title: "关于",
     url: "/about",
     width: 450,
-    height: 360,
+    height: 340,
   });
 }

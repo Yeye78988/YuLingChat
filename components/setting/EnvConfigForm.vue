@@ -72,6 +72,38 @@ async function saveConfig() {
   }
 }
 
+const DEV_EnvConfig: EnvConfigMap = {
+  VITE_API_BASE_URL: "http://localhost:9090/",
+  VITE_API_WS_BASE_URL: "ws://localhost:9091/",
+  VITE_BASE_OSS_PATH: "https://oss.jiwuhub.top/",
+  VITE_XUN_FEI_WSS_URL: "wss://spark-openapi.cn-huabei-1.xf-yun.com/v1/assistants/u8h3bh6wxkq8_v1",
+  VITE_XUN_FEI_APP_ID: "3b3875ac",
+  VITE_TURN_SERVER_URL: "",
+  VITE_TURN_SERVER_USER: "",
+  VITE_TURN_SERVER_PWD: "",
+};
+
+const PROD_EnvConfig: EnvConfigMap = {
+  VITE_API_BASE_URL: "https://api.jiwu.kiwi2333.top/",
+  VITE_API_WS_BASE_URL: "wss://api.jiwu.kiwi2333.top/websocket",
+  VITE_BASE_OSS_PATH: "https://oss.jiwuhub.top/",
+  VITE_XUN_FEI_WSS_URL: "wss://spark-openapi.cn-huabei-1.xf-yun.com/v1/assistants/u8h3bh6wxkq8_v1",
+  VITE_XUN_FEI_APP_ID: "3b3875ac",
+  VITE_TURN_SERVER_URL: "",
+  VITE_TURN_SERVER_USER: "",
+  VITE_TURN_SERVER_PWD: "",
+};
+
+// 切换默认配置
+function changeDefaultConfig(type: "dev" | "prod") {
+  if (type === "dev") {
+    envConfig.value = { ...DEV_EnvConfig };
+  }
+  else {
+    envConfig.value = { ...PROD_EnvConfig };
+  }
+}
+
 // 重置配置（仅重置可修改的字段）
 function resetConfig() {
   envConfig.value = { ...DefaultEnvConfigMap };
@@ -83,9 +115,9 @@ function resetConfig() {
   <div class="env-config-form">
     <!-- 标题 -->
     <div class="form-header mb-6">
-      <h2 class="mb-2">
+      <div class="mb-2 text-lg font-500">
         环境配置
-      </h2>
+      </div>
       <p class="text-mini">
         配置应用的运行环境参数
       </p>
@@ -115,6 +147,28 @@ function resetConfig() {
             placeholder="ws://localhost:9091/"
             clearable
           />
+        </el-form-item>
+        <el-form-item label="环境类型">
+          <el-button-group>
+            <el-button
+              text
+              bg
+              class="h-8"
+              style="font-size: 0.8rem;"
+              @click="changeDefaultConfig('dev')"
+            >
+              开发环境
+            </el-button>
+            <el-button
+              text
+              bg
+              class="h-8"
+              style="font-size: 0.8rem;"
+              @click="changeDefaultConfig('prod')"
+            >
+              生产环境
+            </el-button>
+          </el-button-group>
         </el-form-item>
       </div>
       <!-- 操作按钮 -->

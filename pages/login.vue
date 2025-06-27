@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
-import { appDescription, appKeywords, appName } from "@/constants/index";
+import { appDescription, appKeywords } from "@/constants/index";
 
 useSeoMeta({
   title: "登录 - 极物聊天",
@@ -22,15 +22,15 @@ onMounted(async () => {
     watch(() => user.showLoginPageType, async (val) => {
       if (val !== "") {
         // 关闭窗口动画
-        const height = val === "login" ? 460 : val === "register" ? 500 : val === "env-config" ? 460 : 460;
+        const height = val === "login" ? 440 : val === "register" ? 480 : val === "env-config" ? 460 : 460;
         if (setting.settingPage.isCloseAllTransition) {
-          getCurrentWindow()?.setSize(new LogicalSize(360, height));
+          getCurrentWindow()?.setSize(new LogicalSize(340, height));
           return;
         }
         // 窗口动画
         invoke("animate_window_resize", {
           windowLabel: LOGIN_WINDOW_LABEL,
-          toWidth: 360,
+          toWidth: 340,
           toHeight: height,
           duration: 160,
           steps: 12,
@@ -80,57 +80,34 @@ onMounted(async () => {
     </div>
     <!-- 表单 -->
     <div
-      class="flex flex-row-c-c flex-col select-none rounded-t-8 bg-color shadow-lg sm:(mt-0 h-full animate-none border-0 rounded-t-0 shadow-none)"
-      :class="setting.isDesktop ? 'w-full h-full !rounded-0 animate-none pt-4' : 'h-fit pt-16 pb-10 min-h-7/10 sm:static absolute bottom-0 left-0 w-full   shadow-lg border-default-t'"
+      class="flex select-none rounded-t-8 bg-color px-6 py-4 shadow-lg sm:(mt-0 h-full animate-none border-0 rounded-t-0 shadow-none)"
+      :class="[setting.isDesktop ? 'w-full h-full !rounded-0 mt-a animate-none' : 'h-fit flex-row-c-c sm:static absolute bottom-0 left-0 w-full   shadow-lg border-default-t', setting.isWeb && !setting.isMobileSize ? '' : 'login-bg']"
       data-fade
     >
-      <div class="form-main mx-a w-86/100 text-center sm:(w-3/5 text-left)">
-        <!-- 添加背景动画球 -->
-        <div class="animated-background">
-          <div class="blob blob-1" />
-          <div class="blob blob-2" />
-          <div class="blob blob-3" />
-        </div>
-        <div
-          v-if="setting.isDesktop"
-          key="login-bg"
-          class="flex items-center gap-3 sm:(relative left-a top-a)"
+      <div data-fades class="form-main mx-a my-a w-full text-center sm:(my-a max-w-3/5 w-24rem text-left)">
+        <!-- 登录 -->
+        <FormLoginForm
+          v-if="user.showLoginPageType === 'login'"
+          key="login-form"
+          style="--anima: blur-in;"
+          class="login-form"
         />
-        <div data-fades>
-          <div
-            key="login-bg"
-            style="--anima: blur-in;"
-            class="login-logo absolute left-6 top-6 my-4 block flex items-center gap-3 sm:(static mb-6)"
-          >
-            <ElImage src="/logo.png" class="logo h-8 w-8" />
-            <h3 class="app-name text-1.2rem font-bold tracking-0.2em">
-              {{ appName }}
-            </h3>
-          </div>
-          <!-- 登录 -->
-          <FormLoginForm
-            v-if="user.showLoginPageType === 'login'"
-            key="login-form"
-            style="--anima: blur-in;"
-            class="login-form mt-a"
-          />
-          <!-- 注册 -->
-          <FormRegisterForm
-            v-else-if="user.showLoginPageType === 'register'"
-            key="register-form"
-            style="--anima: blur-in;"
-            :size="setting.isDesktop ? 'default' : 'large'"
-            class="register-form"
-          />
-          <!-- 环境配置 -->
-          <SettingEnvConfigForm
-            v-else-if="user.showLoginPageType === 'env-config'"
-            key="env-config-form"
-            style="--anima: blur-in;"
-            :size="setting.isDesktop ? 'default' : 'large'"
-            class="env-config-form"
-          />
-        </div>
+        <!-- 注册 -->
+        <FormRegisterForm
+          v-else-if="user.showLoginPageType === 'register'"
+          key="register-form"
+          style="--anima: blur-in;"
+          :size="setting.isDesktop ? 'default' : 'large'"
+          class="register-form"
+        />
+        <!-- 环境配置 -->
+        <SettingEnvConfigForm
+          v-else-if="user.showLoginPageType === 'env-config'"
+          key="env-config-form"
+          style="--anima: blur-in;"
+          :size="setting.isDesktop ? 'default' : 'large'"
+          class="env-config-form"
+        />
       </div>
     </div>
   </div>
@@ -182,19 +159,18 @@ onMounted(async () => {
 
 /* 适配桌面版 */
 .is-desktop {
-
   .login-logo {
     --at-apply: ' !static mb-4 p-0  flex-row-c-c';
     .logo {
       --at-apply: 'w-8 h-8';
     }
-    .app-name {
-      --at-apply: 'text-1.2em';
-    }
   }
-  .login-form {
-    --at-apply: 'pb-6';
-  }
+}
+
+.env-config-form,
+.login-form,
+.register-form {
+  --at-apply: 'py-4 w-full';
 }
 
 .show-register {
@@ -221,7 +197,7 @@ onMounted(async () => {
   }
 }
 
-/* 背景动画球样式 */
+/* 镜像渐变背景样式 */
 .animated-background {
   display: block;
   position: absolute;
@@ -232,66 +208,126 @@ onMounted(async () => {
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
-  filter: blur(4px);
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(132, 98, 255, 0.3) 0%,
+    rgba(135, 206, 235, 0.1) 25%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 70% 80%,
+    rgba(1132, 98, 255, 0.3) 0%,
+    rgba(167, 143, 255, 0.1) 25%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 50% 50%,
+    rgba(173, 216, 230, 0.04) 0%,
+    transparent 40%
+  );
+  background-size: 120% 120%, 140% 140%, 160% 160%;
+  animation: gradient-shift 15s ease-in-out infinite;
 }
 
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(3rem);
-  opacity: 0.7;
-}
-.dark {
-  .blob {
-    opacity: 0.3;
+.is-mobile {
+
+  .form-main {
+    --at-apply: "min-h-52vh";
   }
 }
 
-.blob-1 {
-  width: 22rem;
-  height: 22rem;
-  background: radial-gradient(circle, rgba(74, 144, 226, 0.3) 0%, rgba(74, 144, 226, 0.1) 70%);
-  left: -50%;
-  top: -50%;
-  animation: float-blob-1 12s ease-in-out infinite;
+.dark .animated-background {
+  background: transparent;
+  background-image: none;
+  animation: none;
 }
 
-.blob-2 {
-  width: 18rem;
-  height: 18rem;
-  background: radial-gradient(circle, rgba(107, 74, 226, 0.3) 0%, rgba(107, 74, 226, 0.1) 70%);
-  right: -40%;
-  top: 20%;
-  animation: float-blob-2 18s ease-in-out infinite;
+.login-bg {
+  background-color: #f9f7ff;
+  background-image: radial-gradient(closest-side, #e9e1ff, transparent),
+    radial-gradient(closest-side, #e8e0ff, transparent),
+    radial-gradient(closest-side, #efdbff, transparent),
+    radial-gradient(closest-side, #fff1db, transparent),
+    radial-gradient(closest-side, #f6f3ff, transparent);
+  background-size:
+    130vmax 130vmax,
+    80vmax 80vmax,
+    90vmax 90vmax,
+    110vmax 110vmax,
+    90vmax 90vmax;
+  background-position:
+    -80vmax -80vmax,
+    60vmax -30vmax,
+    10vmax 10vmax,
+    -30vmax -10vmax,
+    50vmax 50vmax;
+  background-repeat: no-repeat;
+  animation: bg-animation 12s linear infinite;
+}
+.dark {
+  .login-bg {
+    background-color: #1f1f1f;
+    background-image: none;
+  }
 }
 
-.blob-3 {
-  width: 16rem;
-  height: 16rem;
-  background: radial-gradient(circle, rgba(103, 178, 240, 0.3) 0%, rgba(103, 178, 240, 0.1) 70%);
-  left: -40%;
-  bottom: -20%;
-  animation: float-blob-3 20s ease-in-out infinite;
-}
-
-@keyframes float-blob-1 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(80px, 60px) rotate(20deg); }
-  66% { transform: translate(20px, 120px) rotate(-10deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-@keyframes float-blob-2 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(-60px, 40px) rotate(-15deg); }
-  66% { transform: translate(-30px, -60px) rotate(10deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-@keyframes float-blob-3 {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(50px, -50px) rotate(10deg); }
-  66% { transform: translate(-40px, -20px) rotate(-15deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+@keyframes bg-animation {
+  0%,
+  100% {
+    background-size:
+      130vmax 130vmax,
+      80vmax 80vmax,
+      90vmax 90vmax,
+      110vmax 110vmax,
+      90vmax 90vmax;
+    background-position:
+      -80vmax -80vmax,
+      60vmax -30vmax,
+      10vmax 10vmax,
+      -30vmax -10vmax,
+      50vmax 50vmax;
+  }
+  25% {
+    background-size:
+      100vmax 100vmax,
+      90vmax 90vmax,
+      100vmax 100vmax,
+      90vmax 90vmax,
+      60vmax 60vmax;
+    background-position:
+      -60vmax -90vmax,
+      50vmax -40vmax,
+      0vmax -20vmax,
+      -40vmax -20vmax,
+      40vmax 60vmax;
+  }
+  50% {
+    background-size:
+      80vmax 80vmax,
+      110vmax 110vmax,
+      80vmax 80vmax,
+      60vmax 60vmax,
+      80vmax 80vmax;
+    background-position:
+      -50vmax -70vmax,
+      40vmax -30vmax,
+      10vmax 0vmax,
+      20vmax 10vmax,
+      30vmax 70vmax;
+  }
+  75% {
+    background-size:
+      90vmax 90vmax,
+      90vmax 90vmax,
+      100vmax 100vmax,
+      90vmax 90vmax,
+      70vmax 70vmax;
+    background-position:
+      -50vmax -40vmax,
+      50vmax -30vmax,
+      20vmax 0vmax,
+      -10vmax 10vmax,
+      40vmax 60vmax;
+  }
 }
 </style>

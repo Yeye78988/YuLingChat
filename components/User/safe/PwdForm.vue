@@ -188,7 +188,7 @@ onMounted(() => {
     :model="userForm"
     class="form"
   >
-    <div my-2 text-center text-lg font-500 tracking-0.2em>
+    <div my-2 text-center text-lg font-bold tracking-0.2em>
       密码修改
     </div>
     <transition-group :name="setting.settingPage.isCloseAllTransition ? '' : 'group-list'" mode="ease-in-out" class="relative">

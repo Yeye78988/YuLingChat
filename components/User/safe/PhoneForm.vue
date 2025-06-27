@@ -103,7 +103,7 @@ async function getPhoneCode() {
     class="form"
     @submit.prevent="() => {}"
   >
-    <div mb-4 mt-2 text-center text-lg font-500 tracking-0.2em>
+    <div mb-4 mt-2 text-center text-lg font-bold tracking-0.2em>
       {{ user.userInfo.isPhoneVerified ? "更换" : "绑定" }}手机号
     </div>
     <el-form-item label="" prop="newPhone" class="animated">

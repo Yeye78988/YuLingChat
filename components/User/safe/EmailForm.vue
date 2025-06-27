@@ -102,7 +102,7 @@ async function getEmailCode() {
     :model="form"
     class="form"
   >
-    <div mb-4 mt-2 text-center text-lg font-500 tracking-0.2em>
+    <div mb-4 mt-2 text-center text-lg font-bold tracking-0.2em>
       {{ user.userInfo.isEmailVerified ? "更换" : "绑定" }}邮箱
     </div>
     <el-form-item type="newEmail" label="" prop="newEmail" class="animated">

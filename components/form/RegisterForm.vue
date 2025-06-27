@@ -379,9 +379,9 @@ function toLoginForm() {
     :model="formUser"
     class="form relative"
   >
-    <h3 mb-4 tracking-0.2em op-80 sm:mb-6>
+    <div my-4 text-lg font-bold tracking-0.2em op-80 sm:mb-6>
       开启你的专属圈子✨
-    </h3>
+    </div>
     <!-- 切换注册 -->
     <el-segmented
       v-model="registerType"
@@ -547,7 +547,7 @@ function toLoginForm() {
 
   // 报错信息
   :deep(.el-form-item) {
-    padding: 0.3em 0;
+    padding: 0.2em 0;
 
     .el-input-group__append {
       --at-apply: "w-8rem min-w-fit  text-theme-info card-rounded-df op-80 transition-200 cursor-pointer overflow-hidden bg-color p-0 m-0 tracking-0.1em hover:(!text-theme-info op-100)";
@@ -564,11 +564,6 @@ function toLoginForm() {
 
 :deep(.el-button) {
   padding: 0.5em 1em;
-}
-
-// label总体
-:deep(.el-form-item) {
-  margin-bottom: 14px;
 }
 
 // 切换注册
