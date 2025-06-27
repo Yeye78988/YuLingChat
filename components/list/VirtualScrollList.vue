@@ -1,10 +1,30 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T = any">
 import type { ScrollbarDirection } from "element-plus";
 import { createReusableTemplate } from "@vueuse/core";
 
+// 虚拟列表项接口
+interface VirtualListItem<T> {
+  index: number
+  data: T
+  top: number
+}
+
+// 可见范围接口
+interface VisibleRange {
+  startIndex: number
+  endIndex: number
+  visibleCount: number
+}
+
+// 滚动事件接口
+interface ScrollEvent {
+  scrollTop: number
+  scrollLeft: number
+}
+
 // 接口定义
-interface Props {
-  items?: any[]
+interface Props<T = any> {
+  items?: T[]
   itemHeight?: number | string
   maxHeight?: string
   wrapClass?: any
@@ -13,7 +33,7 @@ interface Props {
   activeClass?: string
   selectedIndex?: number
   overscan?: number
-  getItemKey?: (item: any, index: number) => string | number // 下拉刷新相关属性
+  getItemKey?: (item: T, index: number) => string | number // 下拉刷新相关属性
   enablePullToRefresh?: boolean
   pullDistance?: number
   pullTriggerDistance?: number
@@ -26,11 +46,11 @@ interface Props {
   disableWhenLoading?: boolean
 }
 
-interface Emits {
-  (e: "itemClick", item: any, index: number): void
-  (e: "itemHover", item: any, index: number): void
+interface Emits<T = any> {
+  (e: "itemClick", item: T, index: number): void
+  (e: "itemHover", item: T, index: number): void
   (e: "update:selectedIndex", index: number): void
-  (e: "scroll", event: { scrollTop: number; scrollLeft: number }): void
+  (e: "scroll", event: ScrollEvent): void
   (e: "endReached", direction: ScrollbarDirection): void
   (e: "refresh"): Promise<any>
 }
@@ -45,8 +65,8 @@ const {
   activeClass = "active",
   selectedIndex = -1,
   overscan = 10,
-  items = [],
-  getItemKey = (item: any, index: number) => item.id || item.userId || index,
+  items = [] as T[],
+  getItemKey = (item: T, index: number) => (item as any).id || (item as any).userId || index,
   // 下拉刷新默认值
   enablePullToRefresh = false,
   pullDistance: pullDistanceMax = 90,
@@ -58,8 +78,8 @@ const {
   refreshTimeout = 2000,
   disableWhenLoading = true,
   onRefresh,
-} = defineProps<Props>();
-const emit = defineEmits<Emits>();
+} = defineProps<Props<T>>();
+const emit = defineEmits<Emits<T>>();
 const setting = useSettingStore();
 const baseFontSize = computed(() => setting.settingPage.fontSize.value);
 
@@ -126,15 +146,16 @@ function useVirtualList() {
     return Math.min(startIndex.value + visibleCount + overscan, items.length);
   });
   // 计算可见项目列表 - 参考代码逻辑，添加前置缓冲
-  const visibleItems = computed(() => {
-    const result = [];
+  const visibleItems = computed<VirtualListItem<T>[]>(() => {
+    const result: VirtualListItem<T>[] = [];
     const start = Math.max(0, startIndex.value - Math.floor(overscan / 2));
 
     for (let i = start; i < endIndex.value; i++) {
-      if (items[i]) {
+      const item = items[i];
+      if (item !== undefined) {
         result.push({
           index: i,
-          data: items[i],
+          data: item,
           top: i * parsedItemHeight.value,
         });
       }
@@ -148,7 +169,7 @@ function useVirtualList() {
   });
 
   // 滚动事件处理
-  function onScroll(event: { scrollTop: number; scrollLeft: number }) {
+  function onScroll(event: ScrollEvent) {
     scrollTop.value = event.scrollTop;
     emit("scroll", event);
   }
@@ -211,13 +232,13 @@ const isScrollTop = computed(() => scrollTop.value <= 0);
 const hasItems = computed(() => items.length > 0);
 
 // 处理点击事件
-function handleItemClick(item: any, index: number) {
+function handleItemClick(item: T, index: number) {
   emit("itemClick", item, index);
   emit("update:selectedIndex", index);
 }
 
 // 处理鼠标悬停事件
-function handleItemHover(item: any, index: number) {
+function handleItemHover(item: T, index: number) {
   emit("itemHover", item, index);
 }
 
@@ -255,7 +276,7 @@ function scrollToBottom() {
 }
 
 // 获取当前可见项目信息
-function getVisibleRange() {
+function getVisibleRange(): VisibleRange {
   return {
     startIndex: startIndex.value,
     endIndex: endIndex.value,
@@ -447,7 +468,6 @@ const [DefineVirtualListContent, ReuseVirtualListContent] = createReusableTempla
     <template v-if="!hasItems">
       <slot name="empty" />
     </template>
-
     <!-- 虚拟列表容器 -->
     <div
       v-else
@@ -483,6 +503,7 @@ const [DefineVirtualListContent, ReuseVirtualListContent] = createReusableTempla
         />
       </div>
     </div>
+    <slot name="end" />
   </DefineVirtualListContent>
 
   <el-scrollbar

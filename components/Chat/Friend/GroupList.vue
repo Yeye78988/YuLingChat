@@ -136,13 +136,13 @@ else if (props.type === "group") { // 群组相关监听
           :class="{ focus: checkIsFocus(p) }"
           @click="chat.setTheFriendOpt(
             isFriendPanel ? FriendOptType.User : FriendOptType.Group,
-            isFriendPanel ? { id: (p as ChatUserFriendVO).userId } : p,
+            isFriendPanel ? { ...p, id: (p as ChatUserFriendVO).userId } : p,
           )"
         >
-          <CardElImage
-            error-class="i-solar:user-bold-duotone"
+          <CardAvatar
             class="avatar-icon overflow-hidden rounded-6px"
             :src="BaseUrlImg + p.avatar"
+            load-class="none-sky"
             fit="cover"
           />
           <span>{{ isFriendPanel ? (p as ChatUserFriendVO).nickName : (p as ChatRoomGroupVO).name || '未填写' }}</span>

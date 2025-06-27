@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { ScrollbarDirection } from "element-plus";
 import { ChatRoomRoleEnum } from "~/composables/api/chat/room";
 
 type EditFormItems = "name" | "notice" | "";
@@ -38,24 +39,47 @@ const {
   searchUserWord,
   imgList,
   isLord,
-  vMemberList,
+  memberList,
   inputOssFileUploadRef,
-  containerProps,
-  wrapperProps,
   isReload,
   isLoading,
+  loadData,
+  reload,
   onSubmitImages,
   toggleImage,
   submitUpdateRoom,
-  onScroll,
-  scrollTo,
   onMemberContextMenu,
   onExitOrClearGroup,
 } = useRoomGroupPopup({
   editFormField,
-  overscan: 10,
-  itemHeight: 44,
 });
+
+const isScrollTop = ref(false);
+function handleEndReachedMember(direction: ScrollbarDirection) {
+  if (direction === "bottom") {
+    loadData();
+    isScrollTop.value = false;
+  }
+  else if (direction === "top") {
+    isScrollTop.value = true;
+  }
+}
+// 处理成员点击事件
+function handleMemberClick(member: any, index: number) {
+  // 移动端点击显示右键菜单
+  if (setting.isMobileSize) {
+    // 模拟右键菜单事件
+    const mockEvent = new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 0,
+      clientY: 0,
+    });
+    onMemberContextMenu(mockEvent, member);
+  }
+}
+
+
 // 邀请进群
 function showJoinGroup() {
   chat.inviteMemberForm = {
@@ -97,7 +121,7 @@ async function changShieldStatus() {
   <el-scrollbar
     v-if="chat.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
-    class="group scroll relative"
+    class="group scroll-root relative"
     wrap-class="pb-16"
   >
     <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate bg-color px-2 pb-2>
@@ -125,7 +149,7 @@ async function changShieldStatus() {
       <ElInput
         ref="searchInputRef"
         v-model.lazy="searchUserWord"
-        style="height: 1.8rem;"
+        style="height: 1.8rem;font-size: 0.8rem;"
         name="search-content"
         type="text"
         clearable
@@ -135,60 +159,87 @@ async function changShieldStatus() {
         maxlength="30"
         placeholder="搜索群成员"
         @blur.stop="() => searchUserWord === '' && (showSearch = false)"
-        @input="scrollTo(0)"
       />
     </div>
-    <div relative h-300px>
-      <div
-        v-bind="containerProps"
-        class="scroll-bar relative !h-300px"
-        @scroll="onScroll"
-      >
+
+    <!-- 群成员虚拟列表 -->
+    <ListVirtualScrollList
+      :items="memberList"
+      item-height="2.75rem"
+      max-height="20rem"
+      :overscan="16"
+      :get-item-key="(item, index) => `${chat.theRoomId!}_${item.userId}`"
+      wrap-class="px-1.5"
+      class-name="py-1.5 scroll-2 relative"
+      active-class="active"
+      enable-pull-to-refresh
+      :pull-trigger-distance="30"
+      :pull-distance="60"
+      pull-refresh-text="下拉刷新"
+      pull-release-text="释放刷新"
+      pull-refreshing-text="正在刷新..."
+      @refresh="reload"
+      @item-click="handleMemberClick"
+      @end-reached="handleEndReachedMember"
+    >
+      <template #default="{ item: member }">
         <div
-          v-bind="wrapperProps"
-          class="relative"
+          :class="member.activeStatus === ChatOfflineType.ONLINE ? 'live' : 'op-60 filter-grayscale filter-grayscale-100'"
+          class="user-card w-full flex-row-c-c gap-2"
+          @dblclick="onMemberContextMenu($event, member)"
+          @contextmenu="onMemberContextMenu($event, member)"
         >
-          <div
-            v-for="p in vMemberList"
-            :key="`${chat.theRoomId!}_${p.data.userId}`"
-            :class="p.data.activeStatus === ChatOfflineType.ONLINE ? 'live' : 'op-60 filter-grayscale filter-grayscale-100 '"
-            class="user-card"
-            @dblclick="onMemberContextMenu($event, p.data)"
-            @contextmenu="onMemberContextMenu($event, p.data)"
-            @click="setting.isMobileSize && onMemberContextMenu($event, p.data)"
-          >
-            <div class="relative flex-row-c-c" :title="p.data.nickName || '未知'">
-              <CardElImage
-                :default-src="p.data.avatar" fit="cover"
-                error-class="i-solar-user-line-duotone p-2 op-80"
-                class="h-2rem w-2rem flex-shrink-0 overflow-auto border-default rounded-1/2 object-cover"
-              />
-              <span class="g-avatar" />
-            </div>
-            <small truncate>{{ p.data.nickName || "未填写" }}</small>
-            <div class="tags ml-a block pl-1">
-              <el-tag v-if="p.data.userId === user.userInfo.id" class="mr-1" style="font-size: 0.6em;border-radius: 2rem;" size="small" type="warning">
-                我
-              </el-tag>
-              <el-tag v-if="p.data.roleType !== null && p.data.roleType !== ChatRoomRoleEnum.MEMBER" class="mr-1" style="font-size: 0.6em;border-radius: 2rem;" size="small" effect="dark" type="info">
-                {{ ChatRoomRoleEnumMap[p.data.roleType || ChatRoomRoleEnum.MEMBER] }}
-              </el-tag>
-            </div>
+          <div class="relative flex-row-c-c" :title="member.nickName || '未知'">
+            <CardElImage
+              :default-src="member.avatar"
+              fit="cover"
+              load-class="none"
+              error-class="i-solar-user-line-duotone p-2 op-80"
+              class="h-2rem w-2rem flex-shrink-0 overflow-auto border-default rounded-1/2 object-cover"
+            />
+            <span class="g-avatar" />
           </div>
-          <!-- loading -->
-          <div v-show="isLoading && !isReload" class="flex-row-c-c text-mini">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin select-none" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="currentColor" d="M12 4.5a7.5 7.5 0 1 0 0 15a7.5 7.5 0 0 0 0-15M1.5 12C1.5 6.201 6.201 1.5 12 1.5S22.5 6.201 22.5 12S17.799 22.5 12 22.5S1.5 17.799 1.5 12" opacity=".1" /><path fill="currentColor" d="M12 4.5a7.46 7.46 0 0 0-5.187 2.083a1.5 1.5 0 0 1-2.075-2.166A10.46 10.46 0 0 1 12 1.5a1.5 1.5 0 0 1 0 3" /></g></svg>
-            &nbsp;加载中...
+          <small truncate>{{ member.nickName || "未填写" }}</small>
+          <div class="tags ml-a block pl-1">
+            <el-tag
+              v-if="member.userId === user.userInfo.id"
+              class="mr-1"
+              style="font-size: 0.6em;border-radius: 2rem;"
+              size="small"
+              type="warning"
+            >
+              我
+            </el-tag>
+            <el-tag
+              v-if="member.roleType !== null && member.roleType !== ChatRoomRoleEnum.MEMBER"
+              class="mr-1"
+              style="font-size: 0.6em;border-radius: 2rem;"
+              size="small"
+              effect="dark"
+              type="info"
+            >
+              {{ ChatRoomRoleEnumMap[member.roleType || ChatRoomRoleEnum.MEMBER] as string }}
+            </el-tag>
           </div>
         </div>
-      <!-- <small
-        class="shadow-linear fixed bottom-0 left-0 block h-2em w-full cursor-pointer text-center"
-        @click="scrollTo(chat.currentMemberList.length - 1)"
-      >
-        <i i-solar:alt-arrow-down-outline p-2 btn-info />
-      </small> -->
-      </div>
-    </div>
+      </template>
+
+      <template #empty>
+        <div v-show="!isReload || !isLoading" class="flex-row-c-c flex-col py-6 text-mini">
+          <i class="i-solar:users-group-two-rounded-line-duotone mb-2 p-3" />
+          <span>暂无群成员</span>
+        </div>
+      </template>
+
+      <template #end>
+        <!-- loading -->
+        <div v-show="isLoading && !isReload" class="flex-row-c-c py-4 text-mini">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin select-none" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.020-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" /><path fill="currentColor" d="M12 4.5a7.5 7.5 0 1 0 0 15a7.5 7.5 0 0 0 0-15M1.5 12C1.5 6.201 6.201 1.5 12 1.5S22.5 6.201 22.5 12S17.799 22.5 12 22.5S1.5 17.799 1.5 12" opacity=".1" /><path fill="currentColor" d="M12 4.5a7.46 7.46 0 0 0-5.187 2.083a1.5 1.5 0 0 1-2.075-2.166A10.46 10.46 0 0 1 12 1.5a1.5 1.5 0 0 1 0 3" /></g></svg>
+          &nbsp;加载中...
+        </div>
+      </template>
+    </ListVirtualScrollList>
+
     <div class="mt-4 w-full flex-1 select-none overflow-y-auto border-default-t text-3.5 leading-1.8em">
       <div relative mt-3>
         群头像
@@ -295,7 +346,7 @@ async function changShieldStatus() {
   --at-apply: "border-default z-1 absolute bottom-0.2em right-0.2em rounded-full block w-2 h-2 ";
 }
 .user-card {
-  --at-apply: "h-44px flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate rounded-2rem filter-grayscale w-full hover:(bg-color-2 op-100)";
+  --at-apply: "h-2.75rem flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate rounded-2rem filter-grayscale w-full hover:(bg-color-2 op-100)";
   .tags {
     :deep(.el-tag) {
       transition: none;
@@ -372,9 +423,16 @@ async function changShieldStatus() {
     --at-apply: "h-2rem w-2rem flex-row-c-c btn-primary-bg  input-bg-color";
   }
 }
-.scroll {
-  :deep(.el-scrollbar__thumb) {
-    display: none;
+.scroll-root > {
+  :deep(.el-scrollbar__bar) {
+    display: none !important;
+    opacity: 0 !important;
+  }
+}
+.scroll-2 {
+
+  :deep(.el-scrollbar__bar) {
+    opacity: 0.5;
   }
 }
 </style>

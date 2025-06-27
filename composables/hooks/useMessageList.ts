@@ -184,7 +184,6 @@ export function useMessageList() {
       console.error("重新加载消息出错:", error);
       await nextTick();
       scrollBottom(false);
-      chat.saveScrollTop && chat.saveScrollTop();
     }
     finally {
       chat.contactMap[roomId]!.isLoading = false;

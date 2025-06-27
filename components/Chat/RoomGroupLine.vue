@@ -57,7 +57,6 @@ async function reload() {
   pageInfo.value.isLast = false;
   isReload.value = true;
   scrollTo(0);
-  containerProps.onScroll();
   await loadData();
   isReload.value = false;
 }

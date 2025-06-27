@@ -2,8 +2,8 @@ import ContextMenu from "@imengyu/vue3-context-menu";
 import { mitter, MittEventType } from "~/composables/utils/useMitt";
 
 
-export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: number, itemHeight: number }) {
-  const { editFormField, overscan = 10, itemHeight = 40 } = opt;
+export function useRoomGroupPopup(opt: { editFormField: Ref<string>, }) {
+  const { editFormField } = opt;
 
   // store
   const ws = useWsStore();
@@ -29,33 +29,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
     return list.sort((a, b) => b.activeStatus - a.activeStatus);
   });
 
-  const { list: vMemberList, scrollTo, containerProps, wrapperProps } = useVirtualList(
-    memberList,
-    {
-      itemHeight,
-      overscan,
-    },
-  );
-
-  watchEffect(() => {
-    if (chat.currentMemberList && chat.currentMemberList.length > 5) {
-      containerProps?.onScroll?.();
-    }
-    else {
-      chat.currentRoomCache.isReload = true;
-      nextTick(() => {
-        chat.currentRoomCache.isReload = false;
-      });
-    }
-  }, {
-  });
-
-  const onScroll = useDebounceFn((e) => {
-    const dom = e.target as HTMLElement;
-    if (dom.scrollHeight - dom.scrollTop <= 500) {
-      loadData();
-    }
-  }, 100);
   const isNotExistOrNorFriend = computed(() => chat.theContact?.selfExist === isTrue.FALESE); // 自己不存在 或 不是好友  || chat.contactMap?.[chat.theRoomId!]?.isFriend === 0
   const theContactClone = ref<Partial<ChatContactDetailVO>>();
   const isLord = computed(() => chat.theContact.member?.role === ChatRoomRoleEnum.OWNER);
@@ -305,8 +278,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
     }
     searchUserWord.value = "";
     await nextTick();
-    containerProps.onScroll();
-    scrollTo(0);
 
     if (!newRoomId) {
       return;
@@ -316,12 +287,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
       return;
     }
     await reload(newRoomId);
-    // reload 后列表数据变化，再次确保滚动和视图更新
-    await nextTick();
-    if (containerProps?.onScroll) {
-      containerProps.onScroll();
-    }
-    scrollTo(0);
   }, {
     immediate: true,
   });
@@ -346,7 +311,6 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
         return;
       }
       await reload(roomId);
-      containerProps.onScroll(); // 触发刷新
     });
   });
 
@@ -505,17 +469,16 @@ export function useRoomGroupPopup(opt: { editFormField: Ref<string>, overscan: n
     imgList,
     isLord,
     theUser,
-    vMemberList,
+    memberList,
     inputOssFileUploadRef,
-    containerProps,
-    wrapperProps,
     isLoading,
     isReload,
     isTheGroupPermission,
+    reload,
     onSubmitImages,
     toggleImage,
     submitUpdateRoom,
-    onScroll,
+    loadData,
     scrollTo,
     onMemberContextMenu,
     onExitOrClearGroup,

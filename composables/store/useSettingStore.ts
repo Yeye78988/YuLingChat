@@ -28,7 +28,7 @@ export const DEFAULT_FONT_FAMILY_LIST = [
   { name: "阿里妈妈方圆体", value: "AlimamaFangYuanTiVF", url: "/font/AlimamaFangYuanTiVF.woff2" },
   { name: "阿里巴巴健康体（盲文）", value: "AlibabaHealthFont2.0Pro", url: `${BaseUrlFont}/AlibabaHealthFont2.0Pro.ttc` },
   { name: "钉钉进步体", value: "DingTalk-JinBuTi", url: `${BaseUrlFont}/DingTalk-JinBuTi.woff2`, baseFontWeight: 300 },
-  { name: "抖音美好体", value: "DouyinSansBold", url: `${BaseUrlFont}/DouyinSansBold.ttf` },
+  { name: "0xProtoNerdFont", value: "0xProtoNerdFont", url: `${BaseUrlFont}/0xProtoNerdFont.ttf` },
   { name: "HarmonyOS_Sans_SC", value: "HarmonyOS_Sans_SC", url: `${BaseUrlFont}/HarmonyOS_Sans_SC.woff2` },
 ];
 
