@@ -26,7 +26,7 @@ function onClickMore() {
     case RoomType.SELFT:
     case RoomType.AICHAT:
     case RoomType.GROUP:
-      setting.isOpenGroupMember = !setting.isOpenGroupMember;
+      chat.isOpenGroupMember = !chat.isOpenGroupMember;
       break;
       // case RoomType.SELFT:
       // case RoomType.AICHAT:

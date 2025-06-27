@@ -65,8 +65,8 @@ function shouldBlockNavigation(
   if (setting.isMobileSize) {
     // 聊天详情页移动端返回处理
     if (from.path === "/" && to.path !== "/" && !to.query?.dis) {
-      if (setting.isOpenGroupMember) {
-        setting.isOpenGroupMember = false;
+      if (chat.isOpenGroupMember) {
+        chat.isOpenGroupMember = false;
         return true;
       }
       if (!chat.isOpenContact) {

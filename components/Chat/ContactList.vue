@@ -73,7 +73,7 @@ async function reload(size: number = 20, dto?: ContactPageDTO, isAll: boolean = 
       size,
     };
     if (setting.isMobileSize) { // 移动端
-      setting.isOpenGroupMember = false;// 关闭群成员列表
+      chat.isOpenGroupMember = false;// 关闭群成员列表
       setting.isOpenContactSearch = true;// 打开搜索框
     }
     // const list = await loadData(dto || props.dto);

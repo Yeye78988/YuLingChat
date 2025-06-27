@@ -188,6 +188,7 @@ export const useChatStore = defineStore(
 
     /* ------------------------------------------- 群聊成员操作 ------------------------------------------- */
     const atMemberRoomMap = ref<Record<number, { time: number, uidList: string[], userMap: Record<string, AtChatMemberOption> }>>({}); // 房间号: {}
+    const isOpenGroupMember = ref(false); // 是否打开 群聊成员菜单列表
     const roomMapCache = ref<Record<string, RoomChacheData>>({}); // 缓存当前房间的成员列表
     const currentRoomCache = computed(() => {
       if (theRoomId.value !== undefined) {
@@ -977,6 +978,7 @@ export const useChatStore = defineStore(
         isLast: false,
         size: 20,
       };
+      isOpenGroupMember.value = true; // 是否打开 群聊成员菜单列表
       roomMapCache.value = {};
       currentMemberList.value = [];
       isMemberLoading.value = false;
@@ -1037,6 +1039,7 @@ export const useChatStore = defineStore(
       isFriendRoom,
       replyMsg,
       atUserList,
+      isOpenGroupMember,
       askAiRobotList,
       setAskAiUid,
       removeAskAiByUsername,

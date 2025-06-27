@@ -95,7 +95,7 @@ async function changShieldStatus() {
 
 <template>
   <el-scrollbar
-    v-if="setting.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
+    v-if="chat.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
     class="group scroll relative"
     wrap-class="pb-16"

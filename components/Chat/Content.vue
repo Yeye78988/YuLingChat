@@ -12,13 +12,13 @@ const msgFormRef = useTemplateRef<any>("msgFormRef");
 
 watch(
   () => chat.theRoomId,
-  () => setting.isOpenGroupMember = false,
+  () => chat.isOpenGroupMember = false,
 );
 </script>
 
 <template>
   <div id="chat-content" class="content flex-1">
-    <div class="relative h-full flex flex-1 flex-col transition-200" :class="{ 'scale-94 op-50 transform-origin-lc': setting.isOpenGroupMember && setting.isMobileSize }">
+    <div class="relative h-full flex flex-1 flex-col transition-200" :class="{ 'scale-94 op-50 transform-origin-lc': chat.isOpenGroupMember && setting.isMobileSize }">
       <!-- 房间信息 -->
       <ChatRoomInfo class="relative z-10 border-default-3-b shadow-sm" />
       <!-- 消息列表 -->
@@ -28,8 +28,8 @@ watch(
     </div>
     <!-- 在线人数 -->
     <Transition name="fade-lr" mode="out-in">
-      <div v-if="setting.isOpenGroupMember" class="member-popup">
-        <div class="model" @click="setting.isOpenGroupMember = false" />
+      <div v-if="chat.isOpenGroupMember" class="member-popup">
+        <div class="model" @click="chat.isOpenGroupMember = false" />
         <component :is="chat.theContact.type === RoomType.GROUP ? ChatRoomGroupPopup : ChatRoomSelfPopup" class="member" />
       </div>
     </Transition>

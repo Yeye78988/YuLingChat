@@ -107,7 +107,7 @@ async function onExitOrDeleteFriend() {
 
 <template>
   <el-scrollbar
-    v-if="setting.isOpenGroupMember && (chat.theContact?.type === RoomType.SELFT || chat.theContact?.type === RoomType.AICHAT)"
+    v-if="chat.isOpenGroupMember && (chat.theContact?.type === RoomType.SELFT || chat.theContact?.type === RoomType.AICHAT)"
     v-bind="$attrs"
     class="group scroll relative"
     wrap-class="pb-10"

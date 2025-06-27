@@ -28,8 +28,8 @@ async function toggleContactOpen() {
     await navigateTo("/");
     return false;
   }
-  if (setting.isOpenGroupMember) {
-    setting.isOpenGroupMember = false;
+  if (chat.isOpenGroupMember) {
+    chat.isOpenGroupMember = false;
     return false;
   }
   if (!chat.isOpenContact) {

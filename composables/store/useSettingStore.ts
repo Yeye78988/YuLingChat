@@ -170,7 +170,6 @@ export const useSettingStore = defineStore(
     const contextMenuTheme = computed(() => colorMode.value === "dark" ? "mac dark" : "mac");
 
     // --------------------- 聊天设置 -----------------
-    const isOpenGroupMember = ref(true); // 是否打开 群聊成员菜单列表
     const showChatMenu = ref(true);
     const downUpChangeContact = ref(true); // 向上向下切换联系人列表
     async function checkMainWinVisible() {
@@ -481,7 +480,6 @@ export const useSettingStore = defineStore(
       settingPage.value.isCloseAllTransition = false;
       settingPage.value.isEscMin = true;
       isChatFold.value = false;
-      isOpenGroupMember.value = true;
       showChatMenu.value = true;
       isThemeChangeLoad.value = false;
       isUseWebsocket.value = true;
@@ -600,7 +598,6 @@ export const useSettingStore = defineStore(
       isChatFold,
       // state
       isCollapse,
-      isOpenGroupMember,
       contextMenuTheme,
       isUserCollapse,
       isUserFold,
