@@ -318,10 +318,10 @@ export const useSettingStore = defineStore(
     } = {
 
     }) {
-      appUploader.value.isCheckUpdatateLoad = true;
       try {
         if (isWeb.value || isMobile.value)
           return false;
+        appUploader.value.isCheckUpdatateLoad = true;
         const update = (await check()) as Update;
         if (!update) {
           handleUploadInfo && handleUploadInfo(update);
