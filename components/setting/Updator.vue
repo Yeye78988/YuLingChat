@@ -71,7 +71,8 @@ const ignoreUpdate = computed({
             mr-1 inline-block
             :class="{
               'i-solar:refresh-outline animate-spin': setting.appUploader.isCheckUpdatateLoad,
-              'i-solar:archive-minimalistic-line-duotone animation-swing': !setting.appUploader.isCheckUpdatateLoad,
+              'i-solar:archive-minimalistic-line-duotone animation-swing': !setting.appUploader.isCheckUpdatateLoad && !setting.appUploader.isUpload,
+              'i-solar:cloud-download-linear': !setting.appUploader.isCheckUpdatateLoad && setting.appUploader.isUpload,
             }"
           />
           {{ setting.appUploader.isUpload ? '新版本' : '更新内容' }}
@@ -107,7 +108,7 @@ const ignoreUpdate = computed({
             />
           </el-scrollbar>
         </div>
-        <div v-if="currentVersion !== latestVersionInfo?.version" class="flex-row-bt-c">
+        <div v-if="currentVersion !== latestVersionInfo?.version || setting.appUploader.isUpload" class="flex-row-bt-c">
           <el-checkbox v-model="ignoreUpdate" size="small">
             忽略更新
           </el-checkbox>
