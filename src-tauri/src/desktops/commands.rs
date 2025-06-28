@@ -94,7 +94,7 @@ pub async fn create_main_window(app_handle: AppHandle) -> tauri::Result<()> {
             .title("极物聊天")
             .resizable(true)
             .center()
-            .shadow(false)
+            .shadow(true)
             .decorations(false)
             .min_inner_size(375.0, 780.0)
             .max_inner_size(1920.0, 1080.0)
@@ -221,7 +221,7 @@ async fn create_login_window(app_handle: AppHandle) -> tauri::Result<()> {
             .title("极物聊天 - 登录")
             .resizable(false)
             .center()
-            .shadow(false)
+            .shadow(true)
             .decorations(false)
             .inner_size(340.0, 480.0)
             .visible(true);
@@ -235,7 +235,6 @@ async fn create_login_window(app_handle: AppHandle) -> tauri::Result<()> {
     {
         use tauri::utils::TitleBarStyle;
         wind_builder = wind_builder.title_bar_style(TitleBarStyle::Overlay);
-        wind_builder = wind_builder.shadow(true);
     }
 
     let login_window = wind_builder.build()?;
@@ -286,7 +285,7 @@ async fn create_extend_window(
             .title(title)
             .resizable(true)
             .center()
-            .shadow(false)
+            .shadow(true)
             .decorations(false)
             .min_inner_size(375.0, 780.0)
             .max_inner_size(1920.0, 1080.0)

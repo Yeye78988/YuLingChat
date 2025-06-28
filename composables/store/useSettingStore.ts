@@ -117,7 +117,7 @@ export const useSettingStore = defineStore(
     const settingPage = ref({
       // 字体
       fontFamily: {
-        value: "HarmonyOS_Sans_SC",
+        value: "AlimamaFangYuanTiVF",
         list: [] as { name: string; value: string }[],
       },
       fontSize: {

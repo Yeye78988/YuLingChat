@@ -47,7 +47,7 @@ async function watchFontFamily() {
     if (fontItem?.url) {
       await loadWebFont(fontItem);
     }
-    const fontStack = `${fontValue}, HarmonyOS_Sans_SC, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    const fontStack = `${fontValue}, AlimamaFangYuanTiVF, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
     document.documentElement.style.setProperty("--font-family", fontStack);
   }
 
