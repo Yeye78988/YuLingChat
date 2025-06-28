@@ -122,9 +122,72 @@ async function changShieldStatus() {
     v-if="chat.isOpenGroupMember && chat.theContact.type === RoomType.GROUP"
     v-bind="$attrs"
     class="group scroll-root relative"
-    wrap-class="pb-16"
+    wrap-class="pb-8 sm:pb-4"
   >
-    <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate bg-color px-2 pb-2>
+    <div class="w-full flex-1 select-none text-3.5 leading-1.8em">
+      <div relative>
+        群头像
+        <InputOssFileUpload
+          ref="inputOssFileUploadRef"
+          :is-animate="false"
+          :show-edit="false"
+          :disable="!isLord"
+          :multiple="false"
+          :limit="1"
+          input-class="w-3rem mt-1 h-3rem flex-shrink-0 card-default"
+          :class="!isLord ? 'cursor-no-drop' : 'cursor-pointer'"
+          :upload-quality="0.3"
+          :model-value="imgList"
+          @click="toggleImage"
+          @error-msg="(msg:string) => {
+            ElMessage.error(msg)
+          }"
+          @submit="onSubmitImages"
+        />
+      </div>
+      <div mt-3 class="label-item">
+        <span select-none>群聊名称</span>
+        <i v-show="isLord && editFormField !== 'name'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'name'" />
+        <div
+          class="dark:op-70"
+        >
+          <el-input
+            v-if="theContactClone"
+            ref="nameInputRef"
+            v-model.lazy="theContactClone.name"
+            :disabled="!isLord || editFormField !== 'name'"
+            type="text"
+            :maxlength="30"
+            style="width: fit-content;"
+            placeholder="未填写"
+            @keydown.enter="submitUpdateRoom('name', theContactClone.name)"
+            @blur.stop="submitUpdateRoom('name', theContactClone.name)"
+          />
+        </div>
+      </div>
+      <div class="label-item">
+        <div mt-3 select-none>
+          群公告
+          <i v-show="isLord && editFormField !== 'notice'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'notice'" />
+        </div>
+        <textarea
+          v-if="theContactClone?.roomGroup?.detail"
+          ref="noticeInputRef"
+          v-model="theContactClone.roomGroup.detail.notice"
+          :disabled="!isLord || editFormField !== 'notice'"
+          :rows="editFormField === 'notice' ? 8 : 1"
+          :maxlength="200"
+          class="scroll-bar mt-2 card-rounded-df border-none bg-transparent transition-200"
+          type="textarea"
+          style="resize:none;width: 100%;"
+          placeholder="未填写"
+          @keydown.enter.stop="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
+          @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
+        />
+      </div>
+    </div>
+
+    <!-- <div sticky left-0 top-0 z-10 flex-row-bt-c flex-shrink-0 flex-row truncate bg-color px-2 pb-2>
       <i
         class="i-solar:magnifer-linear block h-4.5 w-4.5 btn-info"
         @click="() => {
@@ -138,10 +201,24 @@ async function changShieldStatus() {
       <div class="rounded-2rem p-1.5" @click="showJoinGroup">
         <i class="block h-1.8em h-5 w-1.8em w-5 btn-info border-default rounded-2rem" i-carbon:add-large />
       </div>
+    </div> -->
+    <div class="label-item mt-3 select-none border-default-2-t pt-3">
+      <div class="flex-row-bt-c">
+        <small>群成员</small>
+        <i
+          class="i-solar:magnifer-linear block h-4.5 w-4.5 btn-info"
+          @click="() => {
+            showSearch = !showSearch
+            if (showSearch) {
+              searchInputRef?.focus?.()
+            }
+          }"
+        />
+      </div>
     </div>
     <!-- 搜索群聊 -->
     <div
-      class="header sticky left-0 top-10 z-10 h-10 transition-height"
+      class="header mt-3 h-10 transition-height"
       :class="{
         '!h-0 overflow-y-hidden': !showSearch,
       }"
@@ -170,7 +247,7 @@ async function changShieldStatus() {
       :overscan="16"
       :get-item-key="(item, index) => `${chat.theRoomId!}_${item.userId}`"
       wrap-class="px-1.5"
-      class-name="py-1.5 scroll-2 relative"
+      class-name="py-1.5 min-h-14rem bg-color-2 dark:!bg-op-80 card-rounded-df border-default scroll-2 relative"
       active-class="active"
       enable-pull-to-refresh
       :pull-trigger-distance="30"
@@ -240,87 +317,25 @@ async function changShieldStatus() {
       </template>
     </ListVirtualScrollList>
 
-    <div class="mt-4 w-full flex-1 select-none overflow-y-auto border-default-t text-3.5 leading-1.8em">
-      <div relative mt-3>
-        群头像
-        <InputOssFileUpload
-          ref="inputOssFileUploadRef"
-          :is-animate="false"
-          :show-edit="false"
-          :disable="!isLord"
-          :multiple="false"
-          :limit="1"
-          input-class="w-3rem mt-1 h-3rem flex-shrink-0 card-default"
-          :class="!isLord ? 'cursor-no-drop' : 'cursor-pointer'"
-          :upload-quality="0.3"
-          :model-value="imgList"
-          @click="toggleImage"
-          @error-msg="(msg:string) => {
-            ElMessage.error(msg)
-          }"
-          @submit="onSubmitImages"
+    <div class="label-item mt-3 select-none border-default-2-t pt-3 text-3.5">
+      会话设置
+      <div mt-2 flex-row-bt-c>
+        <small text-0.8rem text-small>设为置顶</small>
+        <el-switch
+          :model-value="isPin"
+          size="small"
+          :loading="isPinLoading"
+          :before-change="changIsPin"
         />
       </div>
-      <div mt-3 class="label-item">
-        <span select-none>群聊名称</span>
-        <i v-show="isLord && editFormField !== 'name'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'name'" />
-        <div
-          class="dark:op-70"
-        >
-          <el-input
-            v-if="theContactClone"
-            ref="nameInputRef"
-            v-model.lazy="theContactClone.name"
-            :disabled="!isLord || editFormField !== 'name'"
-            type="text"
-            :maxlength="30"
-            style="width: fit-content;"
-            placeholder="未填写"
-            @keydown.enter="submitUpdateRoom('name', theContactClone.name)"
-            @blur.stop="submitUpdateRoom('name', theContactClone.name)"
-          />
-        </div>
-      </div>
-      <div class="label-item">
-        <div mt-3 select-none>
-          群公告
-          <i v-show="isLord && editFormField !== 'notice'" i-solar:pen-2-bold ml-2 p-2 op-0 transition-opacity @click="editFormField = 'notice'" />
-        </div>
-        <textarea
-          v-if="theContactClone?.roomGroup?.detail"
-          ref="noticeInputRef"
-          v-model="theContactClone.roomGroup.detail.notice"
-          :disabled="!isLord || editFormField !== 'notice'"
-          :rows="editFormField === 'notice' ? 8 : 1"
-          :maxlength="200"
-          class="scroll-bar mt-2 card-rounded-df border-none bg-transparent transition-200"
-          type="textarea"
-          style="resize:none;width: 100%;"
-          placeholder="未填写"
-          @keydown.enter.stop="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
-          @blur="submitUpdateRoom('notice', theContactClone?.roomGroup?.detail?.notice)"
+      <div mt-2 flex-row-bt-c>
+        <small text-0.8rem text-small>消息免打扰</small>
+        <el-switch
+          :model-value="shieldStatus"
+          :loading="shieldStatusLoading"
+          size="small"
+          :before-change="changShieldStatus"
         />
-      </div>
-      <div class="label-item mt-3 select-none border-default-2-t pt-2">
-        会话设置
-        <div mt-2 flex-row-bt-c>
-          <small text-0.8rem text-small>设为置顶</small>
-          <el-switch
-            :model-value="isPin"
-            size="small"
-            :loading="isPinLoading"
-            :before-change="changIsPin"
-          />
-        </div>
-        <div mt-2 flex-row-bt-c>
-          <small text-0.8rem text-small>消息免打扰</small>
-          <el-switch
-            :model-value="shieldStatus"
-            :loading="shieldStatusLoading"
-            size="small"
-            :before-change="changShieldStatus"
-          />
-        </div>
       </div>
     </div>
 
@@ -337,7 +352,7 @@ async function changShieldStatus() {
       </span>
     </btn-el-button>
     <!-- 渐变色 -->
-    <div class="shadow-linear pointer-events-none absolute bottom-0 left-0 z-1 block h-20 w-full w-full select-none text-center" />
+    <div class="shadow-linear pointer-events-none absolute bottom-0 left-0 z-1 block h-12 w-full w-full select-none text-center" />
   </el-scrollbar>
 </template>
 
@@ -346,7 +361,7 @@ async function changShieldStatus() {
   --at-apply: "border-default z-1 absolute bottom-0.2em right-0.2em rounded-full block w-2 h-2 ";
 }
 .user-card {
-  --at-apply: "h-2.75rem flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate rounded-2rem filter-grayscale w-full hover:(bg-color-2 op-100)";
+  --at-apply: "h-2.75rem flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate card-rounded-df filter-grayscale w-full hover:(bg-color op-100)";
   .tags {
     :deep(.el-tag) {
       transition: none;
@@ -406,6 +421,8 @@ async function changShieldStatus() {
   }
 }
 .shadow-linear {
+  cursor: none;
+  pointer-events: none;
   // 渐变色
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
 }

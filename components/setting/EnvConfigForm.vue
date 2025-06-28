@@ -114,8 +114,8 @@ function resetConfig() {
 <template>
   <div class="env-config-form">
     <!-- 标题 -->
-    <div class="form-header mb-6">
-      <div class="mb-2 text-lg font-500">
+    <div class="form-header mb-4">
+      <div class="mb-2 mt-4 text-lg font-500">
         环境配置
       </div>
       <p class="text-mini">
