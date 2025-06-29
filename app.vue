@@ -53,7 +53,8 @@ onUnmounted(useUnmounted);
       class="h-full w-full overflow-hidden bg-color"
       :class="{
         'sm:(w-100vw mx-a h-full) md:(w-100vw mx-a h-full)  lg:(w-1360px mx-a h-92vh max-w-86vw max-h-1020px) shadow-lg': !isIframe && setting.isWeb,
-        '!rounded-2 !wind-border-default': (showShadowBorderRadius || setting.isDesktop && !isWindow10 || $route.path === '/msg'),
+        '!rounded-2 !wind-border-default': showShadowBorderRadius || $route.path === '/msg',
+        '!rounded-2': setting.isDesktop && !isWindow10,
         'border-default-2-t': setting.isDesktop && isWindow10 && $route.path !== '/msg',
       }"
     >

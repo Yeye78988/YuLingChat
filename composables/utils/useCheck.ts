@@ -26,8 +26,8 @@ export async function useWindowsVersion(): Promise<"Windows 10" | "Windows 11" |
         const info = await uaData.getHighEntropyValues(["platformVersion"]);
         if (info.platformVersion) {
           // 通过 platformVersion 判断 Windows 10 或 11
-          const v = info.platformVersion.split(".")[0];
-          return `Windows ${v}` as "Windows 10" | "Windows 11";
+          const v = Number.parseInt(info.platformVersion.split(".")[0] || "10");
+          return `Windows ${v >= 13 ? 11 : 10}` as "Windows 10" | "Windows 11";
         }
       }
     }
