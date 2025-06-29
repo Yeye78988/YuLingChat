@@ -25,7 +25,7 @@ useSeoMeta({
 const route = useRoute();
 const setting = useSettingStore();
 const isIframe = ref(false);
-const showShadowBorderRadius = computed(() => setting.isWeb && !setting.isMobileSize);
+const showShadowBorderRadius = computed(() => setting.isWeb && !setting.isMobileSize && !isIframe.value);
 
 onMounted(() => {
   if (window) // 判断是否在iframe中
@@ -48,6 +48,7 @@ onUnmounted(useUnmounted);
       :class="{
         'sm:(w-100vw mx-a h-full) md:(w-100vw mx-a h-full)  lg:(w-1360px mx-a h-92vh max-w-86vw max-h-1020px) shadow-lg': !isIframe && setting.isWeb,
         '!rounded-2 wind-border-default': showShadowBorderRadius,
+        '!rounded-2 !wind-border-default': setting.isDesktop,
       }"
     >
       <NuxtLayout>

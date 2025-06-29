@@ -215,11 +215,11 @@ onUnmounted(() => {
         退出登录
       </BtnElButton>
     </div>
+    <SettingAnimationOptDialog
+      v-model:show="showCustomTransitionPanel"
+      :size="size"
+    />
   </el-scrollbar>
-  <SettingAnimationOptDialog
-    v-model:show="showCustomTransitionPanel"
-    :size="size"
-  />
 </template>
 
 <style scoped lang="scss">

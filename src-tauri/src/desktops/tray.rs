@@ -4,6 +4,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager,
 };
+use tauri_plugin_opener::open_url;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 #[derive(Clone, serde::Serialize)]
@@ -11,28 +12,32 @@ struct Payload {
     message: String,
 }
 
-const HOST_URL: &str = "https://jiwuchat.kiwi233.top";
+const HOST_URL: &str = "https://blog.jiwuchat.top";
 // msgbox宽高
 // const MSGBOX_WIDTH: f64 = 240.0;
 // const MSGBOX_HEIGHT: f64 = 300.0;
 
 pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
+    let main_window = MenuItemBuilder::with_id("main_window", "主页").build(app)?;
     let setting = MenuItemBuilder::with_id("setting", "设置").build(app)?;
     let to_host = MenuItemBuilder::with_id("to_host", "官网").build(app)?;
     let restart = MenuItemBuilder::with_id("restart", "重启").build(app)?;
     let quit = MenuItemBuilder::with_id("quit", "退出").build(app)?;
 
     let menu = MenuBuilder::new(app)
-        .items(&[&restart, &setting, &to_host, &quit])
+        .items(&[&main_window, &setting, &to_host, &restart, &quit])
         .build()?;
 
     TrayIconBuilder::with_id("tray_icon")
         .menu(&menu)
         .icon(app.default_window_icon().unwrap().clone())
-        .title("极物聊天")
+        // .title("极物聊天")
         .tooltip("极物聊天")
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id().as_ref() {
+            "main_window" => {
+                show_main_window(&app);
+            }
             "setting" => {
                 if let Some(window) = app.get_webview_window("main") {
                     window.unminimize().unwrap();
@@ -49,18 +54,9 @@ pub fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
                 }
             }
             "to_host" => {
-                if let Some(window) = app.get_webview_window("main") {
-                    window
-                        .emit(
-                            "open_url",
-                            Payload {
-                                message: HOST_URL.into(),
-                            },
-                        )
-                        .unwrap();
-                } else {
-                    println!("Window 'main' does not exist!");
-                }
+                open_url(HOST_URL, None::<&str>).unwrap_or_else(|e| {
+                        eprintln!("打开官网时出错: {:?}", e);
+                    });
             }
             "quit" => {
                 app.clone()
@@ -166,4 +162,40 @@ pub fn show_window(app: &AppHandle) {
     } else {
         setup_desktop_window(app).unwrap_or_else(|e| eprintln!("创建窗口时出错: {:?}", e));
     }
+}
+
+#[cfg(desktop)]
+fn show_main_window(app: &AppHandle) {
+    use crate::desktops::window::setup_desktop_window;
+
+    // 优先显示主窗口
+    if let Some(window) = app.webview_windows().get("main") {
+        window
+            .unminimize()
+            .unwrap_or_else(|e| eprintln!("取消最小化主窗口时出错: {:?}", e));
+        window
+            .show()
+            .unwrap_or_else(|e| eprintln!("显示主窗口时出错: {:?}", e));
+        window
+            .set_focus()
+            .unwrap_or_else(|e| eprintln!("聚焦主窗口时出错: {:?}", e));
+        return;
+    }
+
+    // 如果主窗口不存在，显示登录窗口
+    if let Some(window) = app.webview_windows().get("login") {
+        window
+            .unminimize()
+            .unwrap_or_else(|e| eprintln!("取消最小化登录窗口时出错: {:?}", e));
+        window
+            .show()
+            .unwrap_or_else(|e| eprintln!("显示登录窗口时出错: {:?}", e));
+        window
+            .set_focus()
+            .unwrap_or_else(|e| eprintln!("聚焦登录窗口时出错: {:?}", e));
+        return;
+    }
+
+    // 如果都不存在，创建新的登录窗口
+    setup_desktop_window(app).unwrap_or_else(|e| eprintln!("创建新窗口时出错: {:?}", e));
 }
