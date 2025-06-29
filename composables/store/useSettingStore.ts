@@ -32,6 +32,7 @@ export const DEFAULT_FONT_FAMILY_LIST = [
   { name: "HarmonyOS_Sans_SC", value: "HarmonyOS_Sans_SC", url: `${BaseUrlFont}/HarmonyOS_Sans_SC.woff2` },
 ];
 
+
 // @unocss-include
 // https://pinia.web3doc.top/ssr/nuxt.html#%E5%AE%89%E8%A3%85
 export const useSettingStore = defineStore(
@@ -114,50 +115,54 @@ export const useSettingStore = defineStore(
     // ---------------------菜单-----------------
     const selectExtendMenuList = ref<ExtendItem[]>([]);
     // ---------------------设置-----------------
-    const settingPage = ref({
-      // 字体
-      fontFamily: {
-        value: "AlimamaFangYuanTiVF",
-        list: [] as { name: string; value: string }[],
-      },
-      fontSize: {
-        value: 16,
-        list: [
-          { name: "小", value: 12 },
-          { name: "中", value: 14 },
-          { name: "默认", value: 16 },
-          { name: "超大", value: 18 },
-        ],
-      },
-      modeToggle: {
-        value: "system",
-        list: [
-          { name: "系统", value: "system" },
-          { name: "日间", value: "light" },
-          { name: "夜间", value: "dark" },
-        ],
-      },
-      // 翻译
-      translation: {
-        value: 1,
-        targetLang: "zh" as TranslationEnums,
-        stream: false,
-        list: [] as TranslationToolVO[],
-      },
-      isAutoStart: false, // 开机自启
-      isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
-      animation: {
-        pageTransition: true, // 页面切换动画
-        listTransition: true, // 列表过渡动画
-        dialogTransition: true, // 弹窗进入动画
-        messageTransition: true, // 消息气泡动画
-        themeTransition: true, // 主题切换动画
-        hardwareAcceleration: false, // 硬件加速
-      },
-      isEscMin: true, // esc
-      notificationType: NotificationEnums.TRAY as NotificationEnums, // 托盘通知
-      rtcCallBellUrl: DEFAULT_RTC_CALL_BELL_URL as string, // 呼叫铃声
-    });
+    const settingPage = ref(defaultSettingPage());
+    function defaultSettingPage() {
+      return {
+        // 字体
+        fontFamily: {
+          value: "AlimamaFangYuanTiVF",
+          list: [] as { name: string; value: string; url?: string; baseFontWeight?: number }[],
+        },
+        fontSize: {
+          value: 16,
+          list: [
+            { name: "小", value: 12 },
+            { name: "中", value: 14 },
+            { name: "默认", value: 16 },
+            { name: "超大", value: 18 },
+          ],
+        },
+        modeToggle: {
+          value: "system",
+          list: [
+            { name: "系统", value: "system" },
+            { name: "日间", value: "light" },
+            { name: "夜间", value: "dark" },
+          ],
+        },
+        // 翻译
+        translation: {
+          value: 1,
+          targetLang: "zh" as TranslationEnums,
+          stream: false,
+          list: [] as TranslationToolVO[],
+        },
+        isAutoStart: false, // 开机自启
+        isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
+        animation: {
+          pageTransition: true, // 页面切换动画
+          listTransition: true, // 列表过渡动画
+          dialogTransition: true, // 弹窗进入动画
+          messageTransition: true, // 消息气泡动画
+          themeTransition: true, // 主题切换动画
+          hardwareAcceleration: false, // 硬件加速
+        },
+        isWindow10Shadow: false, // 是否启用 Windows 10 窗口阴影
+        isEscMin: true, // esc
+        notificationType: isWeb.value ? NotificationEnums.SYSTEM : NotificationEnums.TRAY, // 托盘通知
+        rtcCallBellUrl: DEFAULT_RTC_CALL_BELL_URL, // 呼叫铃声铃声
+      };
+    }
     // 自定义主题配置
     const customThemeConfig = ref<ThemeConfig | null>(null);
     const translationTool = computed(() => settingPage.value.translation.list.find(item => item.value === settingPage.value.translation.value));
@@ -488,10 +493,6 @@ export const useSettingStore = defineStore(
      * 重置设置
      */
     async function reset() {
-      settingPage.value.fontFamily.value = "HarmonyOS_Sans_SC";
-      settingPage.value.modeToggle.value = "system";
-      settingPage.value.isCloseAllTransition = false;
-      settingPage.value.isEscMin = true;
       isChatFold.value = false;
       showChatMenu.value = true;
       isThemeChangeLoad.value = false;
@@ -517,50 +518,7 @@ export const useSettingStore = defineStore(
         isNotification: false,
         isNotificationSound: true,
       };
-      settingPage.value = {
-        // 字体
-        fontFamily: {
-          value: "HarmonyOS_Sans_SC",
-          list: [],
-        },
-        fontSize: {
-          value: 16,
-          list: [
-            { name: "小", value: 12 },
-            { name: "中", value: 14 },
-            { name: "默认", value: 16 },
-            { name: "超大", value: 18 },
-          ],
-        },
-        modeToggle: {
-          value: "system",
-          list: [
-            { name: "系统", value: "system" },
-            { name: "日间", value: "light" },
-            { name: "夜间", value: "dark" },
-          ],
-        },
-        // 翻译
-        translation: {
-          value: 1,
-          targetLang: "zh" as TranslationEnums,
-          stream: false,
-          list: [],
-        },
-        isAutoStart: settingPage.value.isAutoStart, // 开机自启
-        isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
-        animation: {
-          pageTransition: true, // 页面切换动画
-          listTransition: true, // 列表过渡动画
-          dialogTransition: true, // 弹窗进入动画
-          messageTransition: true, // 消息气泡动画
-          themeTransition: true, // 主题切换动画
-          hardwareAcceleration: false, // 硬件加速
-        },
-        isEscMin: true, // esc
-        notificationType: isWeb.value ? NotificationEnums.SYSTEM : NotificationEnums.TRAY, // 托盘通知
-        rtcCallBellUrl: DEFAULT_RTC_CALL_BELL_URL, // 呼叫铃声铃声
-      };
+      settingPage.value = defaultSettingPage();
       selectExtendMenuList.value = [];
       fileDownloadMap.value = {};
       appDataDownloadDirUrl.value = "";

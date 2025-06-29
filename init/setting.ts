@@ -281,7 +281,7 @@ export function useHotkeyInit() {
 export function useWindowVisibilityInit() {
   document.addEventListener("visibilitychange", onVisibilityChange);
   return () => {
-    console.log("remove visibilitychange");
+    // console.log("remove visibilitychange");
     document.removeEventListener("visibilitychange", onVisibilityChange);
   };
 }

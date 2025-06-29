@@ -27,6 +27,13 @@ const setting = useSettingStore();
 const isIframe = ref(false);
 const showShadowBorderRadius = computed(() => setting.isWeb && !setting.isMobileSize && !isIframe.value);
 const isWindow10 = ref(false);
+const getRootClass = computed(() =>
+  ({
+    "sm:(w-100vw mx-a h-full) md:(w-100vw mx-a h-full)  lg:(w-1360px mx-a h-92vh max-w-86vw max-h-1020px) shadow-lg": !isIframe.value && setting.isWeb,
+    "!rounded-2 !wind-border-default": showShadowBorderRadius.value || route.path === "/msg" || (setting.isDesktop && isWindow10 && !setting.settingPage.isWindow10Shadow && route.path !== "/msg"),
+    "!rounded-0 border-default-t border-color-[#595959b3] dark:border-color-dark-2": (setting.isDesktop && isWindow10 && setting.settingPage.isWindow10Shadow && route.path !== "/msg"),
+  }));
+
 
 onMounted(() => {
   if (window) // 判断是否在iframe中
@@ -37,17 +44,20 @@ onMounted(() => {
   else {
     useInit();
   }
+});
+
+callOnce(() => {
   checkWind10CloseShadow();
 });
 
 async function checkWind10CloseShadow() {
+  console.log("checkWind10CloseShadow checking...");
   const v = await useWindowsVersion();
   isWindow10.value = v === "Windows 10";
   if (isWindow10.value && setting.isDesktop) {
-    getCurrentWebviewWindow()?.setShadow(false);
+    getCurrentWebviewWindow()?.setShadow(setting.settingPage.isWindow10Shadow);
   }
 }
-
 onUnmounted(useUnmounted);
 </script>
 
@@ -55,10 +65,7 @@ onUnmounted(useUnmounted);
   <main class="h-100vh flex-row-c-c">
     <div
       class="h-full w-full overflow-hidden bg-color"
-      :class="{
-        'sm:(w-100vw mx-a h-full) md:(w-100vw mx-a h-full)  lg:(w-1360px mx-a h-92vh max-w-86vw max-h-1020px) shadow-lg': !isIframe && setting.isWeb,
-        '!rounded-2 !wind-border-default': showShadowBorderRadius || $route.path === '/msg' || (setting.isDesktop && isWindow10 && $route.path !== '/msg'),
-      }"
+      :class="getRootClass"
     >
       <NuxtLayout>
         <NuxtPage

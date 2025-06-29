@@ -247,8 +247,8 @@ onMounted(async () => {
   background-color: #f9f7ff;
   background-image: radial-gradient(closest-side, #e9e1ff, transparent),
     radial-gradient(closest-side, #e8e0ff, transparent),
-    radial-gradient(closest-side, #efdbff, transparent),
-    radial-gradient(closest-side, #fff1db, transparent),
+    radial-gradient(closest-side, #f3e4ff, transparent),
+    radial-gradient(closest-side, #fff6e8, transparent),
     radial-gradient(closest-side, #f6f3ff, transparent);
   background-size:
     130vmax 130vmax,

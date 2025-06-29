@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { appKeywords, appName } from "~/constants";
 
 useSeoMeta({
@@ -12,6 +13,7 @@ definePageMeta({
 
 const user = useUserStore();
 const setting = useSettingStore();
+const isWindow10 = ref(false);
 
 // 默认
 const {
@@ -72,8 +74,18 @@ async function onHashHandle() {
   }, 2000);
 }
 
+function checkWind10Shadow() {
+  if (setting.isDesktop) {
+    getCurrentWebviewWindow()?.setShadow(setting.settingPage.isWindow10Shadow);
+  }
+}
+
 onActivated(onHashHandle);
-onMounted(onHashHandle);
+onMounted(async () => {
+  onHashHandle();
+  const v = await useWindowsVersion();
+  isWindow10.value = v === "Windows 10";
+});
 onDeactivated(() => {
   clearTimeout(timer.value);
   showAnima.value = false;
@@ -142,9 +154,9 @@ onUnmounted(() => {
           class="ml-a mr-2 h-5 !border-default-hover"
           icon-class="i-solar:pen-2-bold text-1em mr-1"
           title="定制化动画"
-          bg
-          text
-          round
+
+
+          text bg round
           size="small"
           @click="showCustomTransitionPanel = true"
         />
@@ -159,6 +171,19 @@ onUnmounted(() => {
             inline-prompt @change="changeAnimateMode"
           />
         </el-tooltip>
+      </div>
+      <!-- Window10阴影 -->
+      <div v-if="setting.isDesktop && isWindow10" class="group h-8 flex items-center">
+        窗口阴影
+        <span class="tip mx-2 border-default rounded-8 px-2 py-0.2em text-mini">Window 10</span>
+        <el-switch
+          v-model="setting.settingPage.isWindow10Shadow"
+          :title="!setting.settingPage.isWindow10Shadow ? '开启窗口阴影，Windows 10 不兼容圆角' : '关闭窗口阴影，窗口采用圆角'" placement="left"
+          class="ml-a transition-opacity hover:op-80"
+          :size="size"
+          inline-prompt
+          @change="checkWind10Shadow"
+        />
       </div>
       <!-- 上下按键切换会话 -->
       <div v-if="!setting.isMobileSize" class="group h-8 flex-row-bt-c">

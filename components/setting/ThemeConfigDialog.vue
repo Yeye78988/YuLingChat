@@ -109,8 +109,6 @@ watch(_show, (newShow, oldShow) => {
     if (hasUnsavedChanges.value) {
       // 恢复原始配置（不应用）
       currentThemeConfig.value = JSON.parse(JSON.stringify(originalThemeConfig.value));
-      console.log(originalThemeConfig.value);
-
       ElMessage.info("已取消主题更改");
     }
   }
@@ -211,7 +209,7 @@ function importThemeConfig(file: File) {
     destroy-on-close
     content-class="select-none rounded-3 p-4 w-fit border-default-2 bg-color-2"
   >
-    <el-scrollbar max-height="60vh" class="max-w-86vw w-30rem text-left sm:(px-4 pb-4)">
+    <el-scrollbar max-height="60vh" wrap-class="max-w-86vw w-30rem text-left p-1">
       <!-- 预设主题区域 -->
       <div class="setting-group">
         <p class="title">
@@ -288,8 +286,9 @@ function importThemeConfig(file: File) {
           </div>
         </div>
       </div>
-    </el-scrollbar>    <!-- 操作按钮区域 -->
-    <div class="actions-footer">
+    </el-scrollbar>
+    <!-- 操作按钮区域 -->
+    <div class="actions-footer p-1">
       <div class="left-actions">
         <BtnElButton
           icon-class="i-solar:import-bold-duotone mr-1"
@@ -331,7 +330,7 @@ function importThemeConfig(file: File) {
 
 <style lang="scss" scoped>
 .title {
-  --at-apply: "text-sm flex items-center tracking-0.1em mt-6 mb-4";
+  --at-apply: "text-sm flex items-center tracking-0.1em mb-4";
 
   .tip {
     --at-apply: "text-mini ml-2";
@@ -343,8 +342,10 @@ function importThemeConfig(file: File) {
 }
 
 .setting-group {
+  --at-apply: "p-4 bg-color rounded-2 shadow mb-4";
+
   .box {
-    --at-apply: "px-2 flex gap-3";
+    --at-apply: "flex gap-3";
   }
 }
 
@@ -353,11 +354,12 @@ function importThemeConfig(file: File) {
 }
 
 .theme-card {
-  --at-apply: "mx-a flex-row-c-c p-3 w-fit flex-col gap-2 rounded-2 cursor-pointer transition-all duration-200";
+  --at-apply: "mx-a flex-row-c-c p-2 w-fit flex-col gap-2 rounded-2 cursor-pointer transition-all duration-200";
   border: 2px solid transparent;
 
   &.active {
     border-color: var(--el-color-primary);
+    color: var(--el-color-primary);
     --at-apply: "shadow";
   }
 
@@ -375,14 +377,14 @@ function importThemeConfig(file: File) {
 }
 
 .color-config-grid {
-  --at-apply: "grid w-full pb-10 grid-cols-3 gap-4 justify-center";
+  --at-apply: "grid w-full py-4 grid-cols-3 gap-4 justify-center";
 
   .color-item {
     --at-apply: "flex-row-c-c sm:gap-2 w-full";
   }
 
   .color-label {
-    --at-apply: "text-sm flex-shrink-0 min-w-16";
+    --at-apply: "text-sm flex-shrink-0 min-w-12";
   }
 
   .color-picker {
@@ -402,7 +404,7 @@ function importThemeConfig(file: File) {
 }
 
 .actions-footer {
-  --at-apply: "flex justify-between items-center";
+  --at-apply: "pt-4 flex justify-between items-center";
 }
 
 .left-actions,
