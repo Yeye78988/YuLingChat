@@ -6,42 +6,44 @@ export function checkPhone(phone: string): boolean {
   return /^(?:(?:\+|00)86)?1[3-9]\d{9}$/.test(phone);
 }
 
-// /**
-//  * 检测浏览器是否支持 border-radius < windows11、linux全部 不支持
-//  * @returns {Promise<boolean>} 是否支持 border-radius
-//  */
-// export async function checkBorderRadiusSupport(): Promise<boolean> {
-//   try {
-//     // 使用 Tauri 的系统版本检测
-//     const systemVersion = await invoke<string>("get_system_version");
-//     console.log(`Detected system version: ${systemVersion}`);
 
-//     if (systemVersion.startsWith("windows_")) {
-//       // Windows 11 支持 border-radius，Windows 10 及以下不支持
-//       const isWindows11OrHigher = systemVersion === "windows_11";
+export async function useWindowsVersion(): Promise<"Windows 10" | "Windows 11" | "Windows 8.1" | "Windows 8" | "Windows 7" | "Windows Vista" | "Windows XP" | null> {
+  const userAgent = navigator.userAgent || navigator.appVersion;
 
-//       if (!isWindows11OrHigher) {
-//         const win = getCurrentWindow();
-//         win.setShadow(false);
-//       }
+  if (!userAgent.includes("Windows")) {
+    return null; // 非 Windows 系统
+  }
 
-//       return isWindows11OrHigher;
-//     }
+  // 基于 UA 判断 Windows 版本
+  if (userAgent.includes("Windows NT 10.0")) {
+    // Windows 10 或 11，需要进一步判断
+    // Windows 11 和 10 在 UA 上大多数一致，除非 User-Agent 字串中包含额外提示
+    // @ts-expect-error
+    const uaData = navigator.userAgentData;
+    if (uaData && uaData.platform === "Windows") {
+      // 有些新版浏览器在 userAgentData 中区分得更清楚
+      if ("getHighEntropyValues" in uaData) {
+        const info = await uaData.getHighEntropyValues(["platformVersion"]);
+        if (info.platformVersion) {
+          // 通过 platformVersion 判断 Windows 10 或 11
+          const v = info.platformVersion.split(".")[0];
+          return `Windows ${v}` as "Windows 10" | "Windows 11";
+        }
+      }
+    }
+    return null;
+  }
 
-//     // Linux 系统不支持
-//     if (systemVersion.startsWith("linux_")) {
-//       return false;
-//     }
+  if (userAgent.includes("Windows NT 6.3"))
+    return "Windows 8.1";
+  if (userAgent.includes("Windows NT 6.2"))
+    return "Windows 8";
+  if (userAgent.includes("Windows NT 6.1"))
+    return "Windows 7";
+  if (userAgent.includes("Windows NT 6.0"))
+    return "Windows Vista";
+  if (userAgent.includes("Windows NT 5.1"))
+    return "Windows XP";
 
-//     // macOS 支持
-//     if (systemVersion.startsWith("macos_")) {
-//       return true;
-//     }
-
-//     return false;
-//   }
-//   catch (error) {
-//     console.error("Failed to get system version:", error);
-//     return false;
-//   }
-// }
+  return null;
+}
