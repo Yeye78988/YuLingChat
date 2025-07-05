@@ -11,7 +11,6 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const isSSR = process.env.NUXT_PUBLIC_SPA;
 const mode = process.env.NUXT_PUBLIC_NODE_ENV as "development" | "production" | "test";
 const version = packageJson?.version;
-const host = process.env.TAURI_DEV_HOST;
 // 打印
 console.log(`mode:${mode} api_url:${BASE_URL} SSR:${isSSR} platform: ${platform}`);
 export default defineNuxtConfig({
@@ -128,9 +127,11 @@ export default defineNuxtConfig({
     themes: ["dark"],
     defaultLocale: "zh-cn",
   },
-  // pwa
   // pwa,
-  devServer: { host: host || "localhost" },
+  devServer: {
+    host: process.env.TAURI_DEV_HOST || "localhost",
+    port: 3000,
+  },
   // nuxt开发者工具
   devtools: {
     enabled: false,
@@ -149,33 +150,21 @@ export default defineNuxtConfig({
     // 为 Tauri 命令输出提供更好的支持
     clearScreen: false,
     // 启用环境变量 其他环境变量可以在如下网页中获知：https://v2.tauri.app/reference/environment-variables/
-    envPrefix: ["VITE_", "TAURI_"],
+    envPrefix: ["VITE_", "TAURI_ENV_*"],
     server: {
-      // Tauri需要一个确定的端口
+      // Tauri 工作于固定端口，如果端口不可用则报错
       strictPort: true,
-      hmr: host
+      hmr: process.env.TAURI_DEV_HOST
         ? {
             protocol: "ws",
-            host,
-            port: 1421,
+            host: process.env.TAURI_DEV_HOST,
+            port: 3000,
           }
         : undefined,
-      // hmr: {
-      //   host: "192.168.31.14",
-      //   port: 3000,
-      //   protocol: "ws",
-      // }, // 热更新
-      // watch: {
-      //   ignored: [
-      //     "**/src-tauri/**",
-      //     "**/node_modules/**",
-      //     "**/dist/**",
-      //     "**/.git/**",
-      //     "**/.nuxt/**",
-      //     "**/public/**",
-      //     "**/.output/**",
-      //   ],
-      // },
+      watch: {
+        // 告诉 Vite 忽略监听 `src-tauri` 目录
+        ignored: ["**/src-tauri/**"],
+      },
     },
     css: {
       preprocessorOptions: {
@@ -198,6 +187,14 @@ export default defineNuxtConfig({
         },
         // external: ["workbox-build"],
       },
+      // Tauri 在 Windows 上使用 Chromium，在 macOS 和 Linux 上使用 WebKit
+      target: process.env.TAURI_ENV_PLATFORM === "windows"
+        ? "chrome105"
+        : "safari13",
+      // 在 debug 构建中不使用 minify
+      minify: !process.env.TAURI_ENV_DEBUG ? "esbuild" : false,
+      // 在 debug 构建中生成 sourcemap
+      sourcemap: !!process.env.TAURI_ENV_DEBUG,
     },
   },
   typescript: {
