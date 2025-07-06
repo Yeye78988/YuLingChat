@@ -180,17 +180,74 @@ export default defineNuxtConfig({
     },
     build: {
       chunkSizeWarningLimit: 1000, // chunk 大小警告的限制(kb)
-      cssCodeSplit: true, // 是否将 CSS 代码拆分为单独的文件
       minify: "terser", // 使用 terser 进行代码压缩
       // 分包配置
       rollupOptions: {
         output: {
-          chunkFileNames: "public/js/[name]_[hash].js",
-          entryFileNames: "public/js/[name]_[hash].js",
-          assetFileNames: "public/[ext]/[name]_[hash].[ext]", // 静态资源文件名格式
           manualChunks(id) {
-            if (id.includes("node_modules"))
-              return "vendor"; // 将 node_modules 中的依赖打包到 vendor 分包中
+            if (id.includes("node_modules")) {
+              // Vue 核心生态系统
+              if (id.match(/(vue|@vue\/|pinia)/)) {
+                return "vue-core";
+              }
+
+              // Element Plus 及其图标
+              if (id.includes("element-plus") || id.includes("@element-plus")) {
+                return "element-plus";
+              }
+
+              // Tauri 相关插件
+              if (id.match(/@tauri-apps\//)) {
+                return "tauri";
+              }
+
+              // VueUse 工具库
+              if (id.match(/@vueuse\//)) {
+                return "vueuse";
+              }
+
+              // 图标相关
+              if (id.match(/(@iconify|@iconify-json)\//)) {
+                return "icons";
+              }
+
+              // 工具库
+              if (id.includes("lodash-es")) {
+                return "lodash";
+              }
+              if (id.includes("dayjs")) {
+                return "dayjs";
+              }
+
+              // 编辑器相关
+              if (id.includes("markdown-it")) {
+                return "editor";
+              }
+
+              // 文件处理相关
+              if (id.match(/(qiniu-js|streamsaver)/)) {
+                return "file-utils";
+              }
+
+              // 其他第三方库
+              if (id.match(/(@imengyu|element-china-area-data)/)) {
+                return "ui-components";
+              }
+
+              // 其余的第三方库
+              return "vendor";
+            }
+
+            // 处理项目内部代码
+            if (id.includes("/composables/")) {
+              return "composables";
+            }
+            if (id.includes("/components/")) {
+              return "components";
+            }
+            if (id.includes("/utils/") || id.includes("/helpers/")) {
+              return "utils";
+            }
           },
         },
       },
