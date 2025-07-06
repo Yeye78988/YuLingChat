@@ -182,52 +182,6 @@ export default defineNuxtConfig({
       chunkSizeWarningLimit: 1000, // chunk 大小警告的限制(kb)
       cssCodeSplit: true, // 是否将 CSS 代码拆分为单独的文件
       minify: "terser", // 使用 terser 进行代码压缩
-      // 分包配置
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes("node_modules")) {
-              // Element Plus 及其图标
-              if (id.includes("element-plus") || id.includes("@element-plus")) {
-                return "element-plus";
-              }
-
-              // VueUse 工具库
-              if (id.match(/@vueuse\//)) {
-                return "vueuse";
-              }
-
-              // 图标相关
-              if (id.match(/(@iconify|@iconify-json)\//)) {
-                return "icons";
-              }
-
-              // 工具库
-              if (id.includes("lodash-es")) {
-                return "lodash";
-              }
-              if (id.includes("dayjs")) {
-                return "dayjs";
-              }
-
-              // 编辑器相关
-              if (id.includes("markdown-it")) {
-                return "markdown-it";
-              }
-
-              // 文件处理相关
-              if (id.match(/(qiniu-js|streamsaver)/)) {
-                return "file-utils";
-              }
-
-              // 其他第三方库
-              if (id.match(/(@imengyu|element-china-area-data)/)) {
-                return "ui-components";
-              }
-            }
-          },
-        },
-      },
     },
   },
   typescript: {
