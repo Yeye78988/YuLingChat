@@ -179,22 +179,21 @@ export default defineNuxtConfig({
       },
     },
     build: {
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 1000, // chunk 大小警告的限制(kb)
+      cssCodeSplit: true, // 是否将 CSS 代码拆分为单独的文件
+      minify: "terser", // 使用 terser 进行代码压缩
+      // 分包配置
       rollupOptions: {
         output: {
-          manualChunks: {
+          chunkFileNames: "public/js/[name]_[hash].js",
+          entryFileNames: "public/js/[name]_[hash].js",
+          assetFileNames: "public/[ext]/[name]_[hash].[ext]", // 静态资源文件名格式
+          manualChunks(id) {
+            if (id.includes("node_modules"))
+              return "vendor"; // 将 node_modules 中的依赖打包到 vendor 分包中
           },
         },
-        // external: ["workbox-build"],
       },
-      // Tauri 在 Windows 上使用 Chromium，在 macOS 和 Linux 上使用 WebKit
-      target: process.env.TAURI_ENV_PLATFORM === "windows"
-        ? "chrome105"
-        : "safari13",
-      // 在 debug 构建中不使用 minify
-      minify: !process.env.TAURI_ENV_DEBUG ? "esbuild" : false,
-      // 在 debug 构建中生成 sourcemap
-      sourcemap: !!process.env.TAURI_ENV_DEBUG,
     },
   },
   typescript: {
