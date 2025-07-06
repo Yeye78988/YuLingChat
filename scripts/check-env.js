@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+// 检查是否跳过环境检查
+if (process.env.SKIP_CHECK_ENV === "true" || process.env.SKIP_CHECK_ENV === 1 || process.env.SKIP_CHECK_ENV === "1") {
+  console.log(`🔇 环境变量 SKIP_CHECK_ENV=${process.env.SKIP_CHECK_ENV}，跳过环境检查`);
+  process.exit(0);
+}
+
 const { execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
