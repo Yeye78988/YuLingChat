@@ -115,13 +115,13 @@ export async function downloadFile(url: string, fileName: string, options: {
   const { targetPath = "", mimeType = "" } = options;
   const setting = useSettingStore();
 
-  if (setting.isWeb || setting.isMobile) {
+  if (setting.isWeb) {
     // 移动端 | Web 使用 streamSaver 正在使用浏览器下载，请稍后 下载
     ElMessage.warning("正在下载，请稍后...");
     return downloadFileByStreamSaver(url, fileName, callback);
   }
-  if (!setting.checkDownloadPath())
-    return;
+  // if (!await setting.checkDownloadPath())
+  // return;
   let dir = setting.appDataDownloadDirUrl;
   const existsDir = await existsFile(dir);
   if (!existsDir || options.selected) {

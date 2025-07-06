@@ -264,11 +264,12 @@ export const useSettingStore = defineStore(
     // 确认下载文件
     async function checkDownloadPath() {
       if (!appDataDownloadDirUrl.value) {
-        await changeDownloadDir();
-        return;
+        return !!(await changeDownloadDir());
       }
       if (!await existsFile(appDataDownloadDirUrl.value))
-        await mkdirFile(appDataDownloadDirUrl.value);
+        return await mkdirFile(appDataDownloadDirUrl.value);
+
+      return false;
     }
 
     // 切换下载目录
