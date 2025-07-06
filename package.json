@@ -4,8 +4,14 @@
   "private": true,
   "description": "jiwu-chat",
   "author": "Kiwi2333",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "scripts": {
     "prepare": "husky install && nuxi prepare",
+    "postinstall": "node scripts/check-env.js",
+    "check-env": "node scripts/check-env.js",
     "tauri": "tauri",
     "dev:tauri": "tauri dev",
     "dev:desktop": "tauri dev",

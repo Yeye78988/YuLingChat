@@ -5,14 +5,13 @@
   "identifier": "com.jiwuchat.app",
   "app": {
     "withGlobalTauri": true,
-    "windows": [
-    ],
+    "windows": [],
     "security": {
       "capabilities": [
         "default-capability",
         "desktop-capability",
         "mobile-capability"
-      ]
+      ]   
     },
     "macOSPrivateApi": true
   },
