@@ -11,7 +11,7 @@
   "scripts": {
     "prepare": "husky install && nuxi prepare",
     "postinstall": "node scripts/check-env.js",
-    "check-env": "node scripts/check-env.js",
+    "tools": "node scripts/engineer.js",
     "tauri": "tauri",
     "dev:tauri": "tauri dev",
     "dev:desktop": "tauri dev",
@@ -84,6 +84,7 @@
     "eslint": "9.30.1",
     "eslint-plugin-format": "1.0.1",
     "husky": "9.1.7",
+    "inquirer": "^8.2.6",
     "lint-staged": "15.5.2",
     "nuxt": "3.17.6",
     "sass": "1.89.2",
