@@ -265,8 +265,7 @@ const theHistoryAccount = ref({
   },
 });
 
-const showAccountAvatar = computed(() => user.showLoginPageType === "login" && theHistoryAccount.value.account);
-
+const findAccountAvatar = computed(() => historyAccounts.value.find(item => item.account === userForm.value.username));
 async function handleSelectAccount(item: Record<string, any>) {
   if (!item || !item.account)
     return;
@@ -321,19 +320,18 @@ defineExpose({
     style="border: none;"
     class="form"
     :class="{
-      'has-account': showAccountAvatar,
+      'has-account': findAccountAvatar,
     }"
     autocomplete="off"
   >
     <template v-if="!user.isLogin">
       <div class="header flex-row-c-c">
         <CardAvatar
-          v-show="user.showLoginPageType === 'login'"
           style="--anima: blur-in;"
-          :src="showAccountAvatar ? BaseUrlImg + theHistoryAccount?.userInfo?.avatar : '/logo.png'"
+          :src="findAccountAvatar?.userInfo?.avatar ? BaseUrlImg + findAccountAvatar?.userInfo?.avatar : '/logo.png'"
           class="avatar"
         />
-        <div v-show="!showAccountAvatar" class="title">
+        <div v-show="!findAccountAvatar" class="title">
           {{ appName }}
         </div>
       </div>
@@ -411,6 +409,7 @@ defineExpose({
         <el-autocomplete
           v-model.trim="userForm.username"
           autocomplete="off"
+          class="login-account"
           :prefix-icon="ElIconUser"
           size="large"
           :fetch-suggestions="querySearchAccount"
@@ -426,7 +425,7 @@ defineExpose({
           @select="handleSelectAccount"
         >
           <template #default="{ item }">
-            <div :title="item.account" class="group w-full flex items-center px-2" @contextmenu="removeHistoryAccount(item.account)">
+            <div :title="item.account" class="group w-full flex items-center px-2">
               <el-avatar :size="30" class="mr-2 flex-shrink-0" :src="BaseUrlImg + item.userInfo.avatar" />
               <span class="block max-w-14em truncate">{{ item.account }}</span>
               <i
@@ -609,6 +608,14 @@ defineExpose({
   }
   .avatar {
     --at-apply: "mx-a h-20 w-20 border-2px border-default rounded-full shadow-lg block";
+  }
+}
+</style>
+
+<style lang="scss">
+.el-autocomplete-suggestion {
+  .el-scrollbar {
+    --at-apply: "!max-h-12em !h-12em";
   }
 }
 </style>

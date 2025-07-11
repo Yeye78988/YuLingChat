@@ -154,6 +154,7 @@ function resetConfig() {
               text
               bg
               class="h-8"
+              :class="{ '!bg-theme-primary': envConfig.VITE_API_BASE_URL === DEV_EnvConfig.VITE_API_BASE_URL }"
               style="font-size: 0.8rem;"
               @click="changeDefaultConfig('dev')"
             >
@@ -163,6 +164,7 @@ function resetConfig() {
               text
               bg
               class="h-8"
+              :class="{ '!bg-theme-primary': envConfig.VITE_API_BASE_URL === PROD_EnvConfig.VITE_API_BASE_URL }"
               style="font-size: 0.8rem;"
               @click="changeDefaultConfig('prod')"
             >
