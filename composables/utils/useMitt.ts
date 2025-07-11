@@ -64,10 +64,9 @@ export interface VideoReadyPayload {
   }
 }
 // 表单操作事件载荷
-export interface MsgFormEventPlaoyload {
-  type: "focus" | "blur",
-  payload?: any
-}
+export type MsgFormEventPlaoyload
+  = | { type: "focus" | "blur", payload?: null }
+    | { type: "update", payload: ChatMessageDTO };
 
 // @用户事件载荷
 export interface AtUserPlaoyload {

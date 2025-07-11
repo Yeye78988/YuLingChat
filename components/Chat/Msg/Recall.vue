@@ -17,19 +17,23 @@ function editRecallMsg() {
   }
   if (enoughEditMsgInfo.value.message.type !== MessageType.TEXT || !enoughEditMsgInfo.value.message.content) {
     ElMessage.warning("非文字部分暂不支持重新编辑！");
+    return;
   }
-  // 重新编辑消息
-  chat.msgForm = {
-    roomId: enoughEditMsgInfo.value.message.roomId,
-    msgType: MessageType.TEXT, // TODO: 暂时只支持文字消息
-    content: enoughEditMsgInfo.value.message.content || "",
-    body: {
+
+  // 设置编辑消息
+  mitter.emit(MittEventType.MSG_FORM, {
+    type: "update",
+    payload: {
+      roomId: enoughEditMsgInfo.value.message.roomId,
+      msgType: MessageType.TEXT, // TODO: 暂时只支持文字消息
+      content: enoughEditMsgInfo.value.message.content || "",
+      body: {
       // ...enoughEditMsgInfo.message.body,
+      },
     },
-  };
-  nextTick(() => {
-    mitter.emit(MittEventType.MSG_FORM, { type: "focus" });
   });
+  // 聚焦
+  nextTick(() => mitter.emit(MittEventType.MSG_FORM, { type: "focus", payload: null }));
 }
 </script>
 

@@ -102,7 +102,7 @@ export function useMessageList() {
       chat.contactMap[roomId]!.pageInfo.cursor = data.cursor || undefined;
 
       await nextTick();
-      chat.saveScrollTop && chat.saveScrollTop();
+      saveScrollTop();
       call && call(msgList.value);
       if (chat.contactMap[roomId]!.pageInfo.cursor === null && !chat.contactMap[roomId]!.msgIds?.length) {
         // 第一次加载默认没有动画
@@ -178,6 +178,8 @@ export function useMessageList() {
         // 滚动到底部
         await nextTick();
         scrollBottom(false);
+        await nextTick();
+        saveScrollTop();
       }
     }
     catch (error) {
@@ -383,10 +385,7 @@ export function useMessageList() {
       immediate: false,
     });
 
-    onMounted(() => {
-      setupEventListeners();
-    });
-
+    setupEventListeners();
     // 组件卸载时清理
     onBeforeUnmount(() => {
       cleanupEventListeners();

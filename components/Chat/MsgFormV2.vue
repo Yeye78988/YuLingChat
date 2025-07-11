@@ -1039,15 +1039,29 @@ onMounted(() => {
   });
 
   // 处理聚焦
-  mitter.on(MittEventType.MSG_FORM, ({
-    type,
-  }: MsgFormEventPlaoyload) => {
+  mitter.on(MittEventType.MSG_FORM, ({ type, payload }) => {
     if (type === "focus") {
-      selectionManager.focusAtEnd()
-      ;
+      selectionManager.focusAtEnd();
     }
     else if (type === "blur") {
       msgInputRef.value?.blur();
+    }
+    else if (type === "update") {
+      // 更新输入框内容
+      chat.msgForm = {
+        ...payload,
+      };
+      // 清空输入框
+      clearInputContent();
+      // 插入新内容
+      if (msgInputRef.value) {
+        msgInputRef.value.textContent = payload.content || "";
+        // 更新表单内容
+        updateFormContent();
+        // 聚焦到末尾
+        selectionManager.focusAtEnd();
+      }
+      updateFormContent();
     }
   });
 });
@@ -1383,6 +1397,7 @@ defineExpose({
             :item-height="32"
             max-height="12rem"
             wrap-class="px-1.5"
+            class-name="py-1.5"
             class="py-1.5"
             item-class="at-item"
             active-class="active"
