@@ -59,8 +59,8 @@ interface Emits<T = any> {
 const {
   itemHeight = "2.5rem",
   maxHeight = "12rem",
-  wrapClass = "px-1.5",
-  className = "py-1.5",
+  wrapClass = "",
+  className = "",
   itemClass = "",
   activeClass = "active",
   selectedIndex = -1,

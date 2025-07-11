@@ -545,7 +545,7 @@ export async function saveImageLocal(url: string, showMessage = true) {
   if (setting.isDesktop) {
     path = await saveDialog({
       title: setting.isDesktop ? `${appName} - 保存图片` : undefined,
-      filters: [{ name: "图片文件", extensions: ["png", "jpeg", "jpg", "svg", "webp"] }],
+      filters: [{ name: "图片文件", extensions: ["png", "jpeg", "jpg", "svg", "webp", "gif", "bmp", "tiff"] }],
       defaultPath: fileName,
     });
 

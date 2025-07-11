@@ -1,4 +1,5 @@
 import ContextMenu from "@imengyu/vue3-context-menu";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 // @unocss-include
 // 常量定义
@@ -116,24 +117,6 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
         },
       },
       {
-        label: "打开链接",
-        hidden: !Object.keys(data.message.body?.urlContentMap || {}).length,
-        customClass: "group",
-        icon: "i-solar:link-line-duotone group-hover:(scale-110 i-solar:link-bold-duotone) group-btn-info",
-        onClick: () => {
-          if (!txt)
-            return;
-          const urlMap = data.message.body?.urlContentMap || {};
-          const urls = Object.keys(urlMap);
-          if (!urls?.length) {
-            return ElMessage.error("抱歉找不到链接！");
-          }
-          if (urls.length === 1) {
-            return window.open(urls[0], "_blank");
-          }
-        },
-      },
-      {
         label: "搜一搜",
         hidden: !data.message.content,
         customClass: "group",
@@ -148,6 +131,38 @@ export function onMsgContextMenu(e: MouseEvent, data: ChatMessageVO<any>, onDown
       },
       ...defaultContextMenu,
     ],
+
+    // 链接内容
+    urllink: [
+      {
+        label: "复制链接",
+        customClass: "group",
+        icon: "i-solar-copy-line-duotone group-hover:(scale-110 i-solar-copy-bold-duotone) group-btn-info",
+        onClick: () => {
+          const url = String((e?.target as HTMLElement)?.getAttribute?.("url") || "");
+          navigator.clipboard.writeText((url || txt) as string);
+          ElMessage.success("复制成功！");
+        },
+      },
+      {
+        label: "打开链接",
+        hidden: !Object.keys(data.message.body?.urlContentMap || {}).length,
+        customClass: "group",
+        icon: "i-solar:link-line-duotone group-hover:(scale-110 i-solar:link-bold-duotone) group-btn-info",
+        onClick: () => {
+          const url = String((e?.target as HTMLElement)?.getAttribute?.("url") || "");
+          if (!url)
+            return;
+          if (setting.isDesktop) {
+            openUrl(url);
+          }
+          else {
+            window.open(url, "_blank");
+          }
+        },
+      },
+    ],
+
     // 翻译
     translation: [
       {
@@ -583,7 +598,6 @@ export function getImgSize(rawWidth?: number, rawWeight?: number, options: ImgSi
  * @returns {string} 消息内容
  */
 export function useRenderMsg(msg: ChatMessageVO) {
-  const chat = useChatStore();
   const body = msg?.message?.body as TextBodyMsgVO;
   const urlContentMap = body.urlContentMap || {};
   const mentionList = body.mentionList || [];
@@ -593,7 +607,7 @@ export function useRenderMsg(msg: ChatMessageVO) {
     if (!content)
       return [];
 
-    return parseMessageContentWithMentionsAndUrls(content, mentionList, urlContentMap);
+    return parseMessageContent(content, mentionList, urlContentMap);
   });
 
 type Token
@@ -624,9 +638,11 @@ type Token
     endIndex: number;
   };
 /**
- * 解析消息内容，替换@提及和链接
+ * 解析消息内容
+ *
+ * @description 替换@提及和链接
  */
-function parseMessageContentWithMentionsAndUrls(
+function parseMessageContent(
   content: string,
   mentions: MentionInfo[],
   urlMap: { [key: string]: UrlInfoDTO },
@@ -759,7 +775,8 @@ function renderMessageContent() {
         return h("a", {
           "key": `url-${index}`,
           "href": token.data?.url,
-          "ctx-name": "content",
+          "ctx-name": "urllink",
+          "url": token.data?.url,
           "target": "_blank",
           "rel": "noopener noreferrer",
           "class": "msg-link",

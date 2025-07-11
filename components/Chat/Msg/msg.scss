@@ -66,11 +66,11 @@
     --at-apply: "text-theme-primary dark:text-theme-info font-500 cursor-pointer";
   }
   :deep(.msg-link) {
-    --at-apply: "inline underline text-theme-primary dark:text-theme-info";
+    --at-apply: "inline hover:underline text-theme-primary dark:text-theme-info";
 
     &::before {
       content: "";
-      --at-apply: "rounded-4 mr-1 p-2 cursor-pointer i-solar:link-line-duotone";
+      --at-apply: "rounded-4 mr-1 p-1.8 cursor-pointer select-none i-solar:link-line-duotone";
     }
   }
 }

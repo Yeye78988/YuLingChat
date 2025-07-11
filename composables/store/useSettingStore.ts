@@ -150,7 +150,7 @@ export const useSettingStore = defineStore(
         isAutoStart: false, // 开机自启
         isCloseAllTransition: false, // 是否关闭所有动画效果，包括页面切换动画和组件动画。
         animation: {
-          pageTransition: true, // 页面切换动画
+          pageTransition: false, // 页面切换动画
           listTransition: true, // 列表过渡动画
           dialogTransition: true, // 弹窗进入动画
           messageTransition: true, // 消息气泡动画

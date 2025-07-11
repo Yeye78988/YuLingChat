@@ -1,8 +1,4 @@
 <script lang="ts" setup>
-import { useRenderMsg } from ".";
-
-// import { dayjs } from "element-plus";
-
 /**
  * 消息模板（默认文本）
  * ctx-name 用于右键菜单
@@ -50,8 +46,10 @@ const showMentionMe = computed(() => !!mentionList.find(item => item.uid === use
 // 计算是否需要显示翻译
 const showTranslation = computed(() => !!body.value?._textTranslation);
 
-// 渲染消息
-const { renderMessageContent } = useRenderMsg(data);
+
+// 多个URL
+const isMultipleUrl = Object.keys(urlContentMap || {}).length > 1;
+const showMentionUrls = ref(false);
 </script>
 
 <template>
@@ -79,9 +77,7 @@ const { renderMessageContent } = useRenderMsg(data);
       <!-- 内容 - 使用渲染函数 -->
       <slot name="body-pre" :send-status="sendStatus" />
       <slot name="body" :send-status="sendStatus">
-        <p v-if="data.message?.content" class="msg-popper msg-wrap whitespace-pre-wrap break-words" ctx-name="content">
-          <component :is="renderMessageContent" />
-        </p>
+        <ChatMsgBodyTemplate :data="data" ctx-name="content" />
       </slot>
       <!-- 翻译内容 -->
       <div
@@ -120,14 +116,25 @@ const { renderMessageContent } = useRenderMsg(data);
       </small>
 
       <!-- URL -->
-      <ChatUrlInfo
-        v-for="(urlInfo, key) in urlContentMap"
-        :key="key"
-        ctx-name="urlContentMap"
-        :url="String(key)"
-        :data="urlInfo"
-        class="url-info max-w-full w-14rem rounded-2 bg-color-br p-3 shadow-sm transition-200 sm:(max-w-16rem min-w-12rem) hover:(shadow)"
-      />
+      <div
+        class="url-group"
+        :class="{
+          'multiple-url': isMultipleUrl && !showMentionUrls,
+        }"
+      >
+        <ChatUrlInfo
+          v-for="(urlInfo, key) in urlContentMap"
+          :key="key"
+          ctx-name="urllink"
+          :url="String(key)"
+          :data="urlInfo"
+          class="url-info"
+        />
+        <div v-if="isMultipleUrl" key="up" class="flex-row-c-c btn-primary select-none text-center text-mini" @click="showMentionUrls = !showMentionUrls">
+          <i class="i-solar:double-alt-arrow-down-line-duotone mr-1 inline-block transition-200" :class="{ 'rotate-180': showMentionUrls }" />
+          {{ showMentionUrls ? '收起' : '展开' }}
+        </div>
+      </div>
       <!-- AT -->
       <small
         v-if="showMentionMe"
@@ -142,4 +149,30 @@ const { renderMessageContent } = useRenderMsg(data);
 
 <style lang="scss" scoped>
 @use './msg.scss';
+
+.url-group {
+  --at-apply: "flex flex-col gap-2 w-fit";
+
+  .url-info {
+    --at-apply: "max-w-full w-14rem rounded-2 bg-color p-3 shadow-sm transition-200 sm:(max-w-16rem min-w-12rem) hover:(shadow)";
+  }
+  &.multiple-url {
+
+    .url-info {
+      --at-apply: "hidden";
+    }
+    .url-info:nth-child(1) {
+      --at-apply: "block mb-2 relative shadow-sm";
+      &::after {
+        content: "";
+        --at-apply: "absolute top-0 left-0 scale-94 translate-y-2 -z-1 w-full h-full rounded-2 bg-color-br bg-op-60 shadow-sm";
+      }
+
+      &::before {
+        content: "";
+        --at-apply: "absolute top-0 left-0 scale-90 translate-y-4 -z-1 w-full h-full rounded-2 bg-color-br bg-op-40 shadow-sm";
+      }
+    }
+  }
+}
 </style>

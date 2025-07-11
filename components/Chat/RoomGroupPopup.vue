@@ -246,8 +246,7 @@ async function changShieldStatus() {
       max-height="20rem"
       :overscan="16"
       :get-item-key="(item, index) => `${chat.theRoomId!}_${item.userId}`"
-      wrap-class="px-1.5"
-      class-name="py-1.5 min-h-14rem bg-color-2 dark:!bg-op-80 card-rounded-df border-default scroll-2 relative"
+      class-name="min-h-14rem card-rounded-df scroll-2 relative"
       active-class="active"
       enable-pull-to-refresh
       :pull-trigger-distance="30"
@@ -361,7 +360,7 @@ async function changShieldStatus() {
   --at-apply: "border-default z-1 absolute bottom-0.2em right-0.2em rounded-full block w-2 h-2 ";
 }
 .user-card {
-  --at-apply: "h-2.75rem flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate card-rounded-df filter-grayscale w-full hover:(bg-color op-100)";
+  --at-apply: "h-2.75rem flex-shrink-0 cursor-pointer flex-row-c-c p-1.5 relative gap-2 truncate card-rounded-df filter-grayscale w-full hover:(bg-color-2 op-100)";
   .tags {
     :deep(.el-tag) {
       transition: none;
