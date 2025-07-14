@@ -1,6 +1,6 @@
 <div align=center>
  <div align=center margin="10em" style="margin:4em 0 0 0;font-size: 30px;letter-spacing:0.3em;">
-<img src="./doc/logo1.png" width="140px" height="140px" alt="图片名称" align=center />
+<img src="./.doc/logo1.png" width="140px" height="140px" alt="图片名称" align=center />
  </div>
  <h2 align=center style="margin: 2em 0;">语灵聊天 APP</h2>
 
