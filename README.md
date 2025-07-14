@@ -2,27 +2,15 @@
  <div align=center margin="10em" style="margin:4em 0 0 0;font-size: 30px;letter-spacing:0.3em;">
 <img src="./.doc/jiwuchat-tauri.png" width="140px" height="140px" alt="图片名称" align=center />
  </div>
- <h2 align=center style="margin: 2em 0;">极物聊天 Tauri APP</h2>
+ <h2 align=center style="margin: 2em 0;">语灵聊天 APP</h2>
 
 <div>
       <a href="https://github.com/Kiwi233333/jiwu-mall-chat-tauri" target="_blank">
         <img class="disabled-img-view" src="https://img.shields.io/badge/Github-项目地址-blueviolet.svg?style=plasticr" alt="项目地址" >
       </a>
-      <a href="https://github.com/Kiwi233333/jiwu-mall-chat-tauri/stargazers" target="_blank">
-        <img class="disabled-img-view" alt="License"
-          src="https://img.shields.io/github/stars/Kiwi233333/jiwu-mall-chat-tauri.svg?style=social">
+      <a href="https://github.com/Yeye78988/jiwu-mall-chat-tauri/stargazers" target="_blank">
       </a>
     </div>
-    <div>
-      <a href="https://github.com/Kiwi233333/jiwu-mall-chat-tauri/commits" target="_blank">
-        <img class="disabled-img-view" alt="Commit"
-          src="https://img.shields.io/github/commit-activity/m/Kiwi233333/jiwu-mall-chat-tauri">
-      </a>
-      <a href="https://github.com/Kiwi233333/jiwu-mall-chat-tauri/issues" target="_blank">
-        <img class="disabled-img-view" alt="Issues" src="https://img.shields.io/github/issues/Kiwi233333/jiwu-mall-chat-tauri">
-      </a>
-    </div>
-    <div>
       <a href="`https://github.com/Kiwi233333/jiwu-mall-chat-tauri/blob/main/LICENSE`" target="_blank">
           <img class="disabled-img-view" alt="License"
           src="https://img.shields.io/github/license/Kiwi233333/jiwu-mall-chat-tauri">
@@ -40,97 +28,7 @@
       </a>
     </div>
 
-官网：[JiwuChat](https://blog.jiwuchat.top/)
-<br>
-语言 : **简体中文** | [English](./.doc/README.en.md) | [Deutsch](./.doc/README.de.md) | [Español](./.doc/README.es.md) | [Français](./.doc/README.fr.md) | [日本語](./.doc/README.ja.md) | [한국어](./.doc/README.ko.md) | [Português](./.doc/README.pt.md) | [Русский](./.doc/README.ru.md)
 
-</div>
-
-## 介绍
-
-JiwuChat 是一款基于 Tauri2 和 Nuxt3 构建的轻量`(~10MB)`多平台聊天应用，具备多种实时消息、AI群聊机器人（`讯飞星火`、`KimiAI`等已接入）、`WebRTC 音视频通话`、屏幕共享以及 AI 购物功能。它支持无缝跨设备通信，涵盖文本、图片、文件和语音等多种消息，还支持群聊和可定制化设置。提供浅色/深色模式，助力高效社交网络。✨
-
-## 一套代码，多端适配
-
-![多端适配](.doc/previews.png)
-
-## 默认账号
-
-- 账号：ikun233
-- 密码：123456
-- 体验：[Web端地址](https://jiwuchat.top/)
-
-> ⚠ 注：~~该账号上传文件、修改个人信息、修改密码等部分没有权限，只作为测试账号使用。~~
-
-> 👀 感谢大家的支持，项目还在开发阶段，后端暂未开源，欢迎大家提出宝贵意见，如有问题请联系邮箱或QQ。
-
-## 项目截图
-
-- 聊天桌面应用 Login / Register
-
-![登录](./.doc/login.png)
-
-![注册](./.doc/register.png)
-
-- 深浅主题 Light / Dark
-
-![浅色](./.doc/chat1.png)
-
-![主页](./.doc/chat.png)
-
-- AI机器人 (DeepSeek、iFlytek Spark、Kimi AI) 🤩
-
-![AI Chatbot](./.doc/group-ai-ds.png)
-
-![AI Chatbot](./.doc/group-ai-2.png)
-
-![AI Chatbot](./.doc/group-ai-1.png)
-
-- 语音视频聊天 WebRTC
-
-![语音视频聊天](./.doc/rtc1.png)
-
-- 屏幕共享
-
-![屏幕内容共享](./.doc/rtc3.png)
-
-- 聊天社交
-
-![暗黑](./.doc/chat2.png)
-
-- AI购物聊天 （来源: [极物圈](https://github.com/KiWi233333/jiwu-mall-sites)）
-
-![暗黑](./.doc/chat3.png)
-
-![暗黑](./.doc/chat3.2.png)
-
-- 账号与安全
-
-![账号与安全](./.doc/chat4.png)
-
-![账号与安全](./.doc/chat5.png)
-
-- 设置
-
-![设置](./.doc/chat6-light.png)
-
-- 移动端适配
-
-<div>
- <img src="./.doc/chat12.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat14.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat13.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat7.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/rtc2.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/rtc_remove_desktop.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat8.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat10.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat15.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat11.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat17.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat16.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
- <img src="./.doc/chat9.png" width = "190" style="display:inline-block;" alt="移动端适配" align=center />
-</div>
 
 ## 🌌 系统功能
 
