@@ -7,20 +7,6 @@
 <div>
       <a href="https://github.com/Yeye78988/YuLingChat" target="_blank">
         <img class="disabled-img-view" src="https://img.shields.io/badge/Github-项目地址-blueviolet.svg?style=plasticr" alt="项目地址" >
-      </a>
-      <a href="https://github.com/Yeye78988/jiwu-mall-chat-tauri/stargazers" target="_blank">
-      </a>
-    </div>
-      <a href="`https://github.com/Kiwi233333/jiwu-mall-chat-tauri/blob/main/LICENSE`" target="_blank">
-          <img class="disabled-img-view" alt="License"
-          src="https://img.shields.io/github/license/Kiwi233333/jiwu-mall-chat-tauri">
-      </a>
-      <a href="https://app.netlify.com/sites/jiwuchat/deploys" target="_blank">
-          <img src="https://api.netlify.com/api/v1/badges/b68ad9ac-53e5-4c5a-ac56-a8882ffe7697/deploy-status" alt="+QQ群"/>
-      </a>
-      <a href="https://qm.qq.com/q/iSaETNVdKw" target="_blank">
-        <img src="https://img.shields.io/badge/QQ群:939204073 -blue?logo=tencentqq&logoColor=white" alt="QQ群"/>
-      </a>
     </div>
     <div>
       <a href="https://www.deepseek.com/" target="_blank" style="margin: 2px;">
