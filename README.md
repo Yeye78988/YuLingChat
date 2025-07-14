@@ -1,6 +1,6 @@
 <div align=center>
  <div align=center margin="10em" style="margin:4em 0 0 0;font-size: 30px;letter-spacing:0.3em;">
-<img src="./.doc/jiwuchat-tauri.png" width="140px" height="140px" alt="图片名称" align=center />
+<img src="./" width="140px" height="140px" alt="图片名称" align=center />
  </div>
  <h2 align=center style="margin: 2em 0;">语灵聊天 APP</h2>
 
@@ -145,12 +145,5 @@ pnpm config set registry https://registry.npmjs.org
 | 类型检查     | TypeScript         | 5.3.2        |
 | 样式处理     | Sass               | 1.77.6       |
 
-## 🦾  趋势
 
-![JiwuChat Star History Chart](https://api.star-history.com/svg?repos=KiWi233333/jiwu-mall-chat-tauri&type=Date)
 
-## 💬 联系方式
-
-- 邮箱：[kiwi2333@qq.com](mailto:kiwi2333@qq.com)
-- QQ: [1329634286](https://wpa.qq.com/msgrd?v=3&uin=1329634286&site=qqq&menu=yes)
-- QQ群: [939204073](https://qm.qq.com/q/iSaETNVdKw)
