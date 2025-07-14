@@ -12,7 +12,7 @@ watch([() => setting.isWeb, () => setting.isMobileSize, latestVersion], async ([
     const ua = navigator.userAgent;
     const res = latestVersion.value;
     if (isMobileSize) {
-      downloadUrl.value = `${BaseUrlAppFile}/app/${res.version}/JiwuChat_${res.version}.apk`;
+      downloadUrl.value = `${BaseUrlAppFile}/app/${res.version}/YuLingChat_${res.version}.apk`;
       return;
     }
     if (ua.toLowerCase().includes("windows"))
@@ -22,7 +22,7 @@ watch([() => setting.isWeb, () => setting.isMobileSize, latestVersion], async ([
     else if (ua.toLowerCase().includes("linux"))
       downloadUrl.value = res.platforms["linux-x86_64"].url;
     else if (ua.includes("iPhone"))
-      downloadUrl.value = `${BaseUrlAppFile}/app/${res.version}/JiwuChat_${res.version}.apk`;
+      downloadUrl.value = `${BaseUrlAppFile}/app/${res.version}/YuLingChat_${res.version}.apk`;
     else
       downloadUrl.value = "https://kiwi233.top/%E9%A1%B9%E7%9B%AE/%E6%9E%81%E7%89%A9%E8%81%8A%E5%A4%A9.html#%F0%9F%92%BB-%E4%B8%8B%E8%BD%BD";
   }
@@ -41,10 +41,10 @@ onMounted(async () => {
 
 <template>
   <template v-if="setting.isWeb">
-    <el-tooltip content="JiwuChat 官网" placement="bottom">
+    <el-tooltip content="语灵Chat 官网" placement="bottom">
       <a
-        href="https://blog.jiwuchat.top/" target="_blank"
-        title="JiwuChat 官网"
+        href="https://blog.yulingchat.top/" target="_blank"
+        title="语灵Chat 官网"
         class="h-2rem w-2rem flex-row-c-c cursor-pointer border-default card-default rounded-full shadow-sm sm:(h-1.8rem w-1.8rem)"
         v-bind="$attrs"
       >
@@ -61,7 +61,7 @@ onMounted(async () => {
     >
       <template #reference>
         <div
-          title="Github开源仓库 - JiwuChat"
+          title="Github开源仓库 - 语灵Chat"
           class="h-2rem w-2rem flex-row-c-c cursor-pointer border-default card-default rounded-full shadow-sm sm:(h-1.8rem w-1.8rem)"
           v-bind="$attrs"
           @click="handleRepo('github', false)"
@@ -82,9 +82,9 @@ onMounted(async () => {
     >
       <template #reference>
         <div
-          href="https://gitee.com/KiWi233333/JiwuChat"
+          href="https://gitee.com/KiWi233333/YuLingChat"
           target="_blank"
-          title="Gitee开源仓库 - JiwuChat"
+          title="Gitee开源仓库 - 语灵Chat"
           class="h-2rem w-2rem flex-row-c-c cursor-pointer border-default card-default rounded-full shadow-sm sm:(h-1.8rem w-1.8rem)"
           v-bind="$attrs"
           @click="handleRepo('gitee', false)"

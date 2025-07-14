@@ -1,6 +1,6 @@
 // import type { ChatMessageVO } from "../api/chat/message";
 
-// const dbName = "jiwuchat_db";
+// const dbName = "yulingchat_db";
 // const tableNameList = [
 //   "message",
 // ];

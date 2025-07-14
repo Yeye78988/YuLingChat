@@ -9,7 +9,7 @@ useHead({
   meta: [
     {
       name: "description",
-      content: "JiwuChat 🍂 : 轻量级跨平台IM聊天应用，集成AI机器人( DeepSeek/Gemini/Kimi... )、音视频通话及AI购物。支持多端消息同步，自定义主题，高效便捷 🍒",
+      content: "语灵Chat 🍂 : 轻量级跨平台IM聊天应用，集成AI机器人( DeepSeek/Gemini/Kimi... )、音视频通话及AI购物。支持多端消息同步，自定义主题，高效便捷 🍒",
     },
     {
       name: "keywords",
