@@ -5,7 +5,7 @@
  <h2 align=center style="margin: 2em 0;">语灵聊天 APP</h2>
 
 <div>
-      <a href="https://github.com/Kiwi233333/jiwu-mall-chat-tauri" target="_blank">
+      <a href="https://github.com/Yeye78988/YuLingChat" target="_blank">
         <img class="disabled-img-view" src="https://img.shields.io/badge/Github-项目地址-blueviolet.svg?style=plasticr" alt="项目地址" >
       </a>
       <a href="https://github.com/Yeye78988/jiwu-mall-chat-tauri/stargazers" target="_blank">
